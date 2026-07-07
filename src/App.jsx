@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { profile, gallery, videos, diary, favorites, guestbook } from './content'
+import { musicBox } from './music'
 import './App.css'
 
 const NAV_LINKS = [
@@ -432,6 +433,23 @@ function Footer() {
   )
 }
 
+function MusicToggle() {
+  const [on, setOn] = useState(false)
+
+  useEffect(() => () => musicBox.stop(), [])
+
+  return (
+    <button
+      type="button"
+      className="music-toggle"
+      aria-pressed={on}
+      onClick={() => setOn(musicBox.toggle())}
+    >
+      {on ? '♪ 음악 재생 중' : '♪ 음악 켜기'}
+    </button>
+  )
+}
+
 export default function App() {
   return (
     <>
@@ -445,6 +463,7 @@ export default function App() {
         <Guestbook />
       </main>
       <Footer />
+      <MusicToggle />
     </>
   )
 }
