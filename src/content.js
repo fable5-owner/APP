@@ -38,12 +38,11 @@ export const profile = {
 }
 
 export const gallery = [
-  { image: null, date: '2025.03.12', caption: '동네 벚꽃길 산책' },
-  { image: null, date: '2025.04.02', caption: '처음 가본 카페, 라떼가 맛있었다' },
-  { image: null, date: '2025.06.20', caption: '여름 바다, 발이 시렸던 기억' },
-  { image: null, date: '2025.07.01', caption: '생일 축하 받은 날' },
-  { image: null, date: '2025.09.15', caption: '야경 보러 갔던 날' },
-  { image: null, date: '2025.11.03', caption: '단풍 구경, 사진 100장 찍음' },
+  { image: null, date: '2026.07.07', caption: '가게에서, 오늘도 손하트' },
+  { image: null, date: '2026.07.07', caption: '바쁜 하루 중 잠깐의 미소' },
+  { image: null, date: '2026.07.07', caption: '브이 두 개, 신나는 날' },
+  { image: null, date: '2026.07.07', caption: '새로 앞치마가 제법 잘 어울리지' },
+  { image: null, date: '2026.07.07', caption: '오늘 하루도 수고했어' },
 ]
 
 export const videos = [
