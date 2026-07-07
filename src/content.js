@@ -33,10 +33,10 @@ import photoFingerHeart from './assets/photos/finger-heart.jpeg'
 import photoFaceFrame from './assets/photos/face-frame.jpeg'
 
 export const profile = {
-  nickname: 'Áng',
+  nickname: 'Ánh',
   koreanName: '민주',
   since: 'SINCE 2026',
-  title: 'Áng의 작은 방',
+  title: 'Ánh의 작은 방',
   tagline: '사진과 영상, 그리고 그날의 마음을 조심스레 모아두는 곳.',
   intro:
     '거창하지 않아도 괜찮아요. 좋아하는 것들과 오래 간직하고 싶은 순간을 이 방 안에 하나씩 걸어둡니다.',
