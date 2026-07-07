@@ -70,24 +70,6 @@ export const videos = [
   },
 ]
 
-export const diary = [
-  {
-    date: '2026.07.05',
-    title: '오늘의 기록',
-    text: '별일 없던 하루였지만, 그래서 더 편안했다. 이런 날도 소중하게 남겨두고 싶어서 여기 적어본다.',
-  },
-  {
-    date: '2026.06.18',
-    title: '작은 행복',
-    text: '좋아하는 노래 들으면서 산책했다. 날씨가 딱 좋아서 계속 걷고 싶었던 하루.',
-  },
-  {
-    date: '2026.05.02',
-    title: '고마웠던 순간',
-    text: '친구가 별거 아닌 걸로 챙겨줘서 괜히 마음이 몽글몽글했다. 오래 기억하고 싶다.',
-  },
-]
-
 export const favorites = [
   { label: '좋아하는 계절', value: '봄' },
   { label: '좋아하는 색', value: '빨간색' },
@@ -97,8 +79,5 @@ export const favorites = [
   { label: '관심사', value: '영화' },
 ]
 
-export const guestbook = [
-  { from: '지은', message: '홈피 너무 예쁘게 잘 꾸몄다 ㅎㅎ 자주 놀러올게!' },
-  { from: '민재', message: '사진이랑 영상 진짜 잘 담았다... 나도 이런 거 만들어야지' },
-  { from: '나', message: '오랜만에 옛날 생각나서 하나 만들어봤다. 소중하게 채워나가야지.' },
-]
+// 방명록 초기 항목은 비워둠 — 실제 방문자가 남긴 글만 표시됩니다.
+export const guestbook = []
