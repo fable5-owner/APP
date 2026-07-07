@@ -1,24 +1,70 @@
-// 이 파일의 값만 바꾸면 홈페이지 전체 내용이 바뀝니다.
+// ─────────────────────────────────────────────────────────────
+//  이 파일의 값만 바꾸면 홈페이지 전체 내용이 바뀝니다.
 //
-// 사진 추가하는 방법:
-// 1. 사진 파일을 src/assets/photos/ 안에 넣기
-// 2. 이 파일 위쪽에서 import (예: import photo1 from './assets/photos/photo1.jpg')
-// 3. 아래 gallery 항목에서 image: photo1 로 채워주면 이모지 대신 실제 사진이 나옵니다.
+//  ▸ 사진 넣기
+//    1. 사진을 src/assets/photos/ 안에 넣기
+//    2. 아래처럼 위쪽에서 import
+//         import photo1 from './assets/photos/photo1.jpg'
+//    3. gallery 항목의 image: null  →  image: photo1  로 교체
+//
+//  ▸ 영상 넣기 (두 가지 방법 중 하나)
+//    (A) 파일 직접 올리기
+//        1. 영상을 src/assets/videos/ 안에 넣기 (mp4 권장)
+//        2. 위쪽에서 import
+//             import clip1 from './assets/videos/clip1.mp4'
+//        3. videos 항목의 src: null  →  src: clip1  로 교체
+//        4. (선택) 썸네일 이미지도 poster 에 넣으면 더 예쁨
+//    (B) 유튜브 / 비메오 링크 붙이기
+//        videos 항목의 embedUrl 에 링크만 넣으면 됩니다
+//          embedUrl: 'https://youtu.be/xxxxxxxx'
+//
+//  src / embedUrl 둘 다 비어 있으면 "영상 준비 중" 카드가 보여요.
+// ─────────────────────────────────────────────────────────────
+
 export const profile = {
   nickname: '민들레',
-  status: '오늘도 소소하게 행복한 하루 🌿',
-  intro: '나만 보려고 만든 작은 공간. 사진이랑 그날그날 생각을 편하게 남겨두는 곳이에요.',
-  avatarEmoji: '🌼',
+  since: 'SINCE 2026',
+  title: '민들레의 작은 방',
+  tagline: '사진과 영상, 그리고 그날의 마음을 조심스레 모아두는 곳.',
+  intro:
+    '거창하지 않아도 괜찮아요. 좋아하는 것들과 오래 간직하고 싶은 순간을 이 방 안에 하나씩 걸어둡니다.',
   visitorCount: 128,
 }
 
 export const gallery = [
-  { image: null, emoji: '🌸', date: '2025.03.12', caption: '동네 벚꽃길 산책' },
-  { image: null, emoji: '☕️', date: '2025.04.02', caption: '처음 가본 카페, 라떼가 맛있었다' },
-  { image: null, emoji: '🏖️', date: '2025.06.20', caption: '여름 바다, 발이 시렸던 기억' },
-  { image: null, emoji: '🎂', date: '2025.07.01', caption: '생일 축하 받은 날' },
-  { image: null, emoji: '🌃', date: '2025.09.15', caption: '야경 보러 갔던 날' },
-  { image: null, emoji: '🍂', date: '2025.11.03', caption: '단풍 구경, 사진 100장 찍음' },
+  { image: null, date: '2025.03.12', caption: '동네 벚꽃길 산책' },
+  { image: null, date: '2025.04.02', caption: '처음 가본 카페, 라떼가 맛있었다' },
+  { image: null, date: '2025.06.20', caption: '여름 바다, 발이 시렸던 기억' },
+  { image: null, date: '2025.07.01', caption: '생일 축하 받은 날' },
+  { image: null, date: '2025.09.15', caption: '야경 보러 갔던 날' },
+  { image: null, date: '2025.11.03', caption: '단풍 구경, 사진 100장 찍음' },
+]
+
+export const videos = [
+  {
+    src: null, // import 한 영상 파일 (예: clip1)
+    embedUrl: null, // 또는 유튜브/비메오 링크
+    poster: null, // (선택) 썸네일 이미지 import
+    date: '2025.05.10',
+    title: '봄날의 기록',
+    description: '바람이 좋아서 그냥 담아본 하루.',
+  },
+  {
+    src: null,
+    embedUrl: null,
+    poster: null,
+    date: '2025.08.22',
+    title: '여름밤 불꽃놀이',
+    description: '하늘을 올려다보던 그 순간.',
+  },
+  {
+    src: null,
+    embedUrl: null,
+    poster: null,
+    date: '2025.12.24',
+    title: '크리스마스 이브',
+    description: '따뜻했던 저녁의 짧은 영상.',
+  },
 ]
 
 export const diary = [
@@ -50,6 +96,6 @@ export const favorites = [
 
 export const guestbook = [
   { from: '지은', message: '홈피 너무 예쁘게 잘 꾸몄다 ㅎㅎ 자주 놀러올게!' },
-  { from: '민재', message: '사진 진짜 잘 찍었다... 나도 이런 거 만들어야지' },
-  { from: '나', message: '오랜만에 옛날 생각나서 하나 만들어봤다. 소중하게 채워나가야지 :)' },
+  { from: '민재', message: '사진이랑 영상 진짜 잘 담았다... 나도 이런 거 만들어야지' },
+  { from: '나', message: '오랜만에 옛날 생각나서 하나 만들어봤다. 소중하게 채워나가야지.' },
 ]
