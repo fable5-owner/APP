@@ -380,22 +380,85 @@ function Favorites() {
   )
 }
 
-/* ─── 좋아하는 것들의 기록 (아카이브, 바로 노출) ─────────── */
+/* ─── 좋아하는 것들의 기록 (아카이브, 클릭/스크롤 없이 전체 노출) ── */
 
 function Archive() {
+  const frameRef = useRef(null)
+  const [height, setHeight] = useState(900)
+
+  useEffect(() => {
+    const frame = frameRef.current
+    if (!frame) return
+
+    const measure = () => {
+      try {
+        const doc = frame.contentWindow?.document
+        if (!doc) return
+        const h = Math.max(doc.documentElement.scrollHeight, doc.body.scrollHeight)
+        if (h > 0) setHeight(h)
+      } catch {
+        // cross-origin — leave the fallback height
+      }
+    }
+
+    let mo = null
+
+    const onLoad = () => {
+      const doc = frame.contentWindow?.document
+      if (!doc) return
+
+      let settled = false
+      const finalize = () => {
+        // 아카이브 페이지는 로드 직후 자체 압축 해제 로직으로 실제
+        // 콘텐츠를 비동기로 채워 넣는 구조라, 처음엔 .ft-reveal 요소가
+        // 아직 없을 수 있다. 실제로 나타난 뒤에 딱 한 번만 처리한다.
+        if (settled || doc.querySelectorAll('.ft-reveal').length === 0) return
+        settled = true
+        // 원래는 "안에서 스크롤하면 서서히 나타나는" 효과인데, 여기선
+        // iframe을 페이지 흐름에 통째로 끼워 넣어서 그 안에서 스크롤이
+        // 일어나지 않아 절대 나타나지 않는다. 그래서 처음부터 다 보이게
+        // 강제로 켜준다.
+        doc.querySelectorAll('.ft-reveal').forEach((el) => el.classList.add('ft-in'))
+        // Hero/Sunflower 구간은 iframe 자신의 높이(vh)를 기준으로 크기가
+        // 정해져 있다. 이대로 두면 "측정 → iframe 높이 반영 → vh 값이
+        // 그 새 높이 기준으로 다시 계산 → 훨씬 커짐"이 반복되며 끝없이
+        // 부풀어 오른다. 두 구간만 고정 픽셀 값으로 못박아 iframe 높이가
+        // 얼마든 안쪽 레이아웃이 흔들리지 않게 만든다.
+        const style = doc.createElement('style')
+        style.textContent = `
+          section[data-screen-label="Hero"] { min-height: 900px !important; }
+          section[data-screen-label="Sunflower"] { height: 720px !important; min-height: 560px !important; }
+        `
+        doc.head.appendChild(style)
+        setTimeout(measure, 300)
+        mo?.disconnect()
+      }
+
+      mo = new MutationObserver(finalize)
+      mo.observe(doc.body, { childList: true, subtree: true })
+      finalize() // 이미 준비돼 있는 경우 대비
+      // 안전장치: 압축 해제가 예상보다 오래 걸리거나 실패해도 마무리한다
+      setTimeout(finalize, 4000)
+    }
+
+    frame.addEventListener('load', onLoad)
+    return () => {
+      frame.removeEventListener('load', onLoad)
+      mo?.disconnect()
+    }
+  }, [])
+
   return (
     <section id="archive" className="sec">
       <SectionHead eyebrow="A Personal Archive" title="좋아하는 것들의 기록" />
       <Reveal className="archive">
         <iframe
+          ref={frameRef}
           className="archive__frame"
+          style={{ height }}
           src="archive.html"
           title="좋아하는 것들의 기록"
-          loading="lazy"
         />
-        <a className="archive__open" href="archive.html" target="_blank" rel="noreferrer">
-          전체 화면으로 보기 ↗
-        </a>
       </Reveal>
     </section>
   )
