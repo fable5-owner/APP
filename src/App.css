@@ -426,19 +426,15 @@ main {
 /* ─── Films ────────────────────────────────────────── */
 .films {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 34px 28px;
-}
-@media (max-width: 900px) {
-  .films {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px 32px;
+  max-width: 960px;
+  margin-inline: auto;
 }
 @media (max-width: 560px) {
   .films {
     grid-template-columns: 1fr;
-    max-width: 420px;
-    margin-inline: auto;
+    max-width: 440px;
   }
 }
 .film {

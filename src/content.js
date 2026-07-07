@@ -21,10 +21,15 @@
 //  src / embedUrl 둘 다 비어 있으면 "영상 준비 중" 카드가 보여요.
 // ─────────────────────────────────────────────────────────────
 
+import friendsFilm from './assets/videos/friends-film.mp4'
+import friendsFilmPoster from './assets/videos/friends-film.jpg'
+import childhoodMemories from './assets/videos/childhood-memories.mp4'
+import childhoodMemoriesPoster from './assets/videos/childhood-memories.jpg'
+
 export const profile = {
-  nickname: '민들레',
+  nickname: '민주',
   since: 'SINCE 2026',
-  title: '민들레의 작은 방',
+  title: '민주의 작은 방',
   tagline: '사진과 영상, 그리고 그날의 마음을 조심스레 모아두는 곳.',
   intro:
     '거창하지 않아도 괜찮아요. 좋아하는 것들과 오래 간직하고 싶은 순간을 이 방 안에 하나씩 걸어둡니다.',
@@ -42,28 +47,20 @@ export const gallery = [
 
 export const videos = [
   {
-    src: null, // import 한 영상 파일 (예: clip1)
-    embedUrl: null, // 또는 유튜브/비메오 링크
-    poster: null, // (선택) 썸네일 이미지 import
-    date: '2025.05.10',
-    title: '봄날의 기록',
-    description: '바람이 좋아서 그냥 담아본 하루.',
+    src: friendsFilm,
+    embedUrl: null,
+    poster: friendsFilmPoster,
+    date: 'ROLL 01',
+    title: '우리들의 날들',
+    description: '친구들과 함께한 순간을 필름 다이어리처럼 담았어요.',
   },
   {
-    src: null,
+    src: childhoodMemories,
     embedUrl: null,
-    poster: null,
-    date: '2025.08.22',
-    title: '여름밤 불꽃놀이',
-    description: '하늘을 올려다보던 그 순간.',
-  },
-  {
-    src: null,
-    embedUrl: null,
-    poster: null,
-    date: '2025.12.24',
-    title: '크리스마스 이브',
-    description: '따뜻했던 저녁의 짧은 영상.',
+    poster: childhoodMemoriesPoster,
+    date: 'ONCE UPON A TIME',
+    title: '어린 시절',
+    description: '오래 간직하고 싶은 다섯 장의 기억.',
   },
 ]
 
