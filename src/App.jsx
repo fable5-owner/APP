@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { profile, gallery, videos, diary, favorites, guestbook } from './content'
+import { profile, gallery, videos, favorites, guestbook } from './content'
 import { musicBox } from './music'
 import './App.css'
 
 const NAV_LINKS = [
   { id: 'gallery', label: '갤러리' },
   { id: 'films', label: '영상' },
-  { id: 'diary', label: '다이어리' },
   { id: 'favorites', label: '좋아하는 것' },
+  { id: 'archive', label: '기록' },
   { id: 'guestbook', label: '방명록' },
 ]
 
@@ -311,7 +311,15 @@ function Film({ item }) {
     <Reveal as="figure" className="film">
       <div className="film__media">
         {item.src ? (
-          <video controls poster={item.poster || undefined} preload="metadata">
+          <video
+            controls
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster={item.poster || undefined}
+            preload="auto"
+          >
             <source src={item.src} />
           </video>
         ) : embed ? (
@@ -353,25 +361,6 @@ function Films() {
   )
 }
 
-/* ─── 다이어리 ───────────────────────────────────────── */
-
-function Diary() {
-  return (
-    <section id="diary" className="sec">
-      <SectionHead eyebrow="Diary" title="그날의 마음" />
-      <div className="journal">
-        {diary.map((entry) => (
-          <Reveal as="article" key={entry.date} className="leaf">
-            <span className="leaf__date">{entry.date}</span>
-            <h3 className="leaf__title">{entry.title}</h3>
-            <p className="leaf__text">{entry.text}</p>
-          </Reveal>
-        ))}
-      </div>
-    </section>
-  )
-}
-
 /* ─── 좋아하는 것 ────────────────────────────────────── */
 
 function Favorites() {
@@ -387,11 +376,26 @@ function Favorites() {
           </div>
         ))}
       </Reveal>
-      <Reveal className="faves__more">
-        <a className="btn btn--solid" href="archive.html" target="_blank" rel="noreferrer">
-          ✦ 좋아하는 것들의 기록 보기
+    </section>
+  )
+}
+
+/* ─── 좋아하는 것들의 기록 (아카이브, 바로 노출) ─────────── */
+
+function Archive() {
+  return (
+    <section id="archive" className="sec">
+      <SectionHead eyebrow="A Personal Archive" title="좋아하는 것들의 기록" />
+      <Reveal className="archive">
+        <iframe
+          className="archive__frame"
+          src="archive.html"
+          title="좋아하는 것들의 기록"
+          loading="lazy"
+        />
+        <a className="archive__open" href="archive.html" target="_blank" rel="noreferrer">
+          전체 화면으로 보기 ↗
         </a>
-        <span className="faves__more-hint">금 · 돈 · 해바라기 그리고 데이지</span>
       </Reveal>
     </section>
   )
@@ -399,24 +403,83 @@ function Favorites() {
 
 /* ─── 방명록 ─────────────────────────────────────────── */
 
+const GUESTBOOK_KEY = 'anh-guestbook'
+
+function loadGuestbook() {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(GUESTBOOK_KEY) || 'null')
+    if (Array.isArray(saved)) return saved
+  } catch {
+    // ignore malformed storage
+  }
+  return guestbook
+}
+
 function Guestbook() {
+  const [notes, setNotes] = useState(loadGuestbook)
+  const [from, setFrom] = useState('')
+  const [message, setMessage] = useState('')
+
+  const save = (next) => {
+    setNotes(next)
+    try {
+      window.localStorage.setItem(GUESTBOOK_KEY, JSON.stringify(next))
+    } catch {
+      // storage may be unavailable (private mode) — keep it in memory at least
+    }
+  }
+
+  const submit = (e) => {
+    e.preventDefault()
+    const name = from.trim() || '익명'
+    const text = message.trim()
+    if (!text) return
+    save([{ from: name, message: text }, ...notes])
+    setFrom('')
+    setMessage('')
+  }
+
   return (
     <section id="guestbook" className="sec">
       <SectionHead eyebrow="Guestbook" title="방명록" />
-      <p className="notes__hint">다녀간 사람들이 남겨준 한마디</p>
-      <div className="notes">
-        {guestbook.map((note, i) => (
-          <Reveal
-            as="blockquote"
-            key={`${note.from}-${i}`}
-            className="note"
-            style={{ transitionDelay: `${(i % 3) * 80}ms` }}
-          >
-            <p className="note__msg">{note.message}</p>
-            <cite className="note__from">— {note.from}</cite>
-          </Reveal>
-        ))}
-      </div>
+      <p className="notes__hint">다녀간 흔적을 한마디 남겨주세요</p>
+
+      <form className="gb-form" onSubmit={submit}>
+        <input
+          className="gb-form__name"
+          type="text"
+          value={from}
+          onChange={(e) => setFrom(e.target.value)}
+          placeholder="이름 (선택)"
+          maxLength={20}
+          aria-label="이름"
+        />
+        <textarea
+          className="gb-form__msg"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="따뜻한 한마디를 남겨주세요..."
+          maxLength={200}
+          rows={3}
+          aria-label="메시지"
+        />
+        <button className="btn btn--solid gb-form__submit" type="submit">
+          남기기
+        </button>
+      </form>
+
+      {notes.length === 0 ? (
+        <p className="notes__empty">아직 첫 방명록이 없어요. 처음으로 한마디 남겨보세요 :)</p>
+      ) : (
+        <div className="notes">
+          {notes.map((note, i) => (
+            <blockquote key={`${note.from}-${i}`} className="note">
+              <p className="note__msg">{note.message}</p>
+              <cite className="note__from">— {note.from}</cite>
+            </blockquote>
+          ))}
+        </div>
+      )}
     </section>
   )
 }
@@ -434,9 +497,28 @@ function Footer() {
 }
 
 function MusicToggle() {
-  const [on, setOn] = useState(false)
+  const [on, setOn] = useState(true)
 
-  useEffect(() => () => musicBox.stop(), [])
+  useEffect(() => {
+    // 브라우저는 사용자가 페이지를 한 번 건드리기 전엔 소리를 막기 때문에,
+    // 첫 상호작용(탭·클릭·스크롤·키 입력) 순간 자동으로 음악을 시작한다.
+    let started = false
+    const start = () => {
+      if (started) return
+      started = true
+      musicBox.play()
+      remove()
+    }
+    const events = ['pointerdown', 'keydown', 'touchstart', 'scroll']
+    const remove = () => events.forEach((e) => window.removeEventListener(e, start))
+    events.forEach((e) => window.addEventListener(e, start, { once: false, passive: true }))
+    // 일부 브라우저는 즉시 허용하기도 하므로 한 번 시도
+    musicBox.play()
+    return () => {
+      remove()
+      musicBox.stop()
+    }
+  }, [])
 
   return (
     <button
@@ -445,7 +527,7 @@ function MusicToggle() {
       aria-pressed={on}
       onClick={() => setOn(musicBox.toggle())}
     >
-      {on ? '♪ 음악 재생 중' : '♪ 음악 켜기'}
+      {on ? '♪ 음악 켜짐 (끄기)' : '♪ 음악 꺼짐 (켜기)'}
     </button>
   )
 }
@@ -458,8 +540,8 @@ export default function App() {
         <Hero />
         <Gallery />
         <Films />
-        <Diary />
         <Favorites />
+        <Archive />
         <Guestbook />
       </main>
       <Footer />
