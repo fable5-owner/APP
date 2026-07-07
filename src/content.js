@@ -26,6 +26,12 @@ import friendsFilmPoster from './assets/videos/friends-film.jpg'
 import childhoodMemories from './assets/videos/childhood-memories.mp4'
 import childhoodMemoriesPoster from './assets/videos/childhood-memories.jpg'
 
+import photoHeartWink from './assets/photos/heart-wink.jpeg'
+import photoCheekSmile from './assets/photos/cheek-smile.jpeg'
+import photoDoubleV from './assets/photos/double-v.jpeg'
+import photoFingerHeart from './assets/photos/finger-heart.jpeg'
+import photoFaceFrame from './assets/photos/face-frame.jpeg'
+
 export const profile = {
   nickname: 'Áng',
   koreanName: '민주',
@@ -38,11 +44,11 @@ export const profile = {
 }
 
 export const gallery = [
-  { image: null, date: '2026.07.07', caption: '가게에서, 오늘도 손하트' },
-  { image: null, date: '2026.07.07', caption: '바쁜 하루 중 잠깐의 미소' },
-  { image: null, date: '2026.07.07', caption: '브이 두 개, 신나는 날' },
-  { image: null, date: '2026.07.07', caption: '새로 앞치마가 제법 잘 어울리지' },
-  { image: null, date: '2026.07.07', caption: '오늘 하루도 수고했어' },
+  { image: photoHeartWink, date: '2026.07.07', caption: '가게에서, 오늘도 손하트' },
+  { image: photoCheekSmile, date: '2026.07.07', caption: '바쁜 하루 중 잠깐의 미소' },
+  { image: photoDoubleV, date: '2026.07.07', caption: '브이 두 개, 신나는 날' },
+  { image: photoFingerHeart, date: '2026.07.07', caption: '새로 앞치마가 제법 잘 어울리지' },
+  { image: photoFaceFrame, date: '2026.07.07', caption: '오늘 하루도 수고했어' },
 ]
 
 export const videos = [
