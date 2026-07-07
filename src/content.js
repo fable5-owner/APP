@@ -84,12 +84,12 @@ export const diary = [
 ]
 
 export const favorites = [
-  { label: '좋아하는 계절', value: '가을' },
-  { label: '좋아하는 색', value: '라벤더' },
-  { label: '좋아하는 음악', value: '잔잔한 인디' },
-  { label: '좋아하는 장소', value: '동네 산책로' },
-  { label: '좋아하는 간식', value: '마카롱' },
-  { label: '요즘 관심사', value: '필름 사진' },
+  { label: '좋아하는 계절', value: '봄' },
+  { label: '좋아하는 색', value: '빨간색' },
+  { label: '좋아하는 음악', value: '베트남' },
+  { label: '좋아하는 장소', value: '베트남' },
+  { label: '좋아하는 간식', value: '고기' },
+  { label: '관심사', value: '영화' },
 ]
 
 export const guestbook = [
