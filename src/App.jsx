@@ -232,6 +232,7 @@ function Hero() {
         <Crest />
         <span className="hero__since">{profile.since}</span>
         <h1 className="hero__title">{profile.title}</h1>
+        <p className="hero__korname">한국 이름 · {profile.koreanName}</p>
         <Flourish />
         <p className="hero__tagline">{profile.tagline}</p>
         <p className="hero__intro">{profile.intro}</p>
@@ -385,6 +386,12 @@ function Favorites() {
           </div>
         ))}
       </Reveal>
+      <Reveal className="faves__more">
+        <a className="btn btn--solid" href="archive.html" target="_blank" rel="noreferrer">
+          ✦ 좋아하는 것들의 기록 보기
+        </a>
+        <span className="faves__more-hint">금 · 돈 · 해바라기 그리고 데이지</span>
+      </Reveal>
     </section>
   )
 }
@@ -419,7 +426,7 @@ function Footer() {
       <Flourish />
       <p>
         {profile.title} · 소중하게 기록하는 중
-        <br />© {new Date().getFullYear()} {profile.nickname}
+        <br />© {new Date().getFullYear()} {profile.nickname} · {profile.koreanName}
       </p>
     </footer>
   )

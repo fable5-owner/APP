@@ -206,6 +206,13 @@ main {
   margin: 14px 0 0;
   letter-spacing: 0.01em;
 }
+.hero__korname {
+  margin-top: 8px;
+  font-family: var(--serif);
+  font-size: 1.02rem;
+  letter-spacing: 0.08em;
+  color: var(--rose-deep);
+}
 .hero__tagline {
   font-family: var(--serif);
   font-size: clamp(1.05rem, 3vw, 1.32rem);
@@ -596,6 +603,20 @@ main {
   font-weight: 700;
   color: var(--ink);
   white-space: nowrap;
+}
+.faves__more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 44px;
+}
+.faves__more-hint {
+  font-family: var(--latin);
+  font-style: italic;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  color: var(--gold);
 }
 
 /* ─── Guestbook ────────────────────────────────────── */
