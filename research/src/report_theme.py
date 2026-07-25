@@ -224,3 +224,99 @@ def fig_japan(japan: pd.DataFrame, path) -> str:
     ax.set_ylabel("1989년 = 1.0 (실질)")
     ax.set_xlabel("연도")
     return _finish(fig, path)
+
+
+# --------------------------------------------------------------------------
+# Spread: past, present, future
+# --------------------------------------------------------------------------
+def fig_spread_history(dates, ey, rr, spread, current, path) -> str:
+    """Where the spread came from: the equity yield minus the cash rate."""
+    years = np.array([d.year + (d.month - 1) / 12 for d in dates])
+    fig, axes = plt.subplots(2, 1, figsize=(7.2, 2.9), sharex=True,
+                             gridspec_kw={"height_ratios": [1.35, 1]})
+    ax = axes[0]
+    ax.plot(years, ey, color=OLIVE, lw=1.5, label="주식 기대수익 (1/CAPE)")
+    ax.plot(years, rr, color=SLATE, lw=1.5, label="현금 실질금리")
+    ax.fill_between(years, ey, rr, where=(ey >= rr), color=CLAY, alpha=0.18,
+                    lw=0, label="스프레드 (기다리는 비용)")
+    ax.fill_between(years, ey, rr, where=(ey < rr), color=SLATE, alpha=0.28, lw=0)
+    ax.axhline(0, color=INK, lw=0.9)
+    ax.legend(frameon=False, fontsize=7.2, ncol=3, loc="upper center")
+    ax.set_ylabel("연 %")
+    ax.set_ylim(-6, 18)
+
+    ax2 = axes[1]
+    ax2.plot(years, spread, color=SPECKLE, lw=1.4)
+    ax2.axhline(np.nanmean(spread), color=INK_SOFT, ls="--", lw=1,
+                label=f"역사적 평균 {np.nanmean(spread):.1f}%")
+    # `current` is the headline spread used everywhere else in the report
+    # (built on the stated 3.6% policy rate), not the last data point.
+    ax2.axhline(current, color=CLAY_DEEP, lw=1.4, label=f"현재 {current:.2f}%")
+    ax2.fill_between(years, spread, current,
+                     where=(spread <= current), color=CLAY, alpha=0.22, lw=0)
+    ax2.set_ylabel("스프레드 (%)")
+    ax2.set_xlabel("연도")
+    ax2.legend(frameon=False, fontsize=7.2, loc="upper right")
+    return _finish(fig, path)
+
+
+def fig_spread_ladder(q: pd.DataFrame, cape_q: pd.DataFrame, path) -> str:
+    """Sort by spread and the answer lines up; sort by CAPE and it does not."""
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.1), sharey=True)
+
+    ax = axes[0]
+    colors = [CLAY if v > 0 else CLAY_DEEP for v in q["adv12"]]
+    ax.bar(range(len(q)), q["adv12"], color=colors, zorder=3, width=0.66)
+    ax.set_xticks(range(len(q)))
+    ax.set_xticklabels([f"{s:.1f}%" for s in q["spread"]], fontsize=7.5)
+    ax.set_xlabel("스프레드 5분위 (평균값)")
+    ax.set_ylabel("12개월 분할의 성과 (%p)")
+    ax.set_title("스프레드로 줄 세우면", fontsize=9.5, color=CLAY_DEEP)
+    ax.axhline(0, color=INK, lw=1)
+    for i, v in enumerate(q["adv12"]):
+        ax.annotate(f"{v:+.1f}", (i, v), ha="center",
+                    va="bottom" if v > 0 else "top", fontsize=7,
+                    xytext=(0, 3 if v > 0 else -3), textcoords="offset points")
+
+    ax2 = axes[1]
+    ax2.bar(range(len(cape_q)), cape_q["adv12"], color=SLATE, alpha=0.8,
+            zorder=3, width=0.66)
+    ax2.set_xticks(range(len(cape_q)))
+    ax2.set_xticklabels([f"{s:.0f}%" for s in cape_q["cape_pct"]], fontsize=7.5)
+    ax2.set_xlabel("CAPE 백분위 5분위 (평균값)")
+    ax2.set_title("CAPE로 줄 세우면", fontsize=9.5, color=SLATE)
+    ax2.axhline(0, color=INK, lw=1)
+    for i, v in enumerate(cape_q["adv12"]):
+        ax2.annotate(f"{v:+.1f}", (i, v), ha="center",
+                     va="bottom" if v > 0 else "top", fontsize=7,
+                     xytext=(0, 3 if v > 0 else -3), textcoords="offset points")
+    return _finish(fig, path)
+
+
+def fig_breakeven_map(capes, rates, grid, cur_cape, cur_rate, path) -> str:
+    """Which combinations of valuation and cash rate favour spreading."""
+    fig, ax = plt.subplots(figsize=(7.2, 2.5))
+    lim = np.nanmax(np.abs(grid))
+    # High values (spreading pays) render blue, low values clay, matching the
+    # annotations and the rest of the report's colour language.
+    im = ax.imshow(grid, origin="lower", aspect="auto", cmap="RdBu",
+                   vmin=-lim, vmax=lim,
+                   extent=[capes[0], capes[-1], rates[0], rates[-1]])
+    cs = ax.contour(capes, rates, grid, levels=[0], colors=[INK],
+                    linewidths=1.6)
+    ax.clabel(cs, fmt={0: "손익분기"}, fontsize=7.5)
+    ax.scatter([cur_cape], [cur_rate], s=90, marker="*", color="white",
+               edgecolor=INK, linewidth=1.1, zorder=5)
+    ax.annotate("현재", (cur_cape, cur_rate), xytext=(9, 7),
+                textcoords="offset points", fontsize=8, weight="bold", color=INK)
+    ax.set_xlabel("Shiller CAPE")
+    ax.set_ylabel("현금 실질금리 (%)")
+    ax.grid(False)
+    cb = fig.colorbar(im, ax=ax, shrink=0.9)
+    cb.set_label("12개월 분할의 예상 성과 (%p)", fontsize=8)
+    box = dict(boxstyle="round,pad=0.35", fc=PAPER, ec="none", alpha=0.88)
+    ax.annotate("이 위쪽 = 분할이 유리", xy=(capes[0] + 1.2, rates[-1] - 0.42),
+                fontsize=8, color="#1f4a68", weight="bold", bbox=box)
+    ax.annotate("이 아래쪽 = 일시투자가 유리", xy=(capes[0] + 1.2, rates[0] + 0.22),
+                fontsize=8, color=CLAY_DEEP, weight="bold", bbox=box)
+    return _finish(fig, path)
