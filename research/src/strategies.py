@@ -58,12 +58,19 @@ def simulate(eq_gross: np.ndarray,
             allowed = deploy_signal[:, t] | forced
             deploy = np.where(allowed, cash, 0.0)
         elif value_averaging:
-            frac = min((t + 1) / n, 1.0) if n > 0 else 1.0
-            target = frac * 1.0
-            gap = target - equity
-            # No leverage and no shorting: buy at most the cash on hand,
-            # sell at most the equity held.
-            deploy = np.clip(gap, -equity, cash)
+            if n > 0 and t >= n:
+                # Deployment is finished; value averaging stops rebalancing
+                # rather than trimming gains back to the target forever.
+                deploy = np.zeros(n_win)
+            else:
+                target = min((t + 1) / n, 1.0) if n > 0 else 1.0
+                gap = target - equity
+                # No leverage and no shorting: buy at most the cash on hand,
+                # sell at most the equity held.
+                deploy = np.clip(gap, -equity, cash)
+                if t == n - 1:
+                    # Sweep any residual cash in so the sum is fully deployed.
+                    deploy = cash.copy()
         elif n == 0:
             deploy = cash if t == 0 else np.zeros(n_win)
         elif t < n - 1:
