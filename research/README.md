@@ -21,6 +21,18 @@ PYTHONPATH=src .venv/bin/python src/run_all.py
 PYTHONPATH=src .venv/bin/python src/run_all.py --rebuild-data
 ```
 
+### 디자인된 PDF 보고서
+
+```bash
+uv pip install --python .venv/bin/python playwright pypdfium2
+PYTHONPATH=src .venv/bin/python src/fetch_fonts.py   # 한글 폰트 (약 14MB, .fonts/)
+PYTHONPATH=src .venv/bin/python src/report_pdf.py    # -> 고CAPE_분할매수_백테스트.pdf
+```
+
+`report_pdf.py`는 results.md를 옮겨 적는 것이 아니라 패널에서 숫자를 **다시
+계산**한다. 분석이 바뀌면 보고서도 따라 바뀐다. HTML을 Chromium으로 렌더링하므로
+`/opt/pw-browsers`의 사전 설치 브라우저를 쓴다(`playwright install` 불필요).
+
 `run_all.py`는 검증 게이트를 먼저 돌리고, **실패하면 그 자리에서 중단한다.**
 
 ## 구조

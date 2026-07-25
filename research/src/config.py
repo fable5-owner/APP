@@ -1,6 +1,7 @@
 """Shared paths and constants for the DCA-schedule backtest."""
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -8,6 +9,8 @@ RAW = ROOT / "data" / "raw"
 INTERIM = ROOT / "data" / "interim"
 FIGURES = ROOT / "figures"
 RESULTS = ROOT / "results"
+# Korean typefaces for the PDF report; populated by src/fetch_fonts.py.
+FONT_DIR = Path(os.environ.get("REPORT_FONT_DIR", ROOT / ".fonts"))
 
 for _d in (RAW, INTERIM, FIGURES, RESULTS):
     _d.mkdir(parents=True, exist_ok=True)
