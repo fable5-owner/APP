@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# research project
+research/.venv/
+research/__pycache__/
+research/src/__pycache__/
+research/.fonts/
+research/report_build/
