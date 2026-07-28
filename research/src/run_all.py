@@ -17,10 +17,11 @@ import pandas as pd
 import build_series
 import figures
 from advantage import advantage_frame
-from analysis import (advantage_table, cape_bucket_table, crash_shape_table,
-                      crra_table, leave_one_out, lookahead_bias, regret_table,
-                      start_year_table, static_allocation_control,
-                      strategy_comparison)
+from analysis import (advantage_table, allocation_ladder, cape_bucket_table,
+                      crash_shape_table, crra_table, leave_one_out,
+                      lookahead_bias, regret_table, start_year_table,
+                      static_allocation_control, strategy_comparison,
+                      terminal_distribution)
 from config import (BOOTSTRAP_BLOCK, BOOTSTRAP_DRAWS, CURRENT_CAPE, HORIZON_MONTHS,
                     INTERIM, N_GRID, ROOT)
 from gates import run_all_gates
@@ -211,10 +212,31 @@ def main() -> None:
               "이를 선호하는 것은 당연하며, 그것은 타이밍에 대한 진술이 아니라 "
               "**위험예산에 대한 진술**이다. 올바른 대조군은 같은 평균 주식비중을 "
               "가진 고정혼합이다.\n\n"
-              "고밸류에이션 구간에서 N=36의 평균 우위 +6.3%p는 같은 평균비중(85%) "
+              "고밸류에이션 구간에서 N=36의 평균 우위(+2.2%p)는 같은 평균비중(85%) "
               "고정혼합 대비로는 사라지고, γ=5·γ=10에서는 **고정혼합이 이긴다**. "
               "위험을 줄이고 싶다면 배치를 늦추는 것보다 주식비중을 영구적으로 "
               "낮추는 편이 낫다.\n")
+
+    section(out, "3.8 주식비중 사다리 — 실제로 큰 레버", 3)
+    for cond, lab in [(None, "전체 시작월"), (TOP, HIGH)]:
+        t = allocation_ladder(panel, cond=cond)
+        out.write(f"**{lab}** (n={t.attrs['n_windows']}, 유효표본 "
+                  f"{t.attrs['eff_n']}, {t.attrs['span']})\n\n"
+                  + md(t, ".3f") + "\n\n")
+    out.write("1.0 대비 배수, 10년 실질, 매월 재조정. 평균은 주식비중에 단조 "
+              "증가하지만 **확실성등가는 그렇지 않다** — γ=5에서 최대는 70%이고, "
+              "γ=10에서 100% 주식의 확실성등가는 1을 밑돈다. 분할 개월 수와 달리 "
+              "이 표의 방향은 부호가 뒤집히지 않는다.\n")
+
+    section(out, "3.9 최종부의 분포 — 평균이 아니라 꼬리", 3)
+    for cond, lab in [(None, "전체 시작월"), (TOP, HIGH)]:
+        t = terminal_distribution(panel, cond=cond)
+        out.write(f"**{lab}** (n={t.attrs['n_windows']}, 유효표본 "
+                  f"{t.attrs['eff_n']})\n\n" + md(t, ".3f") + "\n\n")
+    out.write("조건부 표들이 보고하는 것은 스케줄 간 평균 *차이*다. 이 표는 각 "
+              "스케줄이 실제로 마주하는 결과의 폭이다. 고 CAPE 진입의 10년 실질 "
+              "손실 확률은 일시불 29.7%, N=36에서도 23.3%로 남는다 — 분할은 "
+              "위험을 제거하지 않는다.\n")
 
     # ---------------------------------------------------------- strategies
     section(out, "4. 전략 S0~S4 비교")

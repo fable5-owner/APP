@@ -441,3 +441,81 @@ def static_allocation_control(panel: pd.DataFrame, n_grid: list = N_GRID,
     out.attrs["n_windows"] = len(ws)
     out.attrs["span"] = f"{ws.starts.min()}..{ws.starts.max()}"
     return out
+
+
+# --------------------------------------------------------------------------
+# How much to put in — the lever the schedule question is usually a proxy for
+# --------------------------------------------------------------------------
+def allocation_ladder(panel: pd.DataFrame,
+                      weights: tuple = (1.0, 0.85, 0.70, 0.50),
+                      gammas: list = GAMMAS,
+                      horizon: int = HORIZON_MONTHS,
+                      cond=None) -> pd.DataFrame:
+    """Terminal real wealth for constant equity weights, rebalanced monthly.
+
+    The schedule question asks *when* the money goes in; this asks *how much*
+    goes in at all.  Both move the average equity exposure, but the schedule
+    moves it only for N months and the sample cannot sign the effect, while
+    this moves it for the whole horizon and the sign is not in doubt.  Reported
+    together so the reader can see which decision is actually large.
+    """
+    ws = build_windows(panel, horizon)
+    if cond is not None:
+        ws = subset(ws, np.asarray(
+            cond(ws.features["cape_pct_expanding"].to_numpy())))
+
+    rows = []
+    for w in weights:
+        wealth = simulate(w * ws.eq + (1 - w) * ws.rf, ws.rf, 0)
+        row = {"equity weight": w,
+               "mean": float(np.mean(wealth)),
+               "p05": float(np.percentile(wealth, 5)),
+               "p50": float(np.percentile(wealth, 50)),
+               "p95": float(np.percentile(wealth, 95)),
+               "min": float(np.min(wealth)),
+               "loss rate": float(np.mean(wealth < 1.0))}
+        for g in gammas:
+            row[f"CE g={g}"] = crra_certainty_equivalent(wealth, g)
+        rows.append(row)
+
+    out = pd.DataFrame(rows).set_index("equity weight")
+    out.attrs["n_windows"] = len(ws)
+    out.attrs["span"] = f"{ws.starts.min()}..{ws.starts.max()}"
+    out.attrs["eff_n"] = round(
+        effective_sample(np.ones(len(ws), dtype=bool), horizon), 1)
+    return out
+
+
+def terminal_distribution(panel: pd.DataFrame, n_grid: list = N_GRID,
+                          horizon: int = HORIZON_MONTHS,
+                          cond=None) -> pd.DataFrame:
+    """Percentiles of terminal real wealth per unit invested, by schedule.
+
+    The advantage tables report a *mean* difference between schedules.  This
+    reports the spread of outcomes each schedule actually faces, which is the
+    quantity a reader means by "how bad can it get".
+    """
+    ws = build_windows(panel, horizon)
+    if cond is not None:
+        ws = subset(ws, np.asarray(
+            cond(ws.features["cape_pct_expanding"].to_numpy())))
+
+    grid = wealth_grid(ws, n_grid)
+    rows = {}
+    for n in n_grid:
+        v = grid[n].to_numpy()
+        rows[n] = {"p05": float(np.percentile(v, 5)),
+                   "p25": float(np.percentile(v, 25)),
+                   "p50": float(np.percentile(v, 50)),
+                   "p75": float(np.percentile(v, 75)),
+                   "p95": float(np.percentile(v, 95)),
+                   "min": float(np.min(v)),
+                   "mean": float(np.mean(v)),
+                   "loss rate": float(np.mean(v < 1.0))}
+    out = pd.DataFrame(rows).T
+    out.index.name = "N"
+    out.attrs["n_windows"] = len(ws)
+    out.attrs["span"] = f"{ws.starts.min()}..{ws.starts.max()}"
+    out.attrs["eff_n"] = round(
+        effective_sample(np.ones(len(ws), dtype=bool), horizon), 1)
+    return out

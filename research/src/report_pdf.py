@@ -15,9 +15,10 @@ import pandas as pd
 import report_theme as T
 from advantage import (advantage_frame, deployment_advantage,
                        effective_sample, features_for)
-from analysis import (bootstrap_advantage, cape_bucket_table, leave_one_out,
-                      regret_table, static_allocation_control,
-                      strategy_comparison)
+from analysis import (allocation_ladder, bootstrap_advantage,
+                      cape_bucket_table, leave_one_out, regret_table,
+                      static_allocation_control, strategy_comparison,
+                      terminal_distribution)
 from bootstrap import percentile_ci
 from config import HORIZON_MONTHS, INTERIM, N_GRID, ROOT
 from krw import build_krw_panel, krw_table, lot_dispersion_check
@@ -137,6 +138,19 @@ def gather(panel: pd.DataFrame, japan: pd.DataFrame) -> dict:
     d["breakeven_rate"] = (d["state"]["earnings_yield"]
                            - d["breakeven"])
 
+    # How much to invest at all, and how wide the outcomes are either way.
+    d["alloc"] = allocation_ladder(panel)
+    d["alloc_top"] = allocation_ladder(panel, cond=TOP)
+    d["dist"] = terminal_distribution(panel)
+    d["dist_top"] = terminal_distribution(panel, cond=TOP)
+
+    # Japan's 1989 entry is the only observed case of a top-decile valuation
+    # that stayed underwater for decades; it anchors the left tail the US
+    # sample does not contain.
+    jg = (1 + japan["eq_tr_real"].dropna())
+    d["japan_entry"] = {h: float(jg.loc[1989:1989 + h - 1].prod())
+                        for h in (10, 20, 30)}
+
     d["split"] = us_split_sample(panel)
     d["japan_tab"], _, _ = japan_table(japan, n_years=(0, 2, 3, 5))
     d["japan_1989"] = japan_1989_detail(japan, n_years=(0, 2, 3, 5))
@@ -170,6 +184,10 @@ def make_figures(d: dict, japan: pd.DataFrame) -> dict:
     f["map"] = T.fig_breakeven_map(d["map_capes"], d["map_rates"], d["map_grid"],
                                    d["state"]["cape"], d["state"]["rf_real"],
                                    BUILD / "f_map.png")
+    f["alloc"] = T.fig_allocation(d["alloc"], d["dist"], d["alloc_top"],
+                                  d["dist_top"], BUILD / "f_alloc.png")
+    f["downside"] = T.fig_downside(d["dist"], d["dist_top"],
+                                   d["japan_entry"][10], BUILD / "f_down.png")
     return {k: data_uri(v) for k, v in f.items()}
 
 
@@ -343,53 +361,6 @@ def page_cover(d: dict) -> str:
 </section>"""
 
 
-def page_summary(d: dict, f: dict) -> str:
-    a, t = d["adv_all"], d["adv_top"]
-    ci = d["ci_top"]
-    return f"""
-<section class="page">
-  <div class="eyebrow">요약</div>
-  <h2><span class="num">1</span>네 가지 질문에 대한 답</h2>
-  <div class="rule"></div>
-
-  <div class="stats">
-    <div class="stat"><div class="n">{pct(a[12],2)}%p</div>
-      <div class="l">12개월 분할의 평균 성과<br>(일시투자 대비, 전체 표본)</div></div>
-    <div class="stat"><div class="n">{d['win_all'][12]*100:.0f}%</div>
-      <div class="l">12개월 분할이<br>일시투자를 이긴 비율</div></div>
-    <div class="stat"><div class="n">3개</div>
-      <div class="l">고 CAPE 조건부 주장이<br>기대는 독립 에피소드 수</div></div>
-  </div>
-
-  <h3>① 최적 N은? — 점추정은 N=0, 그러나 판별 불가</h3>
-  <p>전체 표본에서는 나눠 넣을수록 손해다. N이 길수록 단조적으로 나빠진다.
-  고 CAPE 구간만 보면 N=36이 <em>{pct(t[36])}%p</em>로 뒤집히지만,
-  그 95% 신뢰구간이 <strong>[{pct(ci[36][0],1)}, {pct(ci[36][1],1)}]%p</strong>다.
-  점추정의 다섯 배 폭이고 부호조차 정해지지 않는다.</p>
-
-  <figure><img src="{f['answer']}">
-    <figcaption>가로축은 분할 개월 수. 색칠된 띠가 95% 신뢰구간이다.
-    고 CAPE(주황)의 띠가 0선을 넉넉히 걸치고 있다는 점이 이 그림의 요점이다 —
-    선의 위치가 아니라 띠의 폭이 결론이다.</figcaption></figure>
-
-  <h3>② CAPE인가 스프레드인가? — 스프레드다</h3>
-  <p>통념은 "CAPE가 높으면 분할이 유리"다. 대안 가설은 "분할의 비용은
-  <em>주식 기대수익과 현금금리의 차이</em>에 비례할 뿐이고 CAPE는 그 차이를
-  통해서만 간접적으로 작용한다"였다. 회귀에 둘을 함께 넣자 CAPE 계수는
-  유의성을 잃는 정도가 아니라 <strong>부호가 뒤집혔다.</strong></p>
-
-  <h3>③ 낙폭 트리거는? — 평균은 아니고, 분산은 준다</h3>
-  <p>고점 대비 −10 / −20 / −30%에서 잔여분을 가속 투입하는 규칙은
-  고 CAPE 구간에서 오히려 평균을 낮춘다. 대신 승률이 오르고 최대이익이 잘린다.
-  수익 개선 장치가 아니라 분산 축소 장치다.</p>
-
-  <h3>④ 유효표본은? — 사실상 3개</h3>
-  <p>고 CAPE 시작월 400여 개는 서로 겹치지 않는 <strong>세 구간</strong>에서 나온다.
-  관측치 수가 아무리 많아도 독립적인 사건은 세 번뿐이다.</p>
-  {folio(2, '고 CAPE 분할매수 백테스트')}
-</section>"""
-
-
 def page_why_hard(d: dict, f: dict) -> str:
     sp = d["episode_spans"]
     n_strict = len(d["episode_spans_strict"])
@@ -403,7 +374,7 @@ def page_why_hard(d: dict, f: dict) -> str:
     return f"""
 <section class="page">
   <div class="eyebrow">표본의 한계</div>
-  <h2><span class="num">8</span>왜 이 질문은 답하기 어려운가</h2>
+  <h2><span class="num">7</span>왜 이 질문은 답하기 어려운가</h2>
   <div class="rule"></div>
 
   <p class="lead">100년치 월별 데이터가 있으니 표본이 넉넉해 보인다.
@@ -451,7 +422,7 @@ def page_spread(d: dict, f: dict) -> str:
     return f"""
 <section class="page">
   <div class="eyebrow">핵심 발견 ①</div>
-  <h2><span class="num">9</span>진짜 원인은 CAPE가 아니라 스프레드다</h2>
+  <h2><span class="num">8</span>진짜 원인은 CAPE가 아니라 스프레드다</h2>
   <div class="rule"></div>
 
   <div class="callout">
@@ -509,7 +480,7 @@ def page_cost_formula(d: dict) -> str:
     return f"""
 <section class="page">
   <div class="eyebrow">핵심 발견 ②</div>
-  <h2><span class="num">10</span>분할의 비용에는 공식이 있다</h2>
+  <h2><span class="num">9</span>분할의 비용에는 공식이 있다</h2>
   <div class="rule"></div>
 
   <p class="lead">스프레드가 진짜 원인이라면, 비용은
@@ -571,7 +542,7 @@ def page_regret(d: dict, f: dict) -> str:
     return f"""
 <section class="page">
   <div class="eyebrow">핵심 발견 ③</div>
-  <h2><span class="num">11</span>평균과 최악은 서로 다른 답을 준다</h2>
+  <h2><span class="num">10</span>평균과 최악은 서로 다른 답을 준다</h2>
   <div class="rule"></div>
 
   <p class="lead">평균으로 보면 일시투자가 낫다. 그런데 "가장 후회할 경우"를
@@ -626,7 +597,7 @@ def page_japan(d: dict, f: dict) -> str:
     return f"""
 <section class="page">
   <div class="eyebrow">표본외 검증</div>
-  <h2><span class="num">12</span>일본 — 미국 표본에 없는 진짜 극단</h2>
+  <h2><span class="num">11</span>일본 — 미국 표본에 없는 진짜 극단</h2>
   <div class="rule"></div>
 
   <p class="lead">미국 데이터만 쓰면 생존 편향이다. 미국은 20년·30년 실질
@@ -723,7 +694,7 @@ def page_krw(d: dict) -> str:
   분할이 세금을 덜 내는 이유는 단지 이익이 적기 때문이지 로트가 분산되어서가
   아니다.
   로트 분산이 실제로 작동하려면 분할 매도로 연 250만원 공제를 여러 번 써야 한다.</p>
-  {folio(13, '고 CAPE 분할매수 백테스트')}
+  {folio(14, '고 CAPE 분할매수 백테스트')}
 </section>"""
 
 
@@ -776,7 +747,7 @@ def page_decision(d: dict, f: dict) -> str:
     <div class="v">일시투자 쪽이지만 거의 무차별점이다.<br>
     손익분기 스프레드 {d['breakeven']:.2f}% 대 현재 {st['spread']:.2f}%.</div>
   </div>
-  {folio(14, '고 CAPE 분할매수 백테스트')}
+  {folio(15, '고 CAPE 분할매수 백테스트')}
 </section>"""
 
 
@@ -785,7 +756,7 @@ def page_limits(d: dict) -> str:
     return f"""
 <section class="page">
   <div class="eyebrow">한계</div>
-  <h2><span class="num">16</span>이 결론을 뒤집으려면</h2>
+  <h2><span class="num">18</span>이 결론을 뒤집으려면</h2>
   <div class="rule"></div>
 
   <h3>관측 가능한 뒤집힘 조건</h3>
@@ -832,7 +803,7 @@ def page_limits(d: dict) -> str:
     모형화하지 않았다. 그리고 평균을 볼 것인가 최악을 볼 것인가는
     데이터가 아니라 <strong>선호의 문제</strong>다. 그 선택까지 대신해 줄 수는 없다.</p>
   </div>
-  {folio(16, '고 CAPE 분할매수 백테스트')}
+  {folio(19, '고 CAPE 분할매수 백테스트')}
 </section>"""
 
 
@@ -841,8 +812,9 @@ def build_html(d: dict, f: dict) -> str:
              p_summary(d, f), p_glossary(d), p_cases(d),
              p_spread_past(d, f), p_spread_now(d, f), p_spread_future(d, f),
              page_why_hard(d, f), page_spread(d, f), page_cost_formula(d),
-             page_regret(d, f), page_japan(d, f), page_krw(d),
-             page_decision(d, f), p_priorities(d), page_limits(d)]
+             page_regret(d, f), page_japan(d, f), p_downside(d, f),
+             page_krw(d), page_decision(d, f), p_allocation(d, f),
+             p_priorities(d), p_playbook(d), page_limits(d)]
     return (f"<!doctype html><html lang='ko'><head><meta charset='utf-8'>"
             f"<title>고 CAPE 분할매수 백테스트</title>"
             f"<style>{font_face_css()}\n{CSS}</style></head>"
@@ -1354,7 +1326,7 @@ def p_priorities(d: dict) -> str:
     return f"""
 <section class="page">
   <div class="eyebrow">균형 잡기</div>
-  <h2><span class="num">15</span>이 결정의 크기</h2>
+  <h2><span class="num">16</span>이 결정의 크기</h2>
   <div class="rule"></div>
 
   <p class="lead">100억을 10년 굴리면 평균적으로 <strong>{terminal:.0f}억원</strong>이 된다.
@@ -1385,9 +1357,185 @@ def p_priorities(d: dict) -> str:
     ["실질금리가 1.5% 위로 오르면", "<b>분할을 늘려도 좋다</b>",
      "현금이 벌어주므로 기다리는 비용이 사라진다"],
     ["최악의 시나리오가 감당 안 되면", "<b>N 대신 주식비중을 낮춰라</b>",
-     "같은 위험 감소를 더 확실하게 산다 (11절)"],
+     "같은 위험 감소를 더 확실하게 산다 (16쪽)"],
   ], cls="prose")}
-  {folio(15, '고 CAPE 분할매수 백테스트')}
+  {folio(17, '고 CAPE 분할매수 백테스트')}
+</section>"""
+
+
+
+
+# --------------------------------------------------------------------------
+# The left tail, the bigger lever, and the card you actually act on
+# --------------------------------------------------------------------------
+def p_downside(d: dict, f: dict) -> str:
+    lo, hi, jp = d["dist"].loc[0], d["dist_top"].loc[0], d["japan_entry"]
+    sp = d["dist_top"].loc[36]
+    rows = [["전체 기간 · 일시불", f"{lo['p05']*100:.0f}억", f"{lo['p50']*100:.0f}억",
+             f"{lo['p95']*100:.0f}억", f"{lo['loss rate']*100:.0f}%"],
+            ["고 CAPE 진입 · 일시불", f"{hi['p05']*100:.0f}억", f"{hi['p50']*100:.0f}억",
+             f"{hi['p95']*100:.0f}억", f"{hi['loss rate']*100:.0f}%"],
+            ["고 CAPE 진입 · 36개월 분할", f"{sp['p05']*100:.0f}억",
+             f"{sp['p50']*100:.0f}억", f"{sp['p95']*100:.0f}억",
+             f"{sp['loss rate']*100:.0f}%"]]
+    jrows = [[f"{h}년 뒤", f"{jp[h]*100:.0f}억",
+              f"{jp[h]**(1/h)-1:+.2%}"] for h in (10, 20, 30)]
+    return f"""
+<section class="page">
+  <div class="eyebrow">나쁜 쪽</div>
+  <h2><span class="num">12</span>지면 얼마나 지는가</h2>
+  <div class="rule"></div>
+
+  <p class="lead">여기까지는 전부 <strong>평균</strong> 이야기였다. 평균은 결정의 절반만
+  말해준다. 나머지 절반은 "빗나가면 어디까지 가느냐"인데, 이쪽이 사실 잠을
+  못 자게 만드는 부분이다.</p>
+
+  <figure><img src="{f['downside']}">
+    <figcaption>100억을 넣고 10년 뒤 실질 가치. 진한 막대가 가운데 50%,
+    연한 막대가 하위 5%~상위 5%, 흰 점이 중앙값. 세로 점선은 원금.</figcaption></figure>
+
+  {table(["진입 상황", "하위 5%", "중앙값", "상위 5%", "10년 뒤 원금 손실 확률"], rows)}
+  <div class="tnote">실질 기준, 배당 재투자, 세전. 1926~2016년 시작월
+  {int(d['dist'].attrs['n_windows'])}개 / 고 CAPE {int(d['dist_top'].attrs['n_windows'])}개지만,
+  10년 보유라 독립 표본은 {d['dist'].attrs['eff_n']:.0f}개와
+  {d['dist_top'].attrs['eff_n']:.1f}개뿐이다.</div>
+
+  <div class="callout warn"><div class="t">스케줄로 고칠 수 있는 부분은 작다</div>
+  <p>비싼 구간 진입은 10년 뒤 실질 손실 확률을
+  {lo['loss rate']*100:.0f}% → <strong>{hi['loss rate']*100:.0f}%</strong>로 밀어올린다.
+  36개월에 걸쳐 나눠 사면 {sp['loss rate']*100:.0f}%로 내려오지만, 여전히
+  <strong>네 번에 한 번</strong>이다. 분할은 위험을 없애는 도구가 아니라
+  조금 깎는 도구다.</p></div>
+
+  <h3>미국 표본이 모르는 사례 — 1989년 일본</h3>
+  {table(["보유 기간", "100억의 실질 가치", "연평균 실질수익"], jrows)}
+  <div class="tnote">1989년은 일본 밸류에이션이 사상 최고였던 해다.
+  실질 기준, 배당 재투자 포함.</div>
+
+  <p>미국 표본 최악의 10년은 {lo['min']*100:.0f}억, 일본 1989년 진입은
+  <strong>{jp[10]*100:.0f}억</strong>이었고 <strong>30년 뒤에도 {jp[30]*100:.0f}억</strong>이었다.</p>
+
+  <div class="callout"><div class="t">"양쪽 다 열려 있다"는 반만 맞다</div>
+  <p>미국은 100년 동안 20년·30년 실질수익이 마이너스였던 적이 없다. 하지만 그건
+  <em>안전하다는 증거가 아니라 이긴 나라 하나를 보고 있다는 증거</em>일 수 있다.
+  왼쪽 꼬리의 실제 사례는 표본 밖에 딱 하나, 일본이다.</p></div>
+
+  {folio(13, '고 CAPE 분할매수 백테스트')}
+</section>"""
+
+
+def p_allocation(d: dict, f: dict) -> str:
+    a, at = d["alloc"], d["alloc_top"]
+    dist = d["dist"]
+    rows = [[f"{w:.0%}", f"{r['mean']*100:.0f}억", f"{r['p05']*100:.0f}억",
+             f"{r['loss rate']*100:.0f}%", f"{r['CE g=5']:.3f}",
+             f"{r['CE g=10']:.3f}"] for w, r in a.iterrows()]
+    trows = [[f"{w:.0%}", f"{r['mean']*100:.0f}억", f"{r['p05']*100:.0f}억",
+              f"{r['loss rate']*100:.0f}%", f"{r['CE g=5']:.3f}"]
+             for w, r in at.iterrows()]
+    best5 = a["CE g=5"].idxmax()
+    d36, s85 = dist.loc[36], a.loc[0.85]
+    full = a.loc[1.0]
+    return f"""
+<section class="page">
+  <div class="eyebrow">더 큰 결정</div>
+  <h2><span class="num">15</span>언제 넣느냐보다 얼마나 넣느냐</h2>
+  <div class="rule"></div>
+
+  <p class="lead">분할매수가 마음 편한 이유는 사실 타이밍이 아니라
+  <strong>한동안 주식을 덜 들고 있기 때문</strong>이다. 그렇다면 정직한 비교 대상은
+  일시불이 아니라 "주식 비중을 아예 낮춰서 계속 들고 가는 것"이다.</p>
+
+  <figure><img src="{f['alloc']}">
+    <figcaption>가로축 평균, 세로축 하위 5%. 올리브 선은 주식 비중을 100%→50%로
+    낮췄을 때의 궤적, 주황 마름모는 분할매수 — 같은 선 위에 앉는다.</figcaption></figure>
+
+  <p>36개월 분할은 평균 {d36['mean']*100:.0f}억 / 하위 5% {d36['p05']*100:.0f}억,
+  주식 85% 고정은 평균 {s85['mean']*100:.0f}억 / 하위 5% {s85['p05']*100:.0f}억.
+  <strong>값도 같고 사는 것도 같다.</strong> 차이는 하나 — 고정 비중은 계속 남지만
+  분할은 3년 뒤 사라지고 그때부터는 100% 주식이다.</p>
+
+  <h3>비중을 낮추면 무엇을 잃고 무엇을 얻나 (전체 기간)</h3>
+  {table(["주식 비중", "평균", "하위 5%", "손실 확률", "확실성등가 γ=5", "γ=10"], rows)}
+  <div class="tnote">100억을 넣고 10년 뒤 실질 가치, 매월 재조정. 확실성등가는
+  위험을 감안한 값으로 클수록 좋다. 10년 보유라 독립 표본은
+  {a.attrs['eff_n']:.0f}개뿐이다.</div>
+
+  <p>평균만 보면 100%가 이긴다. 그런데 확실성등가는 <strong>중간 어딘가에서 꺾인다</strong> —
+  표본에서는 {best5:.0%} 부근이 가장 높다. 겁이 많은 투자자(γ=10)에게 100% 주식은
+  {full['CE g=10']:.3f}로 <strong>1보다 작다</strong> — 현금만 들고 있느니만 못하다.</p>
+
+  <h3>고 CAPE 진입만 골라 보면 더 뚜렷하다</h3>
+  {table(["주식 비중", "평균", "하위 5%", "손실 확률", "확실성등가 γ=5"], trows)}
+
+  <div class="callout warn"><div class="t">스케줄은 부호를 모르고, 비중은 안다</div>
+  <p>최적 비중이 70%인지 85%인지는 이 표본으로 못 고른다. 하지만 <strong>방향</strong>은
+  안다 — 낮추면 평균이 줄고 바닥이 오른다. 분할 개월 수는 그 방향조차 모른다.</p></div>
+
+  {folio(16, '고 CAPE 분할매수 백테스트')}
+</section>"""
+
+
+def p_playbook(d: dict) -> str:
+    st = d["state"]
+    be, ber = d["breakeven"], d["breakeven_rate"]
+    gap = (ber - st["rf_real"]) * 100
+    rows = [["주식 기대수익 (1/CAPE)", f"{st['earnings_yield']:.2f}%",
+             "Shiller CAPE의 역수", "분기 1회"],
+            ["명목 단기금리", f"{st['rf_nominal']:.2f}%",
+             "3개월 미 국채 (FRED: DTB3)", "월 1회"],
+            ["기대 인플레이션", f"{st['inflation_expected']:.2f}%",
+             "최근 10년 평균 물가상승률", "연 1회"],
+            ["<strong>실질 현금금리</strong>",
+             f"<strong>{st['rf_real']:.2f}%</strong>",
+             "명목 − 기대 인플레", "월 1회"],
+            ["<strong>스프레드</strong>", f"<strong>{st['spread']:.2f}%</strong>",
+             "주식 기대수익 − 실질 현금금리", "월 1회"]]
+    return f"""
+<section class="page">
+  <div class="eyebrow">실행</div>
+  <h2><span class="num">17</span>그래서 무엇을 보고 있으면 되나</h2>
+  <div class="rule"></div>
+
+  <p class="lead">이 보고서의 결론은 "CAPE 말고 실질 현금금리를 보라"였다.
+  그 말이 실제로 무슨 행동을 뜻하는지 한 장에 적는다.</p>
+
+  <h3>지켜볼 숫자는 다섯 개, 사실상 하나</h3>
+  {table(["항목", "현재", "어디서", "확인 주기"], rows)}
+  <div class="tnote">기준일 {st['as_of']}. 앞의 셋은 마지막 둘을 만들기 위한
+  재료일 뿐이라, 실제로 추적할 것은 실질 현금금리 하나다.</div>
+
+  <div class="stats">
+    <div class="stat"><div class="n">{st['rf_real']:.2f}%</div>
+      <div class="l">현재 실질 현금금리</div></div>
+    <div class="stat"><div class="n">{ber:.2f}%</div>
+      <div class="l">분할이 유리해지는<br>실질 현금금리</div></div>
+    <div class="stat"><div class="n">{gap:.0f}bp</div>
+      <div class="l">둘 사이의 거리</div></div>
+  </div>
+
+  <div class="callout warn"><div class="t">방아쇠는 하나뿐</div>
+  <p>손익분기 스프레드는 {be:.2f}%이고 지금은 {st['spread']:.2f}%다.
+  주식 기대수익이 그대로라면, <strong>실질 현금금리가 {ber:.2f}%를 넘는 순간</strong>
+  분할이 유리한 쪽으로 넘어간다. 지금보다 {gap:.0f}bp 위다 — 명목금리가
+  {st['rf_nominal'] + gap/100:.2f}%로 오르거나, 기대 인플레가
+  {st['inflation_expected'] - gap/100:.2f}%로 내려가면 도달한다.</p></div>
+
+  <h3>안 봐도 되는 것</h3>
+  <p><strong>CAPE.</strong> 지금 99분위지만, 앞에서 본 대로 분할 결정에 정보를 주지
+  않는다. 밸류에이션이 더 오르든 내리든 이 결정은 거의 안 바뀐다 —
+  오히려 <em>주식이 싸지면 일시불이 더 유리해진다</em>. 기대수익이 올라가서
+  기다리는 값이 비싸지기 때문이다. 직관과 반대라서 한 번 더 적는다.</p>
+
+  <div class="callout"><div class="t">현실적인 실행 순서</div>
+  <p><strong>1.</strong> 주식에 얼마를 배정할지부터 정한다 (16쪽). 이게 4배 큰 결정이다.<br>
+  <strong>2.</strong> 그 금액은 스케줄을 길게 고민하지 말고 넣는다. 12개월이든
+  18개월이든 기대 차이가 0.03%p라 고를 이유가 없다.<br>
+  <strong>3.</strong> 분기에 한 번 실질 현금금리만 확인한다. {ber:.2f}%를 넘으면
+  그때 다시 계산한다.<br>
+  <strong>4.</strong> 원화 투자자라면 대기 현금은 달러로 두는 편이 나았다 (14쪽).</p></div>
+
+  {folio(18, '고 CAPE 분할매수 백테스트')}
 </section>"""
 
 

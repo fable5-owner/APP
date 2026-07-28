@@ -320,3 +320,78 @@ def fig_breakeven_map(capes, rates, grid, cur_cape, cur_rate, path) -> str:
     ax.annotate("이 아래쪽 = 일시투자가 유리", xy=(capes[0] + 1.2, rates[0] + 0.22),
                 fontsize=8, color=CLAY_DEEP, weight="bold", bbox=box)
     return _finish(fig, path)
+
+
+def fig_allocation(alloc: pd.DataFrame, dist: pd.DataFrame,
+                   alloc_top: pd.DataFrame, dist_top: pd.DataFrame,
+                   path) -> str:
+    """Mean against 5th percentile — schedules land on the allocation frontier.
+
+    Both levers buy the same thing: a higher floor paid for out of the mean.
+    Drawing them in one space shows that a 36-month schedule is priced almost
+    exactly like a permanent cut in equity weight.
+    """
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 1.95), sharey=False)
+    for ax, al, di, title in ((axes[0], alloc, dist, "전체 기간"),
+                              (axes[1], alloc_top, dist_top, "고 CAPE 진입만")):
+        ax.plot(al["mean"], al["p05"], "-", color=OLIVE, lw=1.6, zorder=1)
+        ax.scatter(al["mean"], al["p05"], s=34, color=OLIVE, zorder=3,
+                   label="고정 주식비중")
+        # The frontier slopes down to the right, so both regions off the line
+        # are empty: weights are labelled up-left, schedules down-right.  That
+        # keeps the two label families from landing on each other where a
+        # diamond sits almost exactly on the line.
+        for w, r in al.iterrows():
+            ax.annotate(f"{w:.0%}", (r["mean"], r["p05"]), fontsize=7,
+                        color=OLIVE, xytext=(-5, 6),
+                        textcoords="offset points", ha="right", va="bottom")
+        sched = [n for n in (12, 36) if n in di.index]
+        ax.scatter(di.loc[sched, "mean"], di.loc[sched, "p05"], s=46,
+                   marker="D", color=CLAY, zorder=4, label="분할매수 N개월")
+        for n in sched:
+            ax.annotate(f"{n}개월", (di.loc[n, "mean"], di.loc[n, "p05"]),
+                        fontsize=7, color=CLAY_DEEP, xytext=(8, -5),
+                        textcoords="offset points", ha="left", va="top")
+        ax.set_title(title, fontsize=8.5, color=INK_SOFT, pad=6)
+        ax.set_xlabel("평균 (10년 실질 배수)")
+        ax.margins(0.16)
+    axes[0].set_ylabel("하위 5% (10년 실질 배수)")
+    axes[0].legend(frameon=False, fontsize=7.2, loc="lower left")
+    return _finish(fig, path)
+
+
+def fig_downside(dist: pd.DataFrame, dist_top: pd.DataFrame,
+                 japan_1989: float, path) -> str:
+    """What 100억 turns into after ten real years — both tails, one picture."""
+    fig, ax = plt.subplots(figsize=(7.2, 2.5))
+    rows = [("전체 기간 · 일시불", dist.loc[0], SLATE),
+            ("고 CAPE 진입 · 일시불", dist_top.loc[0], CLAY),
+            ("고 CAPE 진입 · 36개월 분할", dist_top.loc[36], OLIVE)]
+    for i, (label, r, color) in enumerate(rows):
+        y = len(rows) - 1 - i
+        ax.plot([r["p05"] * 100, r["p95"] * 100], [y, y], lw=7, color=color,
+                alpha=0.35, solid_capstyle="butt")
+        ax.plot([r["p25"] * 100, r["p75"] * 100], [y, y], lw=7, color=color,
+                solid_capstyle="butt")
+        ax.scatter([r["p50"] * 100], [y], s=30, color=PAPER, zorder=4,
+                   edgecolor=color, linewidth=1.6)
+        # Row labels ride the left edge in axes coordinates; the data axis
+        # starts well right of zero, so a data-space anchor would clip them.
+        ax.text(0.005, y + 0.30, label, transform=ax.get_yaxis_transform(),
+                fontsize=7.6, color=INK_SOFT, ha="left", va="bottom")
+    ax.axvline(100, color=INK_FAINT, lw=1, ls="--")
+    ax.annotate("원금 100억", (100, -0.72), fontsize=7, color=INK_FAINT,
+                ha="center")
+    # The Japan marker sits near 원금 on the x-axis, so it is labelled at the
+    # top of the panel to keep the two captions from colliding.
+    ax.axvline(japan_1989 * 100, color=CLAY_DEEP, lw=1.2, ls=":")
+    ax.annotate(f"일본 1989년 진입 {japan_1989*100:.0f}억",
+                (japan_1989 * 100, 2.74), xytext=(4, 0),
+                textcoords="offset points", fontsize=7, color=CLAY_DEEP,
+                ha="left", va="center")
+    ax.set_yticks([])
+    ax.set_ylim(-0.95, 3.0)
+    ax.set_xlabel("10년 뒤 실질 가치 (억원, 세전)")
+    ax.spines["left"].set_visible(False)
+    ax.grid(axis="y", visible=False)
+    return _finish(fig, path)
