@@ -42,7 +42,6 @@ ES 모듈을 쓰므로 `file://`로 직접 열면 동작하지 않습니다. 글
 | `js/ui.js` | 화면 템플릿(문자열 반환) |
 | `js/main.js` | 라우팅, 입력 처리, 턴 흐름 |
 | `js/map.js`, `js/geo.js` | 양피지풍 헥스 세계지도 생성(시작 시 1회) |
-| `js/portraits.js` | 코드로 그린 임시 초상화(SVG) |
 | `play.html` | **배포용 단일 파일**(생성물). `tools/build-single.mjs`로 만듭니다 |
 | `art/` | 실제 일러스트로 교체하는 방법: `art/README.md`, 프롬프트: `art/PROMPTS.md` |
 
