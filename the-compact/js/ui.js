@@ -1,5 +1,6 @@
 // View templates: pure functions returning HTML strings. No drawn faces — avatars are initials / orbs.
 import { COMPANIES, CHARS, ORIGINS, SHOP, LEVERS, LETTERS, QUARTERS, TOTAL_TURNS, SUSPECTS, ENDINGS } from './data.js';
+import { art, CAMEO } from './chars.js';
 import { COMP, totalMcap, netWorth, getEvent, previewCompany, pickEnding } from './state.js';
 
 export const fmtB = (b) => { const sg = b < 0 ? '−' : '', a = Math.abs(b); return a >= 1000 ? `${sg}$${(a / 1000).toFixed(2)}T` : a >= 1 ? `${sg}$${a.toFixed(1)}B` : `${sg}$${Math.round(a * 1000)}M`; };
@@ -26,10 +27,13 @@ export const ic = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentCo
 const AVC = { mira: '#f0a6ca', victor: '#9db4d6', jonah: '#6fcf97', lin: '#7fc4d9', dana: '#e58a7a', aria: '#ffb259', sage: '#7aa8ff', elias: '#d9d2c0', hero: '#cbd5e1' };
 const INI = { mira: 'M', victor: 'V', jonah: 'J', lin: 'L', dana: 'D', elias: 'E', hero: 'E' };
 export function av(id, size = 2.4) {
-  if (id === 'aria' || id === 'sage') return `<div class="av orb" style="--s:${size}rem;--c:${AVC[id]}" title="${CHARS[id].kr}"></div>`;
-  return `<div class="av" style="--s:${size}rem;--c:${AVC[id] || '#9db4d6'}" title="${id === 'hero' ? '' : CHARS[id].kr}">${INI[id] || '?'}</div>`;
+  const key = id === 'hero' || SPEC_HAS(id) ? id : 'hero';
+  const bg = AVC[id] || (CAMEO[id.replace('cm_', '')] || {}).c || '#9db4d6';
+  return `<div class="av ch" style="--s:${size}rem;--c:${bg}" title="${id === 'hero' ? '' : (CHARS[id] ? CHARS[id].kr : (CAMEO[id.replace('cm_', '')] || {}).kr || '')}">${art(key)}</div>`;
 }
-export const coAv = (id, size = 2.4) => `<div class="av sq" style="--s:${size}rem;--c:${COMP[id].color}">${id}</div>`;
+const SPEC_HAS = (id) => !!(CHARS[id] || id.startsWith('cm_'));
+export const coAv = (id, size = 2.4) => `<div class="av ch sq" style="--s:${size}rem;--c:${COMP[id].color}">${art(id)}</div>`;
+export const portrait = (id, h = 18) => `<div class="portrait" style="--h:${h}rem;--c:${AVC[id] || '#9db4d6'}">${art(id)}</div>`;
 
 // ---------- effect chips ----------
 const SL = { gov: '정부', tech: '기술', talent: '인재', bubble: '거품', intel: '정보', audit: '감사 위험' };
@@ -168,7 +172,7 @@ export function archive(s, V) {
   const tab = V.arch || 'letters';
   const tabs = `<div style="display:flex;gap:.4rem;padding:.2rem .4rem .6rem"><button class="chip ${tab === 'letters' ? 'acc' : ''}" data-act="arch" data-t="letters">편지 ${s.letters.length}/7</button><button class="chip ${tab === 'people' ? 'acc' : ''}" data-act="arch" data-t="people">인물</button></div>`;
   if (tab === 'people') {
-    return `<div class="view"><div style="margin-bottom:1rem">${tabs}</div><div class="people">${Object.keys(CHARS).filter((k) => k !== 'elias').map((k) => `<div class="panel pcard">${av(k, 3.2)}<div style="flex:1"><h3>${CHARS[k].kr}</h3><div class="muted" style="font-size:.78rem">${CHARS[k].role}</div><p>${CHARS[k].tag}</p><div class="meter" style="width:100%;margin-top:.7rem"><i style="width:${s.trust[k]}%;background:var(--accent)"></i></div></div><span class="mono muted">${Math.round(s.trust[k])}</span></div>`).join('')}</div></div>`;
+    return `<div class="view"><div style="margin-bottom:1rem">${tabs}</div><div class="people">${Object.keys(CHARS).filter((k) => k !== 'elias').map((k) => `<div class="panel pcard">${av(k, 4.4)}<div style="flex:1"><h3>${CHARS[k].kr}</h3><div class="muted" style="font-size:.78rem">${CHARS[k].role}</div><p>${CHARS[k].tag}</p><div class="meter" style="width:100%;margin-top:.7rem"><i style="width:${s.trust[k]}%;background:var(--accent)"></i></div></div><span class="mono muted">${Math.round(s.trust[k])}</span></div>`).join('')}</div></div>`;
   }
   const sel = V.letter && s.letters.includes(V.letter) ? V.letter : s.letters[0];
   const items = Array.from({ length: 7 }, (_, i) => { const id = 'L' + (i + 1), L = LETTERS[id], open = s.letters.includes(id); return `<div class="doc-i ${open ? '' : 'lock'} ${id === sel ? 'on' : ''}" ${open ? `data-act="read-letter" data-id="${id}"` : ''}>${av('elias', 2.2)}<div><b style="font-size:.86rem">${open && L ? L.title : '봉인된 편지 ' + (i + 1)}</b><div class="muted" style="font-size:.7rem">${open ? '열람 가능' : '아직 열 수 없음'}</div></div></div>`; }).join('');
@@ -182,8 +186,9 @@ export function title(hasSave, endings, muted) {
 <div class="title-wrap"><div class="eyebrow">A STORY OF POWER &amp; MONEY</div><div class="wordmark">THE<br>COMPACT</div><div class="tagline">열한 개의 불, 한 사람의 손</div>
 <p class="lede">세계의 지능을 쥔 열한 개 기업이 단 한 사람에게 상속되었다.<br>회사를 키우고, 재산을 쌓고, 사람을 믿고 의심하라. 그리고 마지막 편지를 열어라.</p>
 <div class="title-actions"><button class="btn primary big" data-act="new">새 게임 ${ic('arrow')}</button><button class="btn big ${hasSave ? '' : 'off'}" data-act="continue">이어하기</button></div>
-<div class="dots11">${COMPANIES.map((c) => coAv(c.id, 1.9)).join('')}</div></div>
-<div class="quote-side">"이 열한 개의 불을 한곳에 두어라.<br>마지막 편지를 열기 전에는 아무도 믿지 마라."<br><span class="muted">— 엘리아스 밴스, 유언장</span></div>
+<div class="dots11">${COMPANIES.map((c) => coAv(c.id, 2.5)).join('')}</div></div>
+<div class="lineup">${['mira', 'victor', 'hero', 'jonah', 'lin', 'aria', 'sage'].map((k, i) => `<div class="lu ${k === 'hero' ? 'star' : ''}" style="animation-delay:${i * 120 + 600}ms">${portrait(k, k === 'hero' ? 20 : 14)}<small>${k === 'hero' ? '에단 류' : CHARS[k].kr.split(' ')[0]}</small></div>`).join('')}</div>
+<div class="quote-side" style="display:none">"이 열한 개의 불을 한곳에 두어라.<br>마지막 편지를 열기 전에는 아무도 믿지 마라."<br><span class="muted">— 엘리아스 밴스, 유언장</span></div>
 <div class="fine">모든 인물과 사건은 허구이며, 기업명은 가상의 시나리오를 위해 사용되었습니다. · 엔딩 ${endings}/5</div></div>`;
 }
 export function origin(sel, name) {
@@ -197,7 +202,8 @@ export function scene(step, name, idx, total) {
   const who = step.who;
   const sp = who === 'narr' ? '' : `<div class="speaker">${av(who, 2.4)}<span>${CHARS[who].kr}</span><small>${CHARS[who].role}</small></div>`;
   const ch = step.choices ? `<div class="choices">${step.choices.map((c, i) => `<button class="choice" style="animation-delay:${i * 90}ms" data-act="vn-choice" data-i="${i}">${c.text}<small>${c.sub}</small></button>`).join('')}</div>` : '';
-  return `<div class="screen"><div class="scene"><div class="loc">PROLOGUE · 오마하 · ${idx + 1}/${total}</div><button class="btn skip" data-act="skip-vn">건너뛰기</button>
+  const pt = who === 'narr' ? '' : portrait(who, 26).replace('class="portrait"', 'class="portrait big"');
+  return `<div class="screen"><div class="scene">${pt}<div class="loc">PROLOGUE · 오마하 · ${idx + 1}/${total}</div><button class="btn skip" data-act="skip-vn">건너뛰기</button>
 <div class="stage-text" ${step.choices ? '' : 'data-act="vn-next"'}>${sp}<div class="line ${who === 'narr' ? 'narr' : ''}" key="${idx}">${step.text}</div>${ch}${step.choices ? '' : '<div class="hintc">클릭하거나 Enter · 계속</div>'}</div></div></div>`;
 }
 export function letterModal(id, ctx) {

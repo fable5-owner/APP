@@ -321,3 +321,31 @@ svg text{font-family:var(--font)}
 .mute{width:2.4rem;height:2.4rem;border-radius:50%;display:grid;place-items:center;color:var(--muted);margin-top:.4rem}.mute:hover{color:var(--text);background:var(--tint)}.mute svg{width:1.2rem;height:1.2rem}
 .mute.float{position:absolute;top:1.6rem;right:2rem;z-index:9;background:var(--tint);border:1px solid var(--line2)}
 .ending h1{background:linear-gradient(100deg,#fff,#9ec0ff,#f3c978,#fff);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:wm 7s linear infinite;}
+
+/* ---- characters ---- */
+.av.ch{background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--c) 55%,#fff 0%),color-mix(in srgb,var(--c) 38%,#0b1220));overflow:hidden;font-size:0;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.28),0 0 1rem color-mix(in srgb,var(--c) 40%,transparent)}
+.av.ch .chsvg{width:112%;height:112%;margin:-4% -6% 0;display:block}
+.av.ch.sq{border-radius:30%}
+.chsvg{overflow:visible}
+.eye{transform-box:fill-box;transform-origin:center;animation:blink 5s infinite}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+.portrait{height:var(--h);aspect-ratio:1;position:relative;filter:drop-shadow(0 1.2rem 1.6rem rgba(0,0,0,.55));animation:idle 3.6s ease-in-out infinite}
+.portrait:before{content:"";position:absolute;left:8%;right:8%;bottom:-.4rem;height:1.2rem;border-radius:50%;background:radial-gradient(ellipse,color-mix(in srgb,var(--c) 70%,transparent),transparent 70%);filter:none;opacity:.7}
+.portrait svg{width:100%;height:100%;position:relative}
+@keyframes idle{50%{transform:translateY(-.5rem) rotate(.8deg)}}
+.scene .portrait.big{position:absolute;right:11%;bottom:8%;--h:30rem;animation:idle 3.6s ease-in-out infinite,popin .6s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes popin{from{opacity:0;transform:translateY(3rem) scale(.8)}}
+.scene .stage-text{width:min(46rem,100%);align-self:flex-start;margin-left:6%}
+.lineup{position:absolute;right:3%;bottom:2rem;display:flex;align-items:flex-end;gap:0;z-index:2}
+.lu{display:flex;flex-direction:column;align-items:center;margin-left:-2.2rem;animation:rise 1s ease both;position:relative}
+.lu small{margin-top:.2rem;font-size:.68rem;font-weight:700;color:#cdd7ea;text-shadow:0 1px 6px #000;letter-spacing:.04em}
+.lu .portrait{animation-duration:4s}
+.lu:nth-child(2n) .portrait{animation-delay:-1s}.lu:nth-child(3n) .portrait{animation-delay:-2s}
+.lu.star{z-index:3;margin:0 -.4rem 0 -.2rem}.lu.star small{color:#fff;font-size:.8rem}
+.msg .av{--s:3.1rem}
+.cameo .bub{border-color:rgba(255,255,255,.18);background:linear-gradient(180deg,rgba(255,210,90,.1),rgba(255,255,255,.03))}
+.cameo .who:after{content:"CAMEO";font-size:.56rem;letter-spacing:.14em;padding:.05rem .4rem;border-radius:999px;background:rgba(255,210,90,.16);color:#ffd24a;font-weight:800}
+.chat-h .stack .av{--s:3rem}
+.hubn .mascot{display:none}
+.lineup{right:1.5%;bottom:2.8rem}.lu{margin-left:-4.2rem}.lu:first-child{margin-left:0}
+.fine{max-width:34%}

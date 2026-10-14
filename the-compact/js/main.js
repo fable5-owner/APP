@@ -5,6 +5,7 @@ import * as S from './state.js';
 import * as UI from './ui.js';
 import { Audio } from './audio.js';
 import { FX } from './fx.js';
+import { CAMEO } from './chars.js';
 
 const app = document.getElementById('app');
 const loading = document.getElementById('loading');
@@ -20,6 +21,19 @@ const REACT = {
   dana: ['"기록해 두겠습니다."', '"의회는 이 일을 잊지 않을 겁니다."'], aria: ['"좋아요! 더 빨리 가요!"', '"…느려요. 너무 느려요."'], sage: ['"고맙습니다."', '"…다시 한번 생각해 주시기를."'],
 };
 
+const QUIPS = {
+  anchor: ['"속보입니다! 컴팩트가 움직일 때마다 시장이 숨을 죽입니다."', '"월가의 눈이 일제히 이 방을 향하고 있습니다. 카메라는 못 들어오지만요."', '"시청자 여러분, 지금 이 결정이 내일 아침 1면입니다!"'],
+  intern: ['"저, 커피 드릴까요…? 아, 지금 아닌가요. 죄송합니다!"', '"방금 메모 적어 뒀어요! 중요한 건 별표 세 개!"', '"다들 표정이 무거우셔서… 쿠키 가져왔어요."'],
+  chef: ['"오늘 구내식당 메뉴는 햄버거와 코카콜라. 늘 그렇듯 가장 합리적인 선택이죠."', '"주식은 몰라도 스테이크는 압니다. 서두르면 고기를 태워요."'],
+  quant: ['"확률로 보면 지금은 52대 48… 다만 숫자는 사람의 표정을 못 읽어요."', '"제 모델은 이번 분기를 \'불안정한 낙관\'이라 부르네요."'],
+  guard: ['"…(말없이 문 쪽을 가리킨다)"', '"회장님, 복도는 안전합니다. 아마도요."'],
+};
+function cameoMsg() {
+  const keys = Object.keys(CAMEO), h = (G.seed * 31 + G.turn * 17 + keys.length) >>> 0;
+  if (h % 10 < 3) return null;
+  const k = keys[h % keys.length], c = CAMEO[k], q = QUIPS[k][(h >> 3) % QUIPS[k].length];
+  return `<div class="msg cameo">${UI.av('cm_' + k, 3.1)}<div><div class="who"><b>${c.kr}</b>${c.role}</div><div class="bub">${q}</div></div></div>`;
+}
 const fullScreens = new Set(['title', 'origin', 'scene', 'ending']);
 
 function render() {
@@ -93,13 +107,13 @@ function setReplies(html) {
   const r = document.getElementById('replies'); if (r) r.innerHTML = html;
   const lg = document.getElementById('chatlog'); if (lg) lg.scrollTop = lg.scrollHeight;
 }
-const msgHTML = (who, text, extra = '') => `<div class="msg">${UI.av(who, 2.5)}<div><div class="who"><b>${CHARS[who].kr}</b>${CHARS[who].role}${extra}</div><div class="bub">${text}</div></div></div>`;
+const msgHTML = (who, text, extra = '') => `<div class="msg">${UI.av(who, 3.1)}<div><div class="who"><b>${CHARS[who].kr}</b>${CHARS[who].role}${extra}</div><div class="bub">${text}</div></div></div>`;
 const optHTML = (opts, s) => opts.map((o, i) => { const lock = o.needIntel && s.intel < o.needIntel; return `<button class="reply ${lock ? 'off' : ''}" data-act="choose" data-i="${i}" style="animation-delay:${i * 70}ms"><div class="l"><span class="num">${i + 1}</span>${o.label}<small>${o.who || ''}${lock ? ` · 정보 ${o.needIntel} 필요` : ''}</small></div><div class="chips">${UI.fxChips(o.fx)}</div></button>`; }).join('');
 
 async function startChat(id) {
   const ev = S.getEvent(G, id), tok = Symbol();
   const who = (ev.advisors || []).map((a) => a.who);
-  V.chat = { id, tok, kicker: ev.kicker, title: `${UI.quarterLabel(G)} · 자문 회의`, stack: who.length ? `<div class="stack">${who.slice(0, 3).map((w) => UI.av(w, 2.6)).join('')}</div>` : UI.av('mira', 2.6), msgs: [], replies: '', ev };
+  V.chat = { id, tok, kicker: ev.kicker, title: `${UI.quarterLabel(G)} · 자문 회의`, stack: who.length ? `<div class="stack">${who.slice(0, 3).map((w) => UI.av(w, 3)).join('')}</div>` : UI.av('mira', 3), msgs: [], replies: '', ev };
   V.screen = V.screen === 'hub' || !G ? 'hub' : V.screen; V.modal = null;
   render();
   const alive = () => V.chat && V.chat.tok === tok;
@@ -108,7 +122,7 @@ async function startChat(id) {
   for (const a of ev.advisors || []) {
     if (!alive()) return;
     const st = STANCE[a.stance] || STANCE.h;
-    const typing = `<div class="typing" id="typing">${UI.av(a.who, 2.5)}<div class="dots"><i></i><i></i><i></i></div></div>`;
+    const typing = `<div class="typing" id="typing">${UI.av(a.who, 3.1)}<div class="dots"><i></i><i></i><i></i></div></div>`;
     const lg = document.getElementById('chatlog'); if (lg) { lg.insertAdjacentHTML('beforeend', typing); lg.scrollTop = lg.scrollHeight; }
     await wait(700);
     if (!alive()) return;
@@ -116,6 +130,9 @@ async function startChat(id) {
     addMsg(msgHTML(a.who, a.quote, `<span class="stance ${st[0]}">${a.label || st[1]}</span>`));
     await wait(180);
   }
+  if (!alive()) return;
+  const cm = cameoMsg();
+  if (cm && id !== 'accuse') { await wait(300); if (!alive()) return; addMsg(cm); await wait(250); }
   if (!alive()) return;
   showChoices(ev);
 }
