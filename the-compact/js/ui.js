@@ -7,6 +7,7 @@ import { COMP, totalMcap, netWorth, getEvent, previewCompany, pickEnding } from 
 export const ART = {};
 // Optional real artwork: put files in art/ and list them in art/manifest.json, e.g. {"hero":"hero.png","mira":"mira.jpg"}
 export async function probeArt() {
+  if (window.COMPACT_NO_ART) return;
   try {
     const r = await fetch('art/manifest.json'); if (!r.ok) return;
     const m = await r.json();

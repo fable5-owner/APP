@@ -358,3 +358,6 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .s10 .btns{position:absolute;right:90px;bottom:48px;display:flex;gap:16px}
 .s10 .cur{outline:3px solid var(--gold2);outline-offset:3px;border-radius:50%}
 .s08 .res{padding:16px 22px;font-family:'Noto Sans KR',sans-serif;font-weight:700}
+
+#rotate{display:none;position:fixed;inset:0;z-index:200;background:#140d07;color:#d8b25e;align-items:center;justify-content:center;text-align:center;font-family:'Noto Sans KR',sans-serif;font-size:18px;line-height:1.8;padding:24px}
+@media (max-aspect-ratio: 1/1){#rotate{display:flex}}
