@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>THE COMPACT — 열한 개의 불, 한 사람의 손</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@600;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    :root{--ink:#2b1d10;--gold:#d8b25e;--gold2:#f3d98f;--leather:#2a1b11;--leather2:#1a110a;--paper:#e9dcb8}
+    #loading{position:absolute;inset:0;background:#140d07;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;color:#d8b25e;font-family:Cinzel,serif;letter-spacing:6px;z-index:99}
+    #loading small{font-family:'Noto Sans KR',sans-serif;letter-spacing:0;color:#9a8a68;font-size:14px}
+  </style>
+</head>
+<body>
+  <div id="stage">
+    <canvas id="bg" class="dim"></canvas>
+    <div id="screen"></div>
+    <div id="loading"><div style="font-size:34px">THE COMPACT</div><small>세계 지도를 그리는 중…</small></div>
+  </div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
