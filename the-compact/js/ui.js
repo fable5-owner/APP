@@ -1,359 +1,231 @@
-// Screen templates (pure functions returning HTML strings).
-import { CH, aiOrb, shade } from './portraits.js';
-import { COMPANIES, CHARS, ORIGINS, SHOP, LEVERS, LETTERS, EVENTS, QUARTERS, TOTAL_TURNS, SUSPECTS } from './data.js';
+// View templates: pure functions returning HTML strings. No drawn faces — avatars are initials / orbs.
+import { COMPANIES, CHARS, ORIGINS, SHOP, LEVERS, LETTERS, QUARTERS, TOTAL_TURNS, SUSPECTS, ENDINGS } from './data.js';
 import { COMP, totalMcap, netWorth, getEvent, previewCompany, pickEnding } from './state.js';
 
-// ---- art overrides: drop art/<id>.png|jpg|webp (hero, mira, victor, jonah, lin, dana, elias, aria, sage) ----
-export const ART = {};
-// Optional real artwork: put files in art/ and list them in art/manifest.json, e.g. {"hero":"hero.png","mira":"mira.jpg"}
-export async function probeArt() {
-  if (window.COMPACT_NO_ART) return;
-  try {
-    const r = await fetch('art/manifest.json'); if (!r.ok) return;
-    const m = await r.json();
-    for (const [id, file] of Object.entries(m)) ART[id] = `art/${file}`;
-  } catch (e) { /* no custom art */ }
-}
-
 export const fmtB = (b) => { const sg = b < 0 ? '−' : '', a = Math.abs(b); return a >= 1000 ? `${sg}$${(a / 1000).toFixed(2)}T` : a >= 1 ? `${sg}$${a.toFixed(1)}B` : `${sg}$${Math.round(a * 1000)}M`; };
-const signed = (n, d = 1) => `${n >= 0 ? '+' : '−'}${Math.abs(n).toFixed(d)}`;
-const bar = (p, c) => `<div class="bar"><i style="width:${Math.max(0, Math.min(100, p))}%;background:${c || '#c9a45a'}"></i></div>`;
+const sgn = (n, d = 1) => `${n >= 0 ? '+' : '−'}${Math.abs(n).toFixed(d)}`;
+const pct = (v, d = 1) => `${(v * 100).toFixed(d)}%`;
 
-export function portraitSVG(id, w, h, opts = {}) {
-  if (ART[id]) return `<img class="artimg" src="${ART[id]}" style="width:${w}px;height:${h}px;object-fit:cover;object-position:center 20%">`;
-  if (id === 'hero') return CH.hero({ w, h, ...opts });
-  const c = CHARS[id];
-  if (c.orb) return aiOrb(c.orb[0], c.orb[1], id, w);
-  return CH[c.preset]({ w, h, ...opts });
-}
-export function portFrame(id, w, label, sub, opts) {
-  return `<div class="frame" style="width:${w + 8}px">${portraitSVG(id, w, w * 1.3, opts)}${label ? `<div class="cap">${label}${sub ? `<small>${sub}</small>` : ''}</div>` : ''}</div>`;
-}
-export function avatar(id, size, opts) {
-  if (ART[id]) return `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;border:3px solid var(--gold);box-shadow:0 4px 10px #000a;flex:none"><img class="artimg" src="${ART[id]}" style="object-position:center 18%"></div>`;
-  const isOrb = id !== 'hero' && CHARS[id].orb;
-  const w = isOrb ? size * 1.5 : size * 1.7;
-  const dx = isOrb ? -size * 0.25 : -size * 0.35, dy = isOrb ? -size * 0.38 : -size * 0.43;
-  return `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;border:3px solid var(--gold);box-shadow:0 4px 10px #000a;flex:none;position:relative;background:#241810"><div style="position:absolute;left:${dx}px;top:${dy}px">${portraitSVG(id, w, w * 1.3)}</div></div>`;
-}
-export function seal(code, col, sz = 44) { return `<div class="seal" style="width:${sz}px;height:${sz}px;font-size:${sz * 0.34}px;background:radial-gradient(circle at 35% 30%,${col},${shade(col, 0.45)})">${code}</div>`; }
+// ---------- icons ----------
+const P = {
+  map: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/>',
+  co: '<path d="M4 20V8l8-4 8 4v12M9 20v-6h6v6M9 10h.01M15 10h.01"/>',
+  wallet: '<path d="M3 7h15a3 3 0 0 1 3 3v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l11-3v3"/><circle cx="16.5" cy="14" r="1"/>',
+  probe: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 5 5"/>',
+  doc: '<path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7"/>',
+  close: '<path d="M6 6l12 12M18 6 6 18"/>',
+  jet: '<path d="M2 14l9-2 5-8 2 1-2 8 5 3-1 2-6-1-3 5-2-1 1-6z"/>', think: '<path d="M3 10 12 4l9 6M5 10v8M10 10v8M14 10v8M19 10v8M3 20h18"/>',
+  art: '<rect x="3" y="4" width="18" height="14" rx="2"/><path d="m3 15 5-5 4 4 3-3 6 5"/>', found: '<path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/>',
+  bunker: '<path d="M3 18c2-6 6-9 9-9s7 3 9 9zM12 9V5"/>', media: '<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>', spark: '<path d="m12 3 2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>',
+};
+export const ic = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${P[n] || ''}</svg>`;
 
-// ---- shared chrome ----
-export function totalCash(s) { return COMPANIES.reduce((a, c) => a + s.comp[c.id].cash, 0); }
-export function topbar(s) {
-  const dm = s.last ? s.last.dM / 1000 : 0, np = s.last ? s.last.netIncome : COMPANIES.reduce((a, c) => a + s.comp[c.id].profit, 0);
-  return `<div class="top"><div class="crown">♛ THE COMPACT</div>
- <div class="ledger"><div class="ic">💵</div><div><b>${fmtB(totalCash(s))}</b><small class="${np >= 0 ? 'up' : 'dn'}">${signed(np)}B / 턴</small></div></div>
- <div class="ledger"><div class="ic">📈</div><div><b>$${(totalMcap(s) / 1000).toFixed(1)}T</b><small class="${dm >= 0 ? 'up' : 'dn'}">${s.last ? (dm >= 0 ? '▲' : '▼') + Math.abs(dm).toFixed(2) + 'T' : '제국 가치'}</small></div></div>
- <div class="ledger"><div class="ic">👑</div><div><b>${fmtB(netWorth(s))}</b><small class="up">내 재산</small></div></div>
- <div class="ledger"><div class="ic">🧠</div><div><b>${Math.round(s.stats.tech)}</b><small>기술</small></div></div>
- <div class="ledger"><div class="ic">🏛️</div><div><b>${Math.round(s.stats.gov)}</b><small class="${s.stats.gov < 35 ? 'dn' : ''}">정부</small></div></div>
- <div class="ledger"><div class="ic">👥</div><div><b>${Math.round(s.stats.talent)}</b><small>인재</small></div></div>
- <div class="ledger"><div class="ic">🫧</div><div><b>${Math.round(s.stats.bubble)}%</b><small class="${s.stats.bubble > 85 ? 'dn' : ''}">거품</small></div></div>
- <div class="ledger"><div class="ic">🕵️</div><div><b>${s.intel}</b><small>정보</small></div></div>
- <div class="ledger"><div class="ic">✉️</div><div><b>${s.letters.length} / 7</b><small>편지</small></div></div>
- <div class="sp"></div><div class="date">${s.turn}턴 · ${QUARTERS[Math.min(s.turn, TOTAL_TURNS) - 1]}<small>${s.name}</small></div></div>`;
+// ---------- avatars ----------
+const AVC = { mira: '#f0a6ca', victor: '#9db4d6', jonah: '#6fcf97', lin: '#7fc4d9', dana: '#e58a7a', aria: '#ffb259', sage: '#7aa8ff', elias: '#d9d2c0', hero: '#cbd5e1' };
+const INI = { mira: 'M', victor: 'V', jonah: 'J', lin: 'L', dana: 'D', elias: 'E', hero: 'E' };
+export function av(id, size = 2.4) {
+  if (id === 'aria' || id === 'sage') return `<div class="av orb" style="--s:${size}rem;--c:${AVC[id]}" title="${CHARS[id].kr}"></div>`;
+  return `<div class="av" style="--s:${size}rem;--c:${AVC[id] || '#9db4d6'}" title="${id === 'hero' ? '' : CHARS[id].kr}">${INI[id] || '?'}</div>`;
 }
-const TABS = [['hub', '🗺️', '세계 지도'], ['company', '🏢', '회사'], ['wallet', '👛', '내 지갑'], ['people', '👥', '인물'], ['letters', '✉️', '편지'], ['invest', '🕵️', '수사']];
-export function nav(active) {
-  return `<div class="nav">${TABS.map((t) => `<div class="tab ${t[0] === active ? 'on' : ''}" data-act="go" data-to="${t[0]}"><span>${t[1]}</span>${t[2]}</div>`).join('')}</div>`;
-}
-const trustColor = (v) => (v >= 60 ? '#6fe0a0' : v >= 40 ? '#e8b04a' : '#e86a5a');
+export const coAv = (id, size = 2.4) => `<div class="av sq" style="--s:${size}rem;--c:${COMP[id].color}">${id}</div>`;
 
-// ---- 01 title ----
-export function title(hasSave, endings) {
-  return `<div class="screen s01 fade"><div class="shade"></div>
-<div class="arch">${portraitSVG('hero', 548, 712, { bg: ['#8aa2cf', '#222c4a'] })}<div class="nm"><b>ETHAN RYU</b><span>컴팩트의 상속자 · 당신</span></div></div>
-<div class="title"><div class="t1">THE COMPACT</div><div class="t2">열한 개의 불, 한 사람의 손</div><div class="t3">세계의 지능을 쥔 열한 개 기업이 단 한 사람에게 상속되었다.<br>회사를 키우고, 재산을 쌓고, 사람을 믿고 의심하라. 그리고 마지막 편지를 열어라.</div></div>
-<div class="menu"><div class="mi on" data-act="new"><span>⚜</span>새 게임<small>NEW GAME</small></div>
-<div class="mi ${hasSave ? '' : 'disabled'}" data-act="continue"><span>📜</span>이어하기<small>${hasSave ? '저장된 게임' : '저장 없음'}</small></div>
-<div class="mi" data-act="endings"><span>🏅</span>엔딩 도감<small>${endings} / 12</small></div></div>
-<div class="seals">${COMPANIES.map((c) => seal(c.id, c.color, 46)).join('')}</div>
-<div class="env"><i>"이 열한 개의 불을 한곳에 두어라.<br>그리고 마지막 편지를 열기 전에는<br>아무도 믿지 마라."</i><br>— 엘리아스 밴스, 유언장</div>
-<div class="foot">이 게임의 모든 인물과 사건은 허구이며, 기업명은 가상의 시나리오를 위해 사용되었습니다. · PROTOTYPE v0.1</div></div>`;
-}
-
-// ---- 03 origin ----
-export function origin(sel, name) {
-  const outfit = { auditor: { glasses: '#2a2a30', suit: '#2b3350', tie: null, stub: 0.08, bg: ['#b99a6a', '#3a2c1c'] }, engineer: { outfit: 'hoodie', suit: '#2f4a3a', tie: null, stub: 0.3, bg: ['#8aa2cf', '#222c4a'] }, analyst: { outfit: 'vest', suit: '#262b3a', shirt: '#efe8d6', tie: '#8a2432', stub: 0.12, bg: ['#7aa08a', '#1f3328'] } };
-  const stat = (t, g) => `<span class="eff ${g}">${t}</span>`;
-  const fxChips = (fx) => [fx.gov && stat(`🏛️ 정부 ${signed(fx.gov, 0)}`, fx.gov > 0 ? 'g' : 'r'), fx.tech && stat(`🧠 기술 ${signed(fx.tech, 0)}`, fx.tech > 0 ? 'g' : 'r'), fx.talent && stat(`👥 인재 ${signed(fx.talent, 0)}`, fx.talent > 0 ? 'g' : 'r'), fx.liquid && stat(`💵 자산 +${(fx.liquid * 1000) | 0}M`, 'g'), fx.intel && stat(`🕵️ 정보 +${fx.intel}`, 'g')].filter(Boolean).join('');
-  const card = (id) => { const o = ORIGINS[id]; return `<div class="parch oc ${sel === id ? 'sel' : ''}" data-act="pick-origin" data-id="${id}">${sel === id ? '<div class="tag">✦ 선택됨</div>' : ''}<div class="pf frame">${portraitSVG('hero', 262, 340, outfit[id])}</div><h3>${o.kr}</h3><div class="sub">${o.en}</div><p>${o.blurb}</p><div class="st">${fxChips(o.fx)}</div><div class="tr"><b>특성 · ${o.trait}</b><br>${o.traitDesc}</div></div>`; };
-  return `<div class="screen s03 fade"><div class="sh"></div>
-<div class="hd"><div class="kick">CHARACTER ORIGIN · 당신의 과거</div><h1>당신은 누구였습니까?</h1><p>선대 엘리아스 밴스가 당신을 고른 이유는 과거에 있습니다. 이 선택이 초반 능력치와 특성을 바꿉니다.</p></div>
-<div class="cards">${['auditor', 'engineer', 'analyst'].map(card).join('')}</div>
-<div class="bot"><div class="parch inp"><span class="cz" style="font-size:12px;color:#7a5a2a;letter-spacing:3px">NAME</span><input id="nameinput" value="${name}" maxlength="10" style="background:none;border:none;outline:none;font:inherit;color:inherit;width:150px"><small>이름을 바꿀 수 있습니다</small></div><div class="btn ghost" data-act="to-title">← 뒤로</div><div class="btn" data-act="start-game">이 과거로 시작</div></div></div>`;
-}
-
-// ---- 02 prologue (visual novel) ----
-export function vn(step, name) {
-  const speaker = step.who;
-  const chars = [['mira', 110, 360], ['hero', 560, 400], ['victor', 1000, 360]];
-  const nameOf = { mira: ['미라 오콩코', '비서실장'], victor: ['빅터 헤일', '재무장관'], narr: ['', ''], hero: [name, '당신'] };
-  const nm = nameOf[speaker];
-  const seals = COMPANIES.map((c, i) => `<div style="position:absolute;left:${150 + i * 150}px;top:${12 + (i % 2) * 10}px">${seal(c.id, c.color, 50)}</div>`).join('');
-  const choices = step.choices ? `<div class="choices">${step.choices.map((c, i) => `<div class="cho ${i === 0 ? 'on' : ''}" data-act="vn-choice" data-i="${i}"><span class="n">${i + 1}</span><div>${c.text}<small>${c.sub}</small></div></div>`).join('')}</div>` : '';
-  return `<div class="screen s02 fade"><div class="room"></div><div class="lamp"></div><div class="win"><div class="skyline"></div></div>
-<div class="chars">${chars.map(([id, x, w]) => `<div class="ch ${speaker === id ? '' : 'dim'}" style="left:${x}px;${id === 'hero' ? 'bottom:-30px' : ''}">${portraitSVG(id, id === 'hero' ? 400 : w, (id === 'hero' ? 400 : w) * 1.3)}</div>`).join('')}</div>
-<div class="table">${seals}</div>
-<div class="chap"><div class="kick">CHAPTER 1</div><b>오마하 · 유언장 낭독</b></div>
-<div class="sys"><span data-act="skip-vn">건너뛰기 ▶▶</span></div>
-${choices}
-<div class="leather dlg" ${step.choices ? '' : 'data-act="vn-next"'}>${nm && nm[0] ? `<div class="name">${nm[0]}<small>${nm[1]}</small></div>` : ''}<div class="txt" ${speaker === 'narr' ? 'style="color:#cdb98c;font-style:italic"' : ''}>${step.text}</div><div class="next">▼</div></div></div>`;
-}
-
-// ---- 04 hub ----
-export function hub(s) {
-  const pending = !!s.pending;
-  const goals = [
-    [!pending, '이번 분기 결정', pending ? '미라가 회의를 소집했습니다' : '완료'],
-    [false, '회사 지렛대 점검', '선택 · 🏢 회사 탭'],
-    [s.payout <= 40, '배당 성향 확인', `현재 ${s.payout}% · 헌장 상한 40%`],
-    [false, '정보 자원 활용', `보유 ${s.intel} · 🕵️ 수사 탭`],
-  ];
-  const nextL = !s.letters.includes('L3') ? '다음 편지: 인물 한 명의 신뢰도 70 이상' : !s.letters.includes('L4') ? '다음 편지: 거품 지수 80% 이상' : '남은 편지는 이야기가 진행되면 열립니다';
-  const pr = (id, extra) => { const c = CHARS[id]; return `<div class="pr" data-act="go" data-to="people">${avatar(id, 42)}<div class="nm"><b>${c.kr}</b><small>${c.role}</small></div><div class="tv">신뢰 ${Math.round(s.trust[id])}${bar(s.trust[id], trustColor(s.trust[id]))}</div></div>`; };
-  const P = s.pending;
-  const e = P && P.kind === 'event' ? getEvent(s, P.id) : null;
-  const toast = P ? `<div class="toast" data-act="open-pending">${avatar('mira', 44)}<div>${P.kind === 'letter' ? '선대의 편지가 도착했습니다' : '미라가 당신을 호출합니다'}<small>${P.kind === 'letter' ? '봉투를 열어 보시겠습니까?' : e.title}</small></div></div>` : '';
-  const nextHint = pending ? '결정 대기 1건' : '턴을 종료할 수 있습니다';
-  return `<div class="screen s04 fade">${topbar(s)}${nav('hub')}
-<div class="parch lp"><div class="row">${avatar('hero', 84)}<div><h3>${s.name}</h3><div class="sub">컴팩트 상속자 · ${ORIGINS[s.origin].kr} 출신</div><div style="margin-top:6px"><span class="eff">⚜ ${ORIGINS[s.origin].trait}</span></div></div></div>
- <div class="kick" style="margin:14px 0 4px">THIS QUARTER · 이번 분기 목표</div>
- ${goals.map((g) => `<div class="goal"><i>${g[0] ? '✔' : ''}</i><div>${g[1]}<small>${g[2]}</small></div></div>`).join('')}
- <div style="margin-top:10px;font-family:'Noto Sans KR';font-size:12px;font-weight:700">컴팩트 결속도 <span class="up">${Math.round(60 + s.stats.gov * 0.2 + s.trust.mira * 0.1)}%</span></div></div>
-<div class="leather rp"><h3>PEOPLE · 인물과 신뢰</h3>${['mira', 'victor', 'jonah', 'lin', 'dana', 'aria', 'sage'].map((id) => pr(id)).join('')}</div>
-<div class="leather letters"><div class="kick" style="color:#cdb98c">LETTERS · 선대의 편지 ${s.letters.length} / 7</div><div class="env">${[1, 2, 3, 4, 5, 6, 7].map((i) => `<div class="ev ${s.letters.includes('L' + i) ? '' : 'lock'}">${s.letters.includes('L' + i) ? i : '🔒'}</div>`).join('')}</div><div style="font-family:'Noto Sans KR';font-size:11.5px;color:#cdb98c;margin-top:8px">${nextL}</div></div>
-${toast}<div class="endt ${pending ? 'wait' : ''}" data-act="end-turn">END TURN<small>${nextHint}</small></div></div>`;
-}
-
-// ---- 08 council / event ----
-export function eventScreen(s, ev, evId, st) {
-  const stances = { y: ['st-y', '찬성'], n: ['st-n', '반대·중단'], h: ['st-h', '보류'] };
-  const adv = ev.advisors || [];
-  const cardW = adv.length > 4 ? 330 : 360, gap = 22;
-  const totalW = adv.length * cardW + (adv.length - 1) * gap, left0 = (1920 - totalW) / 2;
-  const advHTML = adv.map((a, i) => { const c = CHARS[a.who]; const stn = stances[a.stance]; const reveal = a.initiator && s.revealed[evId]; return `<div class="leather adv" style="left:${left0 + i * (cardW + gap)}px;width:${cardW}px"><div class="pf frame" style="width:178px">${portraitSVG(a.who, 170, 221)}</div><h4>${c.kr}</h4><div class="rl">${c.role}</div><div class="stance ${stn[0]}">${a.label || stn[1]}</div><div class="q">${a.quote}</div><div class="meta"><span>신뢰 ${Math.round(s.trust[a.who])}</span><span>${a.tag || ''}</span></div>${reveal ? '<div style="position:absolute;top:8px;right:10px;font-size:20px" title="발의자">🎯</div>' : ''}</div>`; }).join('');
-  let right = '';
-  if (ev.intelAction) {
-    const used = s.revealed[evId], can = s.intel >= ev.intelAction.cost;
-    right = `<div class="leather side"><b>🕵 정보 자원 ${s.intel}</b><br>${used ? ev.intelAction.reveal : `<span ${can ? 'data-act="intel" style="color:#f3d98f;text-decoration:underline;cursor:pointer"' : 'style="opacity:.5"'}>• ${ev.intelAction.label}</span>`}<div style="margin-top:6px;color:#e8b04a">⚠ 의견이 한쪽으로 쏠리면 반대편 신뢰도가 떨어집니다.</div></div>`;
-  } else {
-    right = `<div class="leather side"><b>🕵 정보 자원 ${s.intel}</b><br>정보는 매 분기 +1 (제트기 보유 시 +2). 수사 탭에서 용의자를 조사하는 데 쓰세요.<div style="margin-top:6px;color:#e8b04a">⚠ 모든 선택에는 대가가 있습니다.</div></div>`;
-  }
-  let optsHTML = '';
-  if (st.result) {
-    optsHTML = `<div class="parch res"><b style="display:block;font-size:18px;color:#3a2410;margin-bottom:6px">▶ ${st.result.label}</b><div style="font-size:14px;line-height:1.7;color:#3b2a18">${st.result.text}</div><div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">${chips(st.result.fx)}</div></div><div style="display:flex;justify-content:flex-end"><div class="btn" data-act="event-continue">계속 ▶</div></div>`;
-  } else {
-    optsHTML = ev.options.map((o, i) => `<div class="parch opt ${i === 0 ? 'hot' : ''} ${o.needIntel && s.intel < o.needIntel ? 'disabled' : ''}" data-act="choose" data-i="${i}"><span class="n">${['I', 'II', 'III', 'IV'][i]}</span><b>${o.label}</b><span class="who">${o.who || ''}</span><span class="chs">${chips(o.fx)}</span></div>`).join('');
-  }
-  const bubble = st.result ? '' : `<div class="bub">"${s.flags.auditEye && evId === 'audit' ? '숫자가 맞지 않는 곳이 보여.' : '의견이 갈리는군. 신중해야 해.'}"<small>선택은 되돌릴 수 없습니다. 분기마다 한 번뿐입니다.</small></div>`;
-  return `<div class="screen s08 fade"><div class="room"></div><div class="lamp"></div>
-<div class="parch hd"><div class="kick">${ev.kicker}</div><b>${ev.title}</b><small>${st.result ? '결과' : '응답 시한 0턴'}</small></div>
-<div class="parch" style="position:absolute;left:380px;right:380px;top:150px;padding:14px 26px;font-size:15px;line-height:1.65;font-weight:600;color:#3b2a18;${adv.length ? 'display:none' : ''}">${ev.body}</div>
-${advHTML}<div class="tbl"></div>
-<div class="me">${portFrame('hero', 190, s.name.toUpperCase(), '결정권자 · 당신')}</div>
-${adv.length ? `<div class="parch" style="position:absolute;left:330px;top:552px;width:1100px;padding:10px 20px;font-size:14px;line-height:1.6;font-weight:600;color:#3b2a18">${ev.body}</div>` : ''}
-${st.result ? '' : bubble.replace('class="bub"', 'class="bub" style="top:742px;left:1450px;width:420px;display:none"')}
-<div class="opts" style="top:622px">${optsHTML}</div>${right}</div>`;
-}
-const CHIP_META = { gov: ['🏛️', '정부'], tech: ['🧠', '기술'], talent: ['👥', '인재'], bubble: ['🫧', '거품'], liquid: ['💰', '내 자산'], intel: ['🕵️', '정보'] };
-export function chips(fx) {
+// ---------- effect chips ----------
+const SL = { gov: '정부', tech: '기술', talent: '인재', bubble: '거품', intel: '정보', audit: '감사 위험' };
+export function fxChips(fx) {
   if (!fx) return '';
   const out = [];
-  const add = (txt, good) => out.push(`<span class="eff ${good ? 'g' : 'r'}">${txt}</span>`);
-  for (const k of ['gov', 'tech', 'talent']) if (fx[k]) add(`${CHIP_META[k][0]} ${signed(fx[k], 0)}`, fx[k] > 0);
-  if (fx.bubble) add(`🫧 ${signed(fx.bubble, 0)}`, fx.bubble < 0);
-  if (fx.liquid) add(`💰 ${fx.liquid > 0 ? '+' : '−'}${Math.round(Math.abs(fx.liquid) * 1000)}M`, fx.liquid > 0);
-  if (fx.intel) add(`🕵️ ${signed(fx.intel, 0)}`, fx.intel > 0);
-  if (fx.comp) for (const [id, d] of Object.entries(fx.comp)) {
-    const nm = COMP[id].kr;
-    if (d.g) add(`${nm} 성장 ${signed(d.g * 100, 1)}%p`, d.g > 0);
-    if (d.nm) add(`${nm} 마진 ${signed(d.nm * 100, 1)}%p`, d.nm > 0);
-    if (d.cash) add(`${nm} 현금 ${signed(d.cash, 0)}B`, d.cash > 0);
-    if (d.reg) add(`${nm} 규제 ${signed(d.reg, 0)}`, d.reg < 0);
-  }
-  if (fx.all) { if (fx.all.g) add(`전 기업 성장 ${signed(fx.all.g * 100, 1)}%p`, fx.all.g > 0); if (fx.all.nm) add(`전 기업 마진 ${signed(fx.all.nm * 100, 1)}%p`, fx.all.nm > 0); if (fx.all.reg) add(`전 기업 규제 ${signed(fx.all.reg, 0)}`, fx.all.reg < 0); if (fx.all.morale) add(`전 기업 사기 ${signed(fx.all.morale, 0)}`, fx.all.morale > 0); }
-  if (fx.trust) for (const [id, v] of Object.entries(fx.trust)) add(`${CHARS[id].kr.split(' ')[0]} 신뢰 ${signed(v, 0)}`, v > 0);
-  if (fx.fundFromBK) add(`버크셔 현금 −${fx.fundFromBK}B`, false);
-  if (fx.fundExternal) add(`외부 자본 +${fx.fundExternal}B (지분 희석)`, true);
-  if (fx.cutTarget) add('지출 삭감 · 성장 둔화', false);
-  if (fx.forcePayout) add(`배당 성향 ${fx.forcePayout}%로`, true);
-  if (fx.levers) out.push(`<span class="eff">⚙ 전 기업 운영 방침 변경</span>`);
-  if (fx.audit) add(`감사 위험 ${signed(fx.audit, 0)}`, fx.audit < 0);
-  if (fx.sec) add(`SEC 위험 ${signed(fx.sec, 0)}`, fx.sec < 0);
+  for (const k of ['gov', 'tech', 'talent', 'bubble', 'intel', 'audit']) if (fx[k]) { const good = k === 'bubble' || k === 'audit' ? fx[k] < 0 : fx[k] > 0; out.push(`<span class="chip ${good ? 'good' : 'bad'}">${SL[k]} ${sgn(fx[k], 0)}</span>`); }
+  if (fx.liquid) out.push(`<span class="chip ${fx.liquid > 0 ? 'good' : 'warn'}">내 현금 ${fx.liquid > 0 ? '+' : '−'}${fmtB(Math.abs(fx.liquid))}</span>`);
+  if (fx.trust) for (const [k, v] of Object.entries(fx.trust)) if (v) out.push(`<span class="chip ${v > 0 ? 'good' : 'bad'}">${CHARS[k].kr.split(' ')[0]} ${sgn(v, 0)}</span>`);
+  if (fx.comp) for (const [id, d] of Object.entries(fx.comp)) { if (d.g) out.push(`<span class="chip ${d.g > 0 ? 'good' : 'bad'}">${COMP[id].kr} 성장 ${sgn(d.g * 100, 1)}%p</span>`); if (d.reg) out.push(`<span class="chip ${d.reg < 0 ? 'good' : 'warn'}">${COMP[id].kr} 규제 ${sgn(d.reg, 0)}</span>`); }
+  if (fx.levers) out.push('<span class="chip acc">전사 방향 조정</span>');
   return out.join('');
 }
-export function accuseScreen(s, st) {
-  const names = SUSPECTS;
-  const left0 = (1920 - (names.length * 330 + (names.length - 1) * 22)) / 2;
-  const cards = names.map((id, i) => { const c = CHARS[id]; const n = s.clues[id]; return `<div class="leather adv" style="left:${left0 + i * 352}px"><div class="pf frame" style="width:178px">${portraitSVG(id, 170, 221)}</div><h4>${c.kr}</h4><div class="rl">${c.role}</div><div class="stance st-h">단서 ${n}개</div><div class="q" style="font-size:12px">${s.clueLog.filter((x) => x.who === id).map((x) => '• ' + x.text).join('<br>') || '확인된 단서가 없습니다.'}</div><div class="btn" style="margin-top:10px;height:42px;font-size:14px;letter-spacing:1px" data-act="accuse" data-who="${id}">지목한다</div></div>`; }).join('');
-  const result = st.result ? `<div class="parch res"><b style="display:block;font-size:18px;margin-bottom:6px">${st.result.correct === true ? '✔ 정답' : st.result.correct === false ? '✘ 오판' : '… 보류'}</b><div style="font-size:14px;line-height:1.7">${st.result.text}</div></div><div style="display:flex;justify-content:flex-end"><div class="btn" data-act="event-continue">계속 ▶</div></div>` : `<div class="parch opt" data-act="accuse" data-who=""><span class="n">—</span><b>아무도 지목하지 않는다</b><span class="who">증거가 부족하다고 판단</span></div>`;
-  return `<div class="screen s08 fade"><div class="room"></div><div class="lamp"></div>
-<div class="parch hd"><div class="kick">INVESTIGATION · 수사</div><b>켈스트럴의 첩자를 지목하라</b><small>${st.result ? '결과' : '틀리면 그 인물은 적이 됩니다'}</small></div>
-${st.result ? '' : cards}<div class="tbl"></div><div class="me">${portFrame('hero', 190, s.name.toUpperCase(), '결정권자 · 당신')}</div>
-<div class="opts" style="top:${st.result ? 560 : 640}px;left:330px;width:1100px">${result}</div>
-<div class="leather side"><b>🕵 단서 요약</b><br>가장 단서가 많은 사람이 첩자라는 보장은 없습니다. 누명을 위한 위장일 수 있습니다.</div></div>`;
+
+// ---------- shell ----------
+const NAV = [['hub', 'map', '지도'], ['company', 'co', '회사'], ['wallet', 'wallet', '지갑'], ['invest', 'probe', '수사'], ['archive', 'doc', '기록']];
+export const quarterLabel = (s) => QUARTERS[Math.min(s.turn, TOTAL_TURNS) - 1];
+export const totalCash = (s) => COMPANIES.reduce((a, c) => a + s.comp[c.id].cash, 0);
+export function shell(s, V, inner) {
+  const nq = (s.pending ? 1 : 0) + s.eventQueue.length + s.letterQueue.length;
+  const dm = s.last ? s.last.dM / 1000 : 0;
+  const b = Math.round(s.stats.bubble), bc = b > 92 ? 'var(--bad)' : b > 80 ? 'var(--warn)' : 'var(--good)';
+  const ticks = Array.from({ length: TOTAL_TURNS }, (_, i) => `<i class="${i + 1 < s.turn ? 'on' : i + 1 === s.turn ? 'cur' : ''}"></i>`).join('');
+  return `<div class="rail"><div class="logo">C</div>${NAV.map(([id, icn, lab]) => `<button class="nav ${V.screen === id ? 'on' : ''}" data-act="go" data-to="${id}">${ic(icn)}${lab}${id === 'hub' && nq ? '<span class="dot"></span>' : ''}</button>`).join('')}<div class="sp"></div></div>
+<div class="top"><div class="qtr"><b>${QUARTERS[Math.min(s.turn, TOTAL_TURNS) - 1]} <span class="muted" style="font-weight:500;font-size:.78rem">· ${s.turn}/${TOTAL_TURNS}</span></b><div class="ticks">${ticks}</div></div>
+<div class="kpi"><small>제국 가치</small><b>$${(totalMcap(s) / 1000).toFixed(1)}T${s.last ? `<em class="${dm >= 0 ? 'good' : 'bad'}">${dm >= 0 ? '▲' : '▼'}${Math.abs(dm).toFixed(2)}</em>` : ''}</b></div>
+<div class="kpi"><small>그룹 현금</small><b>${fmtB(totalCash(s))}</b></div>
+<div class="kpi"><small>내 재산</small><b class="money">${fmtB(netWorth(s))}</b></div>
+<div class="kpi"><small>거품 지수</small><b style="color:${bc}">${b}</b><div class="gauge"><i style="width:${Math.min(100, b)}%;background:${bc}"></i></div></div>
+<div class="kpi"><small>정부 · 기술 · 인재</small><b>${Math.round(s.stats.gov)} · ${Math.round(s.stats.tech)} · ${Math.round(s.stats.talent)}</b></div>
+<div class="kpi"><small>정보</small><b>${s.intel}</b></div>
+<div class="sp"></div><button class="btn primary" data-act="end-turn">${nq ? `대화 ${nq}건 먼저` : '분기 마감'}${ic('arrow')}</button></div>
+<div class="main">${inner}</div>`;
 }
 
-// ---- 05 company ----
-export function company(s, id) {
-  const c = COMP[id], st = s.comp[id];
-  const pv = previewCompany(s, id, st.lev);
-  const rev = st.hist.map((h) => h.rev), pf = st.hist.map((h) => h.profit);
-  const maxR = Math.max(...rev) * 1.12;
-  const mgs = st.hist.map((h) => h.profit / h.rev);
-  const mMin = Math.min(...mgs), mMax = Math.max(...mgs), mr = Math.max(0.02, mMax - mMin);
-  let ch = '<svg width="754" height="240" viewBox="0 0 754 240" style="font-family:Noto Sans KR">';
-  for (let i = 0; i < 5; i++) { const y = 30 + i * 42; ch += `<line x1="40" x2="720" y1="${y}" y2="${y}" stroke="#a88c5a" stroke-opacity=".4" stroke-dasharray="3 4"/>`; }
-  const n = st.hist.length;
-  rev.forEach((v, i) => { const x = 60 + i * 84, h = (v / maxR) * 160; ch += `<rect x="${x}" y="${198 - h}" width="46" height="${h}" rx="3" fill="${c.color}" opacity="${i === n - 1 ? 1 : 0.7}"/><text x="${x + 23}" y="${192 - h}" text-anchor="middle" font-size="11" font-weight="700" fill="#3a2410">${v >= 10 ? Math.round(v) : v.toFixed(1)}B</text><text x="${x + 23}" y="222" text-anchor="middle" font-size="10" fill="#7a5a2a">${i === n - 1 ? '현재' : `−${n - 1 - i}분기`}</text>`; });
-  ch += `<polyline fill="none" stroke="#8a1d14" stroke-width="2.6" points="${mgs.map((m, i) => `${83 + i * 84},${190 - ((m - mMin) / mr) * 120}`).join(' ')}"/>` + mgs.map((m, i) => `<circle cx="${83 + i * 84}" cy="${190 - ((m - mMin) / mr) * 120}" r="3.4" fill="#8a1d14"/>`).join('') + `<text x="720" y="16" text-anchor="end" font-size="11" fill="#8a1d14" font-weight="700">━ 순이익률 ${(mgs[n - 1] * 100).toFixed(0)}%</text><text x="60" y="16" font-size="11" fill="#4a3418" font-weight="700">▮ 분기 매출 ($B)</text></svg>`;
-  const kp = (l, v, d, cl) => `<div class="parch k"><small>${l}</small><b>${v}</b><span class="${cl || ''}">${d || ''}</span></div>`;
-  const ceo = c.ceo ? portFrame(c.ceo, 256, CHARS[c.ceo].kr.toUpperCase(), CHARS[c.ceo].role) : c.ai ? portFrame(c.ai, 256, CHARS[c.ai].kr, CHARS[c.ai].role) : `<div class="frame" style="width:264px;height:343px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#34231a,#1d130d)">${seal(c.id, c.color, 150)}<div class="cap">${c.en}<small>${c.desc}</small></div></div>`;
-  const quote = c.ceo === 'jonah' ? '"회장님, 지금 투자를 줄이면 시장은 사라집니다. 경쟁사는 기다려 주지 않아요."' : c.ceo === 'lin' ? '"라인은 한정되어 있어요. 어느 쪽이든 누군가는 기다려야 합니다."' : c.ai === 'aria' ? '"더 많은 컴퓨트를요! 멈추면 뒤처져요."' : c.ai === 'sage' ? '"속도보다 방향입니다. 검증 없는 확장은 위험합니다."' : `"${c.kr}의 경영진은 당신의 지시를 기다리고 있습니다."`;
-  const lev = LEVERS.map((l) => `<div class="lr"><div class="t">${l.icon} ${l.kr}<span id="lv-${l.id}">${st.lev[l.id]}</span></div><input type="range" min="0" max="100" value="${st.lev[l.id]}" data-lev="${l.id}"><small>${l.hint}</small></div>`).join('');
-  const tabs = COMPANIES.map((x) => `<div data-act="pick-company" data-id="${x.id}" style="opacity:${x.id === id ? 1 : 0.55};transform:scale(${x.id === id ? 1.12 : 1})">${seal(x.id, x.color, 34)}</div>`).join('');
-  return `<div class="screen s05 fade"><div class="wall"></div>${topbar(s)}${nav('company')}
-<div class="col ceo">${ceo}<div class="parch q">${quote}<small>${c.ceo ? `신뢰도 ${Math.round(s.trust[c.ceo])}` : '경영진'} · ${c.desc}</small></div>
- <div class="kpis">${kp('분기 매출', fmtB(st.rev), `${signed((st.rev / (st.prevRev || st.rev) - 1) * 100)}%`, 'up')}${kp(c.pub ? '순이익률' : '순이익률', `${(st.profit / st.rev * 100).toFixed(0)}%`, '', st.profit >= 0 ? 'up' : 'dn')}${kp('성장률', `${(pv.g * 100).toFixed(1)}%`, '예상', '')}${kp('가동 용량', `${Math.round(st.cap)}%`, st.cap > 94 ? '⚠ 병목' : '', st.cap > 94 ? 'dn' : '')}${kp('사기', Math.round(st.morale), '', '')}${kp('규제 열기', Math.round(st.reg), st.reg > 70 ? '⚠' : '', st.reg > 70 ? 'dn' : '')}${kp('평판', Math.round(st.rep), '', '')}${kp('현금', fmtB(st.cash), '', st.cash < 8 ? 'dn' : '')}</div></div>
-<div class="col mid"><div class="leather hdr">${seal(c.id, c.color, 58)}<div style="min-width:0"><h2 style="white-space:nowrap;font-size:24px">${c.kr}</h2><small style="white-space:nowrap">${c.desc} · 시총 ${fmtB(st.mcap)}</small></div><div style="margin-left:auto;display:flex;gap:6px;align-items:center">${tabs}</div></div>
- <div class="parch ch">${ch}</div>
- <div class="parch alloc"><div class="kick" style="margin-bottom:4px">NEXT QUARTER FORECAST · 다음 분기 예상</div><div class="ar"><div class="l">예상 매출</div><div class="b">${bar(Math.min(100, pv.rev / maxR * 90))}</div><div class="v" style="width:120px">${fmtB(pv.rev)}</div></div><div class="ar"><div class="l">예상 순이익</div><div class="b">${bar(Math.max(4, Math.min(100, Math.abs(pv.profit) / Math.max(1, st.rev * 0.8) * 100)), pv.profit >= 0 ? '#2f8a4a' : '#9b2a1d')}</div><div class="v" style="width:120px">${fmtB(pv.profit)}</div></div><div class="ar"><div class="l">가동 용량</div><div class="b">${bar(pv.cap, pv.cap > 94 ? '#9b2a1d' : '#c9a45a')}</div><div class="v" style="width:120px">${Math.round(pv.cap)}%</div></div></div></div>
-<div class="col right"><div class="leather lv"><h3>MANAGEMENT LEVERS · 경영 지렛대</h3>${lev}
- <div class="prev" id="prev">${previewHTML(s, id)}</div>
- <div style="display:flex;gap:12px;margin-top:14px;justify-content:flex-end"><div class="btn ghost" data-act="reset-levers">기본값(50)</div></div></div></div></div>`;
+// ---------- hub ----------
+export const HUBGROUP = { sv: ['NV', 'AP', 'GO', 'ME', 'BC', 'AN', 'OA'], sea: ['MS', 'AM'], oma: ['BK'], tw: ['TS'] };
+const HUBINFO = { sv: ['실리콘밸리', '7개 기업'], sea: ['시애틀', '2개 기업'], oma: ['오마하', '버크셔'], tw: ['신주', 'TSMC'] };
+export function hubNodes(s) {
+  const side = { sv: 'r', sea: 'r', oma: 'r', tw: 'l' };
+  return Object.keys(HUBGROUP).map((id) => ({ id, name: HUBINFO[id][0], sub: `$${(HUBGROUP[id].reduce((a, c) => a + s.comp[c].mcap, 0) / 1000).toFixed(1)}T`, side: side[id], alert: HUBGROUP[id].some((c) => s.comp[c].reg > 75) }));
+}
+export function queueItems(s) {
+  const items = [];
+  if (s.pending) items.push({ ...s.pending, cur: true });
+  for (const id of s.letterQueue) items.push({ kind: 'letter', id });
+  for (const id of s.eventQueue) items.push({ kind: 'event', id });
+  return items;
+}
+export function hub(s, V) {
+  const q = queueItems(s);
+  const threads = q.length ? q.map((it) => {
+    if (it.kind === 'letter') return `<div class="thread ${it.cur ? 'unread' : ''}" ${it.cur ? 'data-act="open-pending"' : ''}>${av('elias', 2.6)}<div class="t"><b>엘리아스 밴스 <span class="chip warn">편지</span></b><p>${LETTERS[it.id].title}</p></div>${it.cur ? '<span class="badge">1</span>' : '<span class="chip">대기</span>'}</div>`;
+    const ev = getEvent(s, it.id), who = (ev.advisors || []).map((a) => a.who);
+    const stack = who.length ? `<div class="stack">${who.slice(0, 3).map((w) => av(w, 2.2)).join('')}</div>` : av('mira', 2.6);
+    return `<div class="thread ${it.cur ? 'unread' : ''}" ${it.cur ? 'data-act="open-pending"' : ''}>${stack}<div class="t"><b>${ev.title}</b><p>${ev.body}</p></div>${it.cur ? '<span class="badge">1</span>' : '<span class="chip">대기</span>'}</div>`;
+  }).join('') : `<div style="padding:1.2rem .8rem;color:var(--muted);font-size:.84rem;line-height:1.8">처리할 대화가 없습니다.<br>회사 레버와 배당을 점검한 뒤 <b style="color:var(--text)">분기 마감</b>을 누르세요.</div>`;
+  const goals = [
+    [!s.pending && !s.eventQueue.length && !s.letterQueue.length, '대화 모두 처리', '자문단의 의견을 듣고 결정한다'],
+    [V.levSeen, '회사 레버 점검', '기대치(전분기 이익 × 성장)를 넘길 수 있는지 확인'],
+    [V.paySeen, '배당 비율 확인', `지금 ${s.payout}% · 40% 초과 시 감사 위험`],
+  ].map(([d, t, sub]) => `<div class="goal ${d ? 'done' : ''}"><i>${d ? '✓' : ''}</i><div>${t}<small>${sub}</small></div></div>`).join('');
+  const news = s.last ? `<div class="goal" style="border-top:1px solid var(--line);margin-top:.3rem"><i style="border:0"></i><div>지난 분기 ${s.last.quarter}<small>순이익 ${fmtB(s.last.netIncome)} · 제국 가치 ${sgn(s.last.dM / 1000, 2)}T${s.last.crashMsg ? ' · ' + s.last.crashMsg : ''}</small></div></div>` : '';
+  const ppl = ['mira', 'victor', 'jonah', 'lin', 'dana', 'sage', 'aria'].map((k) => { const v = Math.round(s.trust[k]), c = v >= 60 ? 'var(--good)' : v >= 40 ? 'var(--warn)' : 'var(--bad)'; return `<div class="row">${av(k, 1.9)}<div class="nm">${CHARS[k].kr.split(' ')[0]}<small>${CHARS[k].tag}</small></div><div class="meter"><i style="width:${v}%;background:${c}"></i></div><span class="mono muted" style="width:1.6rem;text-align:right">${v}</span></div>`; }).join('');
+  return `<div class="hub"><div class="mapslot" id="mapslot"></div>
+<div class="dock"><div class="panel"><div class="ph"><span>대화함</span><span class="chip ${q.length ? 'acc' : ''}">${q.length}</span></div><div class="body">${threads}</div></div>
+<div class="panel"><div class="ph"><span>이번 분기</span></div><div class="body">${goals}${news}</div></div>
+<div class="panel"><div class="ph"><span>사람들 · 신뢰</span></div><div class="body">${ppl}</div></div></div>
+${V.pop ? hubPop(s, V.pop) : ''}</div>`;
+}
+function hubPop(s, p) {
+  return `<div class="pop" style="left:${p.x}px;top:${p.y}px"><div class="ph" style="padding:.4rem .6rem">${HUBINFO[p.id][0]}</div>${HUBGROUP[p.id].map((c) => `<div class="row" data-act="pick-company" data-id="${c}" data-go="1">${coAv(c, 1.9)}<div class="nm">${COMP[c].kr}<small>${COMP[c].desc}</small></div><span class="mono muted">$${(s.comp[c].mcap / 1000).toFixed(2)}T</span></div>`).join('')}</div>`;
+}
+
+// ---------- company ----------
+function spark(vals, color, w = 300, h = 70) {
+  const mn = Math.min(...vals), mx = Math.max(...vals), r = mx - mn || 1;
+  const pts = vals.map((v, i) => [(i / (vals.length - 1)) * w, h - 6 - ((v - mn) / r) * (h - 14)]);
+  const d = pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:${h}px"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".35"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs><path d="${d}L${w},${h}L0,${h}Z" fill="url(#sg)"/><path d="${d}" fill="none" stroke="${color}" stroke-width="2"/><circle cx="${pts.at(-1)[0]}" cy="${pts.at(-1)[1]}" r="3.5" fill="${color}"/></svg>`;
 }
 export function previewHTML(s, id) {
-  const st = s.comp[id], pv = previewCompany(s, id, st.lev);
-  const base = previewCompany(s, id, { capex: 50, rnd: 50, hire: 50, price: 50, lobby: 50, mkt: 50 });
-  const dg = (pv.g - base.g) * 100, dp = pv.profit - base.profit;
-  return `<b class="gold">기본 대비 변화 (다음 분기)</b><br>성장률 <b class="${dg >= 0 ? 'up' : 'dn'}">${signed(dg, 1)}%p</b> · 이익 <b class="${dp >= 0 ? 'up' : 'dn'}">${signed(dp, 1)}B</b> · 규제 열기 <b class="${pv.reg > st.reg ? 'dn' : 'up'}">${signed(pv.reg - st.reg, 0)}</b><br><span style="color:#b9a67c">${st.cap > 94 || pv.cap > 96 ? '⚠ 가동 용량이 96%를 넘으면 납기 지연으로 성장이 깎입니다.' : '지렛대를 움직이면 예상 결과가 바로 갱신됩니다.'}</span>`;
+  const st = s.comp[id], c = COMP[id], p = previewCompany(s, id, st.lev), exp = st.profit * (1 + c.g), beat = exp !== 0 ? (p.profit - exp) / Math.abs(exp) : 0;
+  const verdict = beat >= 0.02 ? ['good', '기대치 상회 예상'] : beat <= -0.02 ? ['bad', '기대치 하회 위험'] : ['warn', '기대치 부근'];
+  return `<div class="fc">다음 분기 예상 · 매출 <b>${fmtB(p.rev)}</b> (${pct(p.g)} 성장)<br>이익 <b class="${p.profit >= 0 ? '' : 'bad'}">${fmtB(p.profit)}</b> · 마진 <b>${pct(p.nm)}</b> · 현금 변화 <b>${sgn(p.cash)}B</b><br>가동률 <b>${Math.round(p.cap)}%</b> · 규제 열기 <b>${Math.round(p.reg)}</b><br><span class="chip ${verdict[0]}" style="margin-top:.5rem">${verdict[1]} · 기대 ${fmtB(exp)}</span></div>`;
+}
+export function company(s, V) {
+  const id = V.company, c = COMP[id], st = s.comp[id];
+  const list = COMPANIES.map((x) => { const m = s.comp[x.id]; return `<div class="co ${x.id === id ? 'on' : ''}" data-act="pick-company" data-id="${x.id}">${coAv(x.id, 2.3)}<div><b>${x.kr}</b><small>${x.desc}</small></div><div class="v">$${(m.mcap / 1000).toFixed(2)}T<small class="${m.profit >= 0 ? 'good' : 'bad'}">${m.profit >= 0 ? '이익' : '적자'} ${fmtB(Math.abs(m.profit))}</small></div></div>`; }).join('');
+  const k = (l, v, e = '') => `<div class="k"><small>${l}</small><b>${v}</b>${e}</div>`;
+  const levers = LEVERS.map((l) => `<div class="lv"><div class="t">${l.kr}<span id="lv-${l.id}">${st.lev[l.id]}</span></div><input type="range" min="0" max="100" step="2" value="${st.lev[l.id]}" data-lev="${l.id}" style="--p:${st.lev[l.id]}%"><small>${l.hint}</small></div>`).join('');
+  const hist = st.hist.map((h) => h.profit);
+  return `<div class="view"><div class="split"><div class="panel list">${list}</div><div class="detail">
+<div class="panel dh">${coAv(id, 3.6)}<div><h2>${c.kr}</h2><span class="muted">${c.en} · ${c.desc}${c.pub ? '' : ' · 비상장'}</span></div><div class="big">$${(st.mcap / 1000).toFixed(2)}T<small>시가총액</small></div></div>
+<div class="kpis">${k('매출/분기', fmtB(st.rev))}${k('순이익', fmtB(st.profit))}${k('마진', pct(st.nm + st.nmb, 0))}${k('성장', pct(st.g + st.gb))}${k('현금', fmtB(st.cash))}${k('가동률', Math.round(st.cap) + '%')}${k('사기', Math.round(st.morale))}${k('규제', Math.round(st.reg))}</div>
+<div class="cols"><div class="panel"><div class="ph"><span>경영 레버</span><button class="chip" data-act="reset-levers">초기화</button></div><div class="lev">${levers}</div></div>
+<div style="display:flex;flex-direction:column;gap:1rem"><div class="panel"><div class="ph"><span>이익 추이 · 8분기</span></div><div style="padding:0 1.1rem 1rem">${spark(hist, c.color)}</div></div><div class="panel"><div class="ph"><span>다음 분기 시뮬레이션</span></div><div id="prev">${previewHTML(s, id)}</div></div></div></div></div></div></div>`;
 }
 
-// ---- 06 wallet ----
+// ---------- wallet ----------
 export function wallet(s) {
-  const nw = netWorth(s);
-  const last = s.last ? s.last.take : null;
-  const inc = last ? [['급여·보너스', last.salary], ['배당', last.div], ['성과 보수', last.carry], ['개인 펀드', last.fund], ['기타', last.short || 0]] : [['급여·보너스', 0.02], ['배당', 0], ['성과 보수', 0], ['개인 펀드', 0], ['기타', 0]];
-  let tot = 0; const max = Math.max(0.05, inc.reduce((a, b) => a + Math.max(0, b[1]), 0));
-  let svg = '<svg width="720" height="200" viewBox="0 0 720 200" style="font-family:Noto Sans KR">';
-  inc.forEach((r, i) => { const x = 24 + i * 112, h = Math.max(2, (Math.max(0, r[1]) / max) * 120), y = 150 - (tot / max) * 120 - h; svg += `<rect x="${x}" y="${y}" width="76" height="${h}" rx="3" fill="${i === 1 ? '#c9a45a' : '#8fa86a'}"/><text x="${x + 38}" y="${y - 6}" text-anchor="middle" font-size="12" font-weight="700" fill="#3a2410">${r[1] >= 0 ? '+' : '−'}${fmtB(Math.abs(r[1]))}</text><text x="${x + 38}" y="172" text-anchor="middle" font-size="11" fill="#6a4a1a">${r[0]}</text>`; if (i < 4) svg += `<line x1="${x + 76}" x2="${x + 112}" y1="${y}" y2="${y}" stroke="#8a6f3e" stroke-dasharray="3 3"/>`; tot += Math.max(0, r[1]); });
-  const T = inc.reduce((a, b) => a + b[1], 0);
-  svg += `<rect x="${24 + 5 * 112}" y="${150 - (tot / max) * 120}" width="76" height="${(tot / max) * 120}" rx="3" fill="#8a1d14"/><text x="${24 + 5 * 112 + 38}" y="${144 - (tot / max) * 120}" text-anchor="middle" font-size="13" font-weight="900" fill="#8a1d14">+${fmtB(T)}</text><text x="${24 + 5 * 112 + 38}" y="172" text-anchor="middle" font-size="11" font-weight="700" fill="#8a1d14">${s.last ? '지난 분기 합계' : '아직 소득 없음'}</text><line x1="14" x2="706" y1="150" y2="150" stroke="#6b5330"/></svg>`;
-  const shop = SHOP.map((it) => { const own = s.me.assets.includes(it.id), can = s.me.liquid >= it.cost; return `<div class="parch it ${own ? 'own' : ''} ${!own && !can ? 'cant' : ''}" ${!own && can ? `data-act="buy" data-id="${it.id}"` : ''} style="${!own && !can ? 'opacity:.55' : ''}"><div class="ic">${it.icon}</div><div><b>${it.kr}</b><small>${it.desc}</small><div class="pr">${own ? '✔ 보유 중' : fmtB(it.cost) + (can ? ' · 구매' : ' · 자금 부족')}</div></div></div>`; }).join('');
-  const rk = (l, p, c, e) => `<div class="r"><span>${l}</span><div class="b">${bar(p, c)}</div><em>${e}</em></div>`;
-  const pool = COMPANIES.filter((c) => c.pub).reduce((a, c) => a + Math.max(0, s.comp[c.id].profit), 0);
-  const myDiv = pool * s.payout / 100 * 0.0033, keep = pool * (1 - s.payout / 100);
-  const over = s.payout > 40;
-  const funds = [['소형 AI 스타트업 6곳', '벤처', s.me.fund * 0.19], ['전력·원전 섹터', '롱', s.me.fund * 0.125], ['에너지 선물', '롱', s.me.fund * 0.08], ['국채·현금성', '안전', s.me.fund * 0.605]];
-  return `<div class="screen s06 fade"><div class="wall"></div>${topbar(s)}${nav('내 지갑' && 'wallet')}
-<div class="col me">${portFrame('hero', 300, s.name.toUpperCase(), '컴팩트 상속자 · 개인 자산')}
- <div class="parch nw"><div class="kick">PERSONAL NET WORTH · 내 순자산</div><div class="big">${fmtB(nw)}</div><div class="rk">유동 자산 <b>${fmtB(s.me.liquid)}</b> · 펀드 <b>${fmtB(s.me.fund)}</b></div>
-  <div class="ms">${nw < 50 ? `다음 이정표 · <b>$50B 클럽</b>${bar(nw / 50 * 100)}` : nw < 100 ? `다음 이정표 · <b>$100B 클럽</b>${bar(nw / 100 * 100)}` : '<b>$100B 클럽 달성</b>'}</div></div></div>
-<div class="col mid"><div class="parch pn"><div class="kick">QUARTERLY INCOME · ${s.last ? '지난 분기 내 소득' : '소득 (첫 분기 후 표시)'}</div>${svg}</div>
- <div class="parch pn dv" style="margin-top:12px"><div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:16px">배당 성향 (회사 → 내 지갑)</b><span class="eff ${over ? 'r' : ''}">현재 <b id="payv">${s.payout}%</b> · 컴팩트 헌장 상한 40%</span></div>
-  <div style="position:relative;margin:18px 0 6px"><input type="range" min="0" max="100" value="${s.payout}" data-payout="1"><div style="position:absolute;left:40%;top:-7px;width:3px;height:24px;background:#8a1d14;pointer-events:none"></div></div>
-  <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#6a4a1a"><span>0% 전액 재투자 · 제국 성장 ↑</span><span style="color:#8a1d14;font-weight:700">▲ 40% 초과 = 감사 위험 ↑ · 헌장 위반</span><span>100%</span></div>
-  <div id="payinfo" style="margin-top:8px;font-size:13px">예상 내 몫 <b class="up">+${fmtB(myDiv)}</b> · 회사 유보 <b>${fmtB(keep)}</b> · 감사 위험 <b class="${s.audit > 20 ? 'dn' : ''}">${Math.round(s.audit)}</b></div></div>
- <div class="parch pn" style="margin-top:12px"><div class="kick">PERSONAL FUND · 개인 펀드 포지션</div><table>${'<tr><th>종목·테마</th><th>구분</th><th>평가액</th></tr>'}${funds.map((f) => `<tr><td>${f[0]}</td><td>${f[1]}</td><td>${fmtB(f[2])}</td></tr>`).join('')}</table></div></div>
-<div class="col right"><div class="leather pn" style="padding:16px 20px"><div class="kick" style="color:#f3d98f;margin-bottom:8px">LIFESTYLE &amp; ASSETS · 소비는 곧 효과 (유동 ${fmtB(s.me.liquid)})</div><div class="shop">${shop}</div>
- <div class="rk2" style="margin-top:14px"><div class="kick" style="color:#cdb98c;margin-bottom:4px">RISK · 탐욕의 대가</div>${rk('감사 위험', s.audit, s.audit > 30 ? '#e86a5a' : '#6fe0a0', Math.round(s.audit))}${rk('SEC 수사 위험', s.sec, s.sec > 20 ? '#e86a5a' : '#6fe0a0', Math.round(s.sec))}${rk('정부 관계', s.stats.gov, s.stats.gov < 35 ? '#e8b04a' : '#6fe0a0', Math.round(s.stats.gov))}${rk('헌장 준수', over ? 40 : 100, over ? '#e86a5a' : '#6fe0a0', over ? '위반' : '양호')}</div></div></div></div>`;
+  const eq = totalMcap(s) / 1000 * 0.65, nw = netWorth(s);
+  const parts = [['현금', s.me.liquid, '#f3c978'], ['개인 펀드', s.me.fund, '#86aefc'], ['컴팩트 지분(신탁)', eq, '#62d6a1'], ['자산', s.me.assetsValue, '#c79bff']];
+  const pubProfit = COMPANIES.filter((c) => c.pub).reduce((a, c) => a + Math.max(0, s.comp[c.id].profit), 0);
+  const estDiv = pubProfit * s.payout / 100 * 0.0033;
+  const audit = Math.min(100, s.audit);
+  const shop = SHOP.map((it) => { const own = s.me.assets.includes(it.id), can = s.me.liquid >= it.cost; return `<div class="asset"><div class="ic">${ic(it.id)}</div><div><b>${it.kr}</b><small>${it.desc}</small></div>${own ? '<span class="chip good">보유</span>' : `<button class="btn ${can ? '' : 'off'}" style="height:2rem;padding:0 .9rem" data-act="buy" data-id="${it.id}">${fmtB(it.cost)}</button>`}</div>`; }).join('');
+  return `<div class="view"><div class="wallet">
+<div class="col"><div class="panel nw"><small>내 순자산</small><div class="n">${fmtB(nw)}</div><div class="stackbar">${parts.map(([, v, c]) => `<i style="flex:${Math.max(v, 0.01)};background:${c}"></i>`).join('')}</div><div class="leg">${parts.map(([l, v, c]) => `<span><i style="background:${c}"></i>${l}</span><span>${fmtB(v)}</span>`).join('')}</div></div>
+<div class="panel"><div class="ph"><span>지난 분기 수입</span></div>${s.last ? `<div class="leg" style="padding:0 1.2rem 1.1rem;margin:0"><span>급여</span><span>${fmtB(s.last.take.salary)}</span><span>배당</span><span>${fmtB(s.last.take.div)}</span><span>성과보수</span><span>${fmtB(s.last.take.carry)}</span><span>펀드 손익</span><span>${fmtB(s.last.take.fund)}</span></div>` : '<div style="padding:0 1.2rem 1.1rem;color:var(--muted);font-size:.84rem">첫 분기 마감 후 표시됩니다.</div>'}</div></div>
+<div class="col"><div class="panel pay"><div class="ph" style="padding:0">배당 · 현금 환원</div><div style="display:flex;align-items:baseline;gap:.8rem;margin-top:.4rem"><span class="mono" style="font-size:2.4rem;font-weight:600" id="payv">${s.payout}%</span><span class="muted">상장사 순이익 중 주주에게 분배</span></div>
+<div class="cap"><div class="zone"></div><input type="range" min="0" max="80" step="2" value="${s.payout}" data-payout="1" style="--p:${s.payout / 80 * 100}%"><div class="capmark"></div></div><div class="muted" style="font-size:.72rem;display:flex;justify-content:space-between"><span>0%</span><span style="color:var(--bad);margin-left:20%">헌장 상한 40%</span><span>80%</span></div>
+<div class="leg" style="margin-top:1rem"><span>예상 내 배당 / 분기</span><span class="money">${fmtB(estDiv)}</span></div></div>
+<div class="panel"><div class="ph"><span>리스크</span></div><div class="risk-row"><span>감사 위험</span><div class="meter" style="width:100%"><i style="width:${audit}%;background:${audit > 60 ? 'var(--bad)' : audit > 30 ? 'var(--warn)' : 'var(--good)'}"></i></div><span class="mono">${Math.round(s.audit)}</span></div><div class="risk-row"><span>정부 관계</span><div class="meter" style="width:100%"><i style="width:${s.stats.gov}%;background:var(--accent)"></i></div><span class="mono">${Math.round(s.stats.gov)}</span></div><div class="risk-row"><span>거품 지수</span><div class="meter" style="width:100%"><i style="width:${Math.min(100, s.stats.bubble)}%;background:${s.stats.bubble > 92 ? 'var(--bad)' : 'var(--warn)'}"></i></div><span class="mono">${Math.round(s.stats.bubble)}</span></div><div style="height:.6rem"></div></div></div>
+<div class="col"><div class="panel"><div class="ph"><span>자산 · 투자</span><span class="chip warn">현금 ${fmtB(s.me.liquid)}</span></div>${shop}</div></div></div></div>`;
 }
 
-// ---- people / letters / investigate ----
-const BIO = {
-  mira: '선대의 제자였고, 후계 경쟁에서 밀렸다. 충성과 서운함이 공존한다. 편지의 비밀을 일부 알고 있다.',
-  victor: '노련한 재무장관. 화려한 언변 뒤에 숨은 계산이 있다. 중국계 펀드 지분 소문이 따라다닌다.',
-  jonah: '천재적 칩 설계자. 독단적이고 야심에 차 있다. 회사의 성장을 위해서라면 선을 넘는다.',
-  lin: '대만 파운드리의 총괄. 조국과 회사 사이에서 침묵하는 쪽을 택해 왔다.',
-  dana: '반독점을 앞세운 상원의원. 적이 아니라 가장 정직한 견제자다.',
-  aria: 'OpenAI의 AI. 빠르고 낙관적이며 인정받고 싶어 한다. 조나의 칩 위에서 돌아간다.',
-  sage: 'Anthropic의 AI. 신중하고 불편한 질문을 한다. 미라와 함께 선대의 의도를 일부 안다.',
-  elias: '컴팩트를 만든 전설적 투자자. 편지로만 말한다.',
-};
-export function people(s) {
-  const cards = ['mira', 'victor', 'jonah', 'lin', 'dana', 'aria', 'sage'].map((id) => { const c = CHARS[id]; const t = Math.round(s.trust[id]); return `<div class="leather" style="padding:14px;display:flex;gap:16px;align-items:center;height:210px">${portFrame(id, 120, null)}<div style="font-family:'Noto Sans KR';flex:1"><div style="font-size:19px;font-weight:700;color:#f0e5c8;font-family:'Noto Serif KR'">${c.kr}</div><div style="font-size:12px;color:#b9a67c">${c.role} · ${c.tag}</div><div style="margin:8px 0 4px;font-size:12px;color:#cdb98c">신뢰 ${t}</div>${bar(t, trustColor(t))}<div style="margin-top:10px;font-size:12.5px;line-height:1.55;color:#d8caa6">${BIO[id]}</div></div></div>`; }).join('');
-  return `<div class="screen s05 fade"><div class="wall"></div>${topbar(s)}${nav('people')}<div style="position:absolute;left:40px;right:40px;top:90px;display:grid;grid-template-columns:1fr 1fr;gap:18px">${cards}<div class="leather" style="padding:14px;display:flex;gap:16px;align-items:center;height:210px">${portFrame('elias', 120, null)}<div style="font-family:'Noto Sans KR';flex:1"><div style="font-size:19px;font-weight:700;color:#f0e5c8;font-family:'Noto Serif KR'">${CHARS.elias.kr}</div><div style="font-size:12px;color:#b9a67c">${CHARS.elias.role}</div><div style="margin-top:10px;font-size:12.5px;line-height:1.55;color:#d8caa6">${BIO.elias}<br><b class="gold">열린 편지 ${s.letters.length} / 7</b></div></div></div></div></div>`;
-}
-export function letters(s) {
-  const cards = [1, 2, 3, 4, 5, 6, 7].map((i) => { const id = 'L' + i, open = s.letters.includes(id), L = LETTERS[id]; return `<div class="parch" ${open ? `data-act="read-letter" data-id="${id}"` : ''} style="height:220px;padding:22px 24px;${open ? '' : 'opacity:.5;filter:grayscale(.8)'}"><div class="kick">LETTER ${i}</div><div style="font-weight:900;font-size:21px;margin-top:6px;color:#3a2410">${open ? L.title : '🔒 아직 열리지 않았습니다'}</div><div style="font-family:'Noto Sans KR';font-size:13px;line-height:1.7;margin-top:10px;color:#4a3418">${open ? L.text.split('\n').filter(Boolean)[0] : i <= 4 ? '이야기가 진행되면 열립니다.' : '정식 버전에서 열립니다.'}</div></div>`; }).join('');
-  return `<div class="screen s05 fade"><div class="wall"></div>${topbar(s)}${nav('letters')}<div style="position:absolute;left:40px;right:40px;top:90px"><div style="font-family:Cinzel;font-weight:800;letter-spacing:5px;color:#f3d98f;margin-bottom:10px">LETTERS FROM ELIAS · 선대의 일곱 편지</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px">${cards}</div></div></div>`;
-}
-export function invest(s, selId, note) {
-  const pos = { victor: [90, 134, -3], mira: [440, 122, 2], jonah: [796, 142, -2], lin: [212, 670, 2], aria: [622, 680, -3] };
-  const pol = SUSPECTS.map((id) => { const c = CHARS[id]; const [x, y, r] = pos[id]; return `<div class="pol ${selId === id ? 'sel' : ''}" data-act="pick-suspect" data-id="${id}" style="left:${x}px;top:${y}px;transform:rotate(${r}deg)"><div class="pin"></div><div class="ph">${portraitSVG(id, 212, 276)}</div><div class="nm">${c.kr}</div><div class="rl">${c.role}</div><div class="sus"><span>단서 ${s.clues[id]}</span><span>${s.clues[id] >= 3 ? '의심 높음' : s.clues[id] >= 1 ? '의심' : '—'}</span></div></div>`; }).join('');
-  const P = { victor: [208, 238], mira: [558, 226], jonah: [914, 244], lin: [330, 772], aria: [740, 782] }, C = [620, 440];
-  let str = '<svg class="strings" viewBox="0 0 1920 1080">';
-  for (const k of SUSPECTS) { const w = 2 + Math.min(3, s.clues[k]); str += `<path d="M${P[k][0]} ${P[k][1]} Q ${(P[k][0] + C[0]) / 2} ${(P[k][1] + C[1]) / 2 + 40} ${C[0]} ${C[1]}" fill="none" stroke="#c62a20" stroke-width="${w}" stroke-opacity="${0.35 + Math.min(0.6, s.clues[k] * 0.15)}"/>`; }
-  str += '</svg>';
-  const c = CHARS[selId], log = s.clueLog.filter((x) => x.who === selId);
-  const cl = log.length ? log.map((x) => `<div class="cl"><i>✔</i><div>${x.text}<small>${x.turn}턴에 확인</small></div></div>`).join('') : '<div class="cl"><i>?</i><div>확인된 단서가 없습니다<small>정보를 써서 조사하세요</small></div></div>';
-  return `<div class="screen s09 fade"><div class="cork"></div><div class="frameb"></div>${topbar(s)}${nav('invest')}${str}
-<div class="title"><b>첩자를 찾아라</b><small>켈스트럴 · 신디케이트의 내부 첩자 (후보 5명 중 1명)</small></div>${pol}
-<div class="cen" style="left:470px"><h3>KESTREL</h3><div class="sil">🕴️</div><small>얼굴 없는 지휘자<br>첩자 1명 · 단서가 많다고 범인은 아닙니다</small></div>
-<div class="parch rp"><div class="kick">SUSPECT FILE · 선택된 용의자</div><h2>${c.kr} <span class="eff ${s.clues[selId] >= 3 ? 'r' : ''}" style="vertical-align:middle">단서 ${s.clues[selId]}</span></h2>
- <div class="gauge">${CHARS[selId].role} · 신뢰 ${Math.round(s.trust[selId])}${bar(s.clues[selId] * 20, '#8a1d14')}</div>${cl}
- ${note ? `<div style="margin-top:8px;font-family:'Noto Sans KR';font-size:13px;font-weight:700;color:#7b1710">${note}</div>` : ''}
- <div class="act"><div data-act="investigate" data-id="${selId}" class="${s.intel < 1 ? 'disabled' : ''}">🔎 정보 사용: ${c.kr.split(' ')[0]} 조사<span>정보 −1 (보유 ${s.intel})</span></div><div class="disabled">🗣 직접 추궁은 10턴 '지목'에서 가능합니다<span>—</span></div></div>
- <div style="margin-top:10px;font-family:'Noto Sans KR';font-size:12.5px;line-height:1.6;color:#4a3418"><b>⚖ 힌트:</b> 진짜 첩자는 조사하면 항상 흔적이 나오지만, 결백한 사람도 가끔 오해받을 만한 정황이 나옵니다.</div></div></div>`;
+// ---------- investigation ----------
+const POS = { victor: [50, 14], mira: [84, 38], jonah: [72, 82], lin: [28, 82], aria: [16, 38] };
+export function invest(s, V) {
+  const sel = V.suspect, ck = SUSPECTS.map((k) => s.clues[k]);
+  const lines = SUSPECTS.map((k) => `<line x1="50" y1="50" x2="${POS[k][0]}" y2="${POS[k][1]}" stroke="${k === sel ? '#86aefc' : '#fff'}" stroke-opacity="${k === sel ? 0.8 : 0.08 + Math.min(0.5, s.clues[k] * 0.07)}" stroke-width="${0.25 + Math.min(1.2, s.clues[k] * 0.15)}" ${s.clues[k] ? '' : 'stroke-dasharray="1.2 1.4"'} vector-effect="non-scaling-stroke"/>`).join('');
+  const nodes = SUSPECTS.map((k) => `<button class="gnode ${k === sel ? 'on' : ''}" style="left:${POS[k][0]}%;top:${POS[k][1]}%" data-act="pick-suspect" data-id="${k}">${av(k, 3.4)}<b>${CHARS[k].kr.split(' ')[0]}</b><small>${CHARS[k].role} · 단서 ${s.clues[k]}</small></button>`).join('');
+  const logs = s.clueLog.filter((l) => l.who === sel);
+  const can = s.intel >= 1;
+  return `<div class="view"><div class="graph"><div class="gwrap"><svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">${lines}</svg>
+<div class="gnode" style="left:50%;top:50%"><div class="kes">KESTREL</div></div>${nodes}</div>
+<div class="panel" style="display:flex;flex-direction:column;overflow:hidden"><div class="ph"><span>용의자 파일</span><span class="chip warn">정보 ${s.intel}</span></div>
+<div style="display:flex;gap:1rem;align-items:center;padding:.4rem 1.1rem 1rem">${av(sel, 3.6)}<div><b style="font-size:1.1rem">${CHARS[sel].kr}</b><div class="muted" style="font-size:.78rem">${CHARS[sel].role} · 신뢰 ${Math.round(s.trust[sel])}</div></div></div>
+<div style="padding:0 1.1rem 1rem"><button class="btn ${can ? 'primary' : 'off'}" style="width:100%" data-act="investigate" data-id="${sel}">정보 1 사용 — 조사한다</button>${V.note ? `<div class="sys res" style="margin-top:.8rem;text-align:left">${V.note}</div>` : ''}</div>
+<div class="ph"><span>수집한 단서</span><span class="chip">${logs.length}</span></div><div style="overflow:auto;flex:1">${logs.length ? logs.map((l) => `<div class="clue"><i>●</i><div>${l.text}<small>${QUARTERS[l.turn - 1]}</small></div></div>`).join('') : '<div class="clue muted">아직 단서가 없습니다.</div>'}</div></div></div></div>`;
 }
 
-// ---- 07 earnings ----
+// ---------- archive ----------
+export function archive(s, V) {
+  const tab = V.arch || 'letters';
+  const tabs = `<div style="display:flex;gap:.4rem;padding:.2rem .4rem .6rem"><button class="chip ${tab === 'letters' ? 'acc' : ''}" data-act="arch" data-t="letters">편지 ${s.letters.length}/7</button><button class="chip ${tab === 'people' ? 'acc' : ''}" data-act="arch" data-t="people">인물</button></div>`;
+  if (tab === 'people') {
+    return `<div class="view"><div style="margin-bottom:1rem">${tabs}</div><div class="people">${Object.keys(CHARS).filter((k) => k !== 'elias').map((k) => `<div class="panel pcard">${av(k, 3.2)}<div style="flex:1"><h3>${CHARS[k].kr}</h3><div class="muted" style="font-size:.78rem">${CHARS[k].role}</div><p>${CHARS[k].tag}</p><div class="meter" style="width:100%;margin-top:.7rem"><i style="width:${s.trust[k]}%;background:var(--accent)"></i></div></div><span class="mono muted">${Math.round(s.trust[k])}</span></div>`).join('')}</div></div>`;
+  }
+  const sel = V.letter && s.letters.includes(V.letter) ? V.letter : s.letters[0];
+  const items = Array.from({ length: 7 }, (_, i) => { const id = 'L' + (i + 1), L = LETTERS[id], open = s.letters.includes(id); return `<div class="doc-i ${open ? '' : 'lock'} ${id === sel ? 'on' : ''}" ${open ? `data-act="read-letter" data-id="${id}"` : ''}>${av('elias', 2.2)}<div><b style="font-size:.86rem">${open && L ? L.title : '봉인된 편지 ' + (i + 1)}</b><div class="muted" style="font-size:.7rem">${open ? '열람 가능' : '아직 열 수 없음'}</div></div></div>`; }).join('');
+  const L = sel && LETTERS[sel];
+  return `<div class="view"><div class="docs"><div class="panel" style="padding:.7rem;overflow:auto">${tabs}${items}</div><div class="panel reader">${L ? `<div class="eyebrow">LETTER ${L.n}</div><h2>${L.title}</h2><div class="tx">${L.text}</div><div class="sig">— ${L.sig}</div>` : '<div class="muted">아직 열어 본 편지가 없습니다.</div>'}</div></div></div>`;
+}
+
+// ---------- full screens ----------
+export function title(hasSave, endings) {
+  return `<div class="screen"><div class="full-map" id="mapslot"></div><div class="shade"></div>
+<div class="title-wrap"><div class="eyebrow">A STORY OF POWER &amp; MONEY</div><div class="wordmark">THE<br>COMPACT</div><div class="tagline">열한 개의 불, 한 사람의 손</div>
+<p class="lede">세계의 지능을 쥔 열한 개 기업이 단 한 사람에게 상속되었다.<br>회사를 키우고, 재산을 쌓고, 사람을 믿고 의심하라. 그리고 마지막 편지를 열어라.</p>
+<div class="title-actions"><button class="btn primary big" data-act="new">새 게임 ${ic('arrow')}</button><button class="btn big ${hasSave ? '' : 'off'}" data-act="continue">이어하기</button></div>
+<div class="dots11">${COMPANIES.map((c) => coAv(c.id, 1.9)).join('')}</div></div>
+<div class="quote-side">"이 열한 개의 불을 한곳에 두어라.<br>마지막 편지를 열기 전에는 아무도 믿지 마라."<br><span class="muted">— 엘리아스 밴스, 유언장</span></div>
+<div class="fine">모든 인물과 사건은 허구이며, 기업명은 가상의 시나리오를 위해 사용되었습니다. · 엔딩 ${endings}/5</div></div>`;
+}
+export function origin(sel, name) {
+  const o = ORIGINS[sel];
+  const opts = Object.entries(ORIGINS).map(([k, v]) => `<button class="opt ${k === sel ? 'on' : ''}" data-act="pick-origin" data-id="${k}"><b>${v.kr}</b> <span class="muted" style="font-size:.7rem;letter-spacing:.14em">${v.en}</span><small>${v.blurb}</small></button>`).join('');
+  return `<div class="screen"><div class="full-map" id="mapslot"></div><div class="shade"></div><div class="origin"><div><div class="eyebrow">CHAPTER 0 · 당신은 누구였나</div><h2>상속자의 과거</h2><p class="muted" style="line-height:1.8">유언장에는 당신의 이름만 적혀 있었다. 열한 개의 불을 쥐기 전, 당신은 어떤 사람이었는가?</p>
+<div class="field"><label>이름</label><input id="nameinput" value="${name}" maxlength="12"></div>${opts}</div>
+<div style="align-self:end"><div class="panel trait"><div class="eyebrow">TRAIT</div><h3>${o.trait}</h3><p>${o.traitDesc}</p></div><div style="margin-top:1.2rem;display:flex;gap:.7rem"><button class="btn" data-act="to-title">뒤로</button><button class="btn primary big" style="flex:1" data-act="start-game">이 사람으로 시작 ${ic('arrow')}</button></div></div></div></div>`;
+}
+export function scene(step, name, idx, total) {
+  const who = step.who;
+  const sp = who === 'narr' ? '' : `<div class="speaker">${av(who, 2.4)}<span>${CHARS[who].kr}</span><small>${CHARS[who].role}</small></div>`;
+  const ch = step.choices ? `<div class="choices">${step.choices.map((c, i) => `<button class="choice" style="animation-delay:${i * 90}ms" data-act="vn-choice" data-i="${i}">${c.text}<small>${c.sub}</small></button>`).join('')}</div>` : '';
+  return `<div class="screen"><div class="scene"><div class="loc">PROLOGUE · 오마하 · ${idx + 1}/${total}</div><button class="btn skip" data-act="skip-vn">건너뛰기</button>
+<div class="stage-text" ${step.choices ? '' : 'data-act="vn-next"'}>${sp}<div class="line ${who === 'narr' ? 'narr' : ''}" key="${idx}">${step.text}</div>${ch}${step.choices ? '' : '<div class="hintc">클릭하거나 Enter · 계속</div>'}</div></div></div>`;
+}
+export function letterModal(id, ctx) {
+  const L = LETTERS[id];
+  return `<div class="modal" data-act="close-letter"><div class="card" style="max-width:40rem"><div class="eyebrow">LETTER ${L.n} / 7</div><h2>${L.title}</h2><div class="tx" style="font-family:var(--serif);font-size:1.05rem;line-height:2;white-space:pre-line;color:#d6deec;max-height:48vh;overflow:auto">${L.text}</div><div class="sig" style="margin:1rem 0;color:var(--muted);font-style:italic;font-family:var(--serif)">— ${L.sig}</div><button class="btn primary" data-act="close-letter">편지를 접는다</button></div></div>`;
+}
+export function helpModal() {
+  return `<div class="modal"><div class="card"><div class="eyebrow">HOW TO PLAY</div><h2>분기마다 이렇게 진행됩니다</h2><ol><li><b>대화함</b>의 이야기를 열고 자문단의 의견을 들은 뒤 결정합니다.</li><li><b>회사</b> 탭에서 레버(투자·연구·가격…)를 조정합니다. 기대치를 넘기면 시장이 반응합니다.</li><li><b>지갑</b> 탭에서 배당과 자산을 정합니다. 40%를 넘기면 감사 위험이 쌓입니다.</li><li><b>수사</b> 탭에서 정보를 써 켈스트럴의 첩자를 추적합니다.</li><li>준비되면 오른쪽 위 <b>분기 마감</b>. 12분기 뒤에 결말이 결정됩니다.</li></ol><button class="btn primary big" style="margin-top:1.2rem" data-act="close-help">시작한다</button></div></div>`;
+}
 export function earnings(s) {
-  const e = s.last;
-  const rows = e.rows.map((r) => { const c = COMP[r.id]; const beat = r.beat >= 0; const w = Math.min(100, Math.max(6, 50 + r.beat * 200)); return `<div class="cr"><div class="n">${c.kr}</div><div class="bt"><i style="width:${w}%;background:${beat ? c.color : '#a43a2a'}"></i><u style="left:50%"></u></div><div class="a">${fmtB(r.profit)}</div><div class="r" style="color:${beat ? '#6fe0a0' : '#ff8a7a'}">${beat ? '▲' : '▼'}${Math.abs(r.beat * 100).toFixed(1)}%</div></div>`; }).join('');
-  const beats = e.rows.filter((r) => r.beat >= 0).length;
-  const pts = s.history.slice(-9), mn = Math.min(...pts) * 0.97, mx = Math.max(...pts) * 1.03;
-  const P = pts.map((v, i) => [16 + i * (448 / Math.max(1, pts.length - 1)), 200 - (v - mn) / (mx - mn) * 160]);
-  const sv = `<svg width="480" height="230" viewBox="0 0 480 230"><defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3d98f" stop-opacity=".45"/><stop offset="1" stop-color="#f3d98f" stop-opacity="0"/></linearGradient></defs><polygon fill="url(#ag)" points="16,214 ${P.map((p) => p.join(',')).join(' ')} ${P[P.length - 1][0]},214"/><polyline fill="none" stroke="#f3d98f" stroke-width="3" points="${P.map((p) => p.join(',')).join(' ')}"/>${P.map((p) => `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#fff"/>`).join('')}</svg>`;
-  const up = e.dM >= 0;
-  const notes = [];
-  notes.push(`<div class="parch pp"><b>📈 시장 반응</b>합산 시총 <b class="${up ? 'up' : 'dn'}">${up ? '+' : '−'}${fmtB(Math.abs(e.dM))}</b> (${(e.dM / e.prevMcap * 100).toFixed(1)}%)</div>`);
-  const miss = e.rows.filter((r) => r.beat < -0.02).sort((a, b) => a.beat - b.beat)[0];
-  notes.push(`<div class="parch pp"><b>${miss ? '⚠ 예상 미달' : '✔ 전반적 호조'}</b>${miss ? `${COMP[miss.id].kr}이(가) 예상을 ${Math.abs(miss.beat * 100).toFixed(1)}% 밑돌았습니다.` : '대부분의 기업이 예상을 상회했습니다.'}</div>`);
-  notes.push(`<div class="parch pp"><b>${e.crashMsg ? '💥 시장 충격' : '🫧 거품 지수'}</b>${e.crashMsg || `현재 ${Math.round(e.bubble)}% ${e.bubble > 88 ? '— 위험 수위에 가까워지고 있습니다.' : ''}`}</div>`);
-  const last = s.turn >= TOTAL_TURNS;
-  return `<div class="screen s07 fade"><div class="stage"></div><div class="rays"></div><canvas id="coins" width="1920" height="1080" style="position:absolute;inset:0;pointer-events:none"></canvas>
-<div class="hd"><div class="kick">QUARTERLY EARNINGS DAY</div><h1>${e.quarter.replace("'", '’')} EARNINGS</h1><p>11개 기업 합산 실적 · 컨센서스 대비 (흰 선 = 예상)</p></div>
-<div class="leather list"><div class="kick" style="color:#f3d98f;margin-bottom:6px">CONSENSUS BEAT · 기업별 분기 순이익</div>${rows}<div style="margin-top:8px;font-family:'Noto Sans KR';font-size:12px;color:#cdb98c">예상 상회 ${beats} · 미달 ${11 - beats}</div></div>
-<div class="leather chart"><div class="kick" style="color:#f3d98f;margin-bottom:4px">VALUE TREND · 합산 시총 추이</div>${sv}<div style="font-family:'Noto Sans KR';font-size:12px;color:#cdb98c">현재 ${fmtB(e.mcap)}</div></div>
-<div class="big"><div class="parch bn"><div class="l">연결 매출 · REVENUE</div><div class="v" data-count="${e.revenue}" data-fmt="B">$0</div><div class="d up">${(e.revenue / (e.rows.reduce((a, r) => a + (s.comp[r.id].prevRev || r.rev), 0)) * 100 - 100).toFixed(1)}% 전 분기 대비</div></div><div class="parch bn"><div class="l">연결 순이익 · NET INCOME</div><div class="v" data-count="${e.netIncome}" data-fmt="B">$0</div><div class="d ${e.netIncome >= 0 ? 'up' : 'dn'}">${e.netIncome >= 0 ? '흑자' : '적자'}</div></div></div>
-<div class="take"><div style="font-size:84px">💰</div><div><div class="t">나의 몫 · YOUR TAKE THIS QUARTER</div><div class="m" data-count="${e.take.total}" data-fmt="M">+$0M</div></div><div class="s">급여 <b>${fmtB(e.take.salary)}</b> · 배당 <b>${fmtB(e.take.div)}</b> (성향 ${e.payout}%)<br>성과 보수 <b>${fmtB(e.take.carry)}</b> · 개인 펀드 <b>${fmtB(e.take.fund)}</b>${e.take.short ? `<br>폭락 베팅 수익 <b>${fmtB(e.take.short)}</b>` : ''}<br><span style="color:#f3d98f">순자산 ${fmtB(e.nwBefore)} → <b style="font-size:16px">${fmtB(e.nwAfter)}</b></span></div></div>
-<div class="pop">${notes.join('')}</div>
-<div class="rt">${portFrame('hero', 170, s.name.toUpperCase(), up ? '"숫자는 좋군. 얼마나 갈까."' : '"…이건 좋지 않아."', { smile: up })}</div>
-<div class="ft"><div class="btn" data-act="next-turn">${last ? '결과 보기 ▶' : '다음 분기로 ▶'}</div></div></div>`;
+  const r = s.last;
+  const rows = r.rows.map((x) => { const w = Math.max(4, Math.min(100, 50 + x.beat * 400)); return `<div class="cr"><span>${COMP[x.id].kr}</span><div class="bt"><i style="width:${w}%;background:${x.beat >= 0 ? 'var(--good)' : 'var(--bad)'}"></i><u></u></div><span class="mono">${fmtB(x.profit)}</span><span class="chip ${x.beat >= 0 ? 'good' : 'bad'}">${x.beat >= 0 ? 'BEAT' : 'MISS'}</span></div>`; }).join('');
+  return `<div class="sheet"><div><h2>EARNINGS DAY · ${r.quarter}</h2><h1>${r.crashMsg ? r.crashMsg : '분기 실적 발표'}</h1>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.6rem"><div class="bign"><small>그룹 매출</small><span data-count="${r.revenue}">${fmtB(r.revenue)}</span></div><div class="bign"><small>순이익</small><span data-count="${r.netIncome}">${fmtB(r.netIncome)}</span></div></div>
+<div class="bign" style="margin-top:1.4rem"><small>제국 가치 ${sgn(r.dM / 1000, 2)}T</small>$${(r.mcap / 1000).toFixed(2)}T</div>
+<div style="margin-top:1.6rem" class="muted">막대 가운데 선 = 시장 기대치</div>${rows}</div>
+<div><h2>YOUR TAKE</h2><h1>이번 분기 내 몫</h1><div class="leg" style="font-size:.95rem;gap:.7rem 1rem"><span>급여</span><span>${fmtB(r.take.salary)}</span><span>배당 (${r.payout}%)</span><span>${fmtB(r.take.div)}</span><span>성과보수</span><span>${fmtB(r.take.carry)}</span><span>개인 펀드 손익</span><span class="${r.take.fund >= 0 ? 'good' : 'bad'}">${fmtB(r.take.fund)}</span>${r.take.short ? `<span>공매도 수익</span><span class="good">${fmtB(r.take.short)}</span>` : ''}</div>
+<div class="take"><div class="bign"><small>이번 분기 합계</small><span data-count="${r.take.total}">${fmtB(r.take.total)}</span></div></div>
+<div class="bign" style="margin-top:2rem"><small>내 순자산</small>${fmtB(r.nwBefore)} → <span class="money">${fmtB(r.nwAfter)}</span></div>
+<button class="btn primary big" style="margin-top:2.4rem" data-act="next-turn">${s.turn >= TOTAL_TURNS ? '결말을 본다' : '다음 분기로'} ${ic('arrow')}</button></div></div>`;
 }
-
-// ---- 10 ending ----
 export function ending(s) {
   const r = pickEnding(s), e = r.e;
-  const unlocked = (() => { try { return JSON.parse(localStorage.getItem('compact_endings') || '[]'); } catch (x) { return []; } })();
-  const keys = ['soft', 'emperor', 'crash', 'alone', 'prototype'];
-  const sr = (l, p, col, v, g) => `<div class="sr"><div class="l">${l}</div><div class="b">${bar(p, col)}</div><div class="v">${v}</div><div class="grade">${g}</div></div>`;
-  const aft = [['mira', s.flags.mole_wrong && s.trust.mira < 40 ? '당신을 떠났다.' : (s.flags.soft && !s.crashed) ? '공공 신탁의 초대 이사장이 되었다.' : '말없이 곁에 남았다.'], ['victor', s.flags.short_own ? '당신의 베팅을 알고 있었다.' : s.mole === 'victor' ? '켈스트럴과의 관계가 드러났다.' : '끝내 속을 알 수 없는 사람으로 남았다.'], ['jonah', s.flags.h200_lobby ? '수출로 막대한 부를 쌓았다.' : '새로운 칩을 만들고 있다.'], ['dana', s.flags.deal_dana ? '당신의 증언을 토대로 규제법을 통과시켰다.' : s.flags.fight_dana ? '여전히 당신을 지켜보고 있다.' : '의회의 한구석에서 조용히 일한다.']];
-  return `<div class="screen s10 fade"><div class="sh"></div>
-<div class="book"><div class="pg l"><div class="en">ENDING ${String(e.n).padStart(2, '0')} / 12</div><h1>${e.title}</h1><div class="sub">${e.en} · ${QUARTERS[Math.min(s.turn, TOTAL_TURNS) - 1] || ''}</div>
- <div class="txt">${e.text.map((t) => `<p>${t}</p>`).join('')}</div><div class="quote">${e.quote}</div></div>
- <div class="pg r"><div class="ph"><div style="width:238px;flex:none">${portFrame('hero', 230, s.name.toUpperCase(), '컴팩트의 마지막 소유자', { hairCol: '#8a8a94', age: 1, smile: false })}</div>
-  <div class="sc"><div class="kick" style="margin-bottom:4px">FINAL SCORE · 최종 점수</div>${sr('제국', r.empire / 50 * 100, '#2f8a4a', '$' + r.empire.toFixed(1) + 'T', r.grades.empire)}${sr('재산', r.wealth / 70 * 100, '#c9a45a', fmtB(r.wealth), r.grades.wealth)}${sr('유산', r.legacy, '#8a1d14', Math.round(r.legacy) + '점', r.grades.legacy)}</div></div>
-  <div class="sum"><b>플레이 기록</b> · ${Math.min(s.turn, TOTAL_TURNS)}턴 · 열린 편지 ${s.letters.length} / 7 · 첩자: <b>${CHARS[s.mole].kr}</b> (${s.flags.mole_found ? '정체 폭로 성공' : s.flags.mole_wrong ? '오판' : '미지목'})<br><b>핵심 선택</b> · ${s.log.filter((x) => ['h200', 'senator', 'crossroads'].includes(x.event)).map((x) => x.choice).join(' · ') || '—'}<br><b>개인 자산</b> · ${fmtB(r.wealth)} (감사 위험 ${Math.round(s.audit)} · SEC ${Math.round(s.sec)})</div>
-  <div class="kick" style="margin-top:14px">AFTERMATH · 그 후</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin-top:6px;font-family:'Noto Sans KR';font-size:13px;line-height:1.55">${aft.map((a) => `<div style="display:flex;gap:10px;align-items:center">${avatar(a[0], 46)}<div><b>${CHARS[a[0]].kr}</b><br><span style="color:#5a4426">${a[1]}</span></div></div>`).join('')}</div></div></div>
-<div class="coll"><div class="t">ENDINGS ${unlocked.length} / 12</div>${keys.map((k) => `<div class="${k === r.key ? 'cur' : ''}">${unlocked.includes(k) ? seal(k.slice(0, 2).toUpperCase(), '#8a2432', 46) : '<div class="lock">🔒</div>'}</div>`).join('')}${Array.from({ length: 7 }, () => '<div class="lock">🔒</div>').join('')}</div>
-<div class="btns"><div class="btn ghost" data-act="to-title">타이틀로</div><div class="btn" data-act="new">다시 도전 ↻</div></div></div>`;
-}
-export function letterModal(id) {
-  const L = LETTERS[id];
-  return `<div class="modal fade" data-act="close-letter"><div class="parch letterbox"><div class="seal2">${L.n}</div><div class="kick">LETTER ${L.n} / 7</div><h2>${L.title}</h2>${L.text}<div class="sig">— ${L.sig}</div><div style="text-align:center;margin-top:18px"><div class="btn" data-act="close-letter">편지를 접는다</div></div></div></div>`;
-}
-
-export function helpModal() {
-  return `<div class="modal fade"><div class="parch letterbox" style="width:880px;font-size:16px"><div class="kick">HOW TO PLAY · 조작 안내</div><h2>열한 개의 불을 쥔 첫 분기</h2>
-<div style="font-family:'Noto Sans KR';font-weight:400;line-height:1.85;white-space:normal">
-<b>① 분기마다 회의</b> — 미라가 소집하는 회의에서 한 가지를 결정합니다. 인물들의 조언은 서로 어긋나고, 일부는 숨은 의도를 갖고 있습니다.<br>
-<b>② 🏢 회사 탭</b> — 기업별 지렛대(설비투자·R&amp;D·채용·가격·로비·마케팅)를 조정해 성장과 이익, 거품을 다룹니다.<br>
-<b>③ 👛 내 지갑 탭</b> — 배당 성향을 정해 내 몫을 늘리되, 헌장 상한(40%)을 넘기면 감사 위험이 쌓입니다. 번 돈은 쓸 수도 있습니다.<br>
-<b>④ 🕵️ 수사 탭</b> — 정보로 용의자를 조사해 첩자를 찾으세요. 10분기에 지목할 수 있습니다.<br>
-<b>⑤ END TURN</b> — 결정을 마치면 분기를 끝내고 실적 발표(어닝스 데이)를 봅니다. 12분기 동안 어떤 결말에 닿을지는 당신의 선택에 달렸습니다.</div>
-<div style="text-align:center;margin-top:22px"><div class="btn" data-act="close-help">시작하기</div></div></div></div>`;
+  const sc = (l, v, g) => `<div class="panel score"><small>${l}</small><b>${v}<em>${g}</em></b></div>`;
+  const hist = s.history;
+  return `<div class="ending"><div class="en">ENDING ${e.n} / 5</div><h1>${e.title}</h1><div class="sub2">${e.en}</div>
+<div class="story">${e.text.map((t) => `<p>${t}</p>`).join('')}</div><div class="q">${e.quote}</div>
+<div class="scores">${sc('제국 가치', '$' + r.empire.toFixed(1) + 'T', r.grades.empire)}${sc('내 재산', fmtB(r.wealth), r.grades.wealth)}${sc('유산', Math.round(r.legacy), r.grades.legacy)}</div>
+<div class="panel" style="max-width:46rem;margin:1.4rem 0;padding:1rem 1.3rem"><div class="muted" style="font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700">제국 가치 추이</div>${spark(hist.map((h) => h / 1000), '#86aefc', 600, 90)}</div>
+<div class="after"><div>${av('mira', 2.2)}<span><b>미라</b>신뢰 ${Math.round(s.trust.mira)}</span></div><div>${av('sage', 2.2)}<span><b>SAGE</b>신뢰 ${Math.round(s.trust.sage)}</span></div><div>${av('victor', 2.2)}<span><b>헤일</b>${s.flags.mole_found ? '첩자로 밝혀짐' : s.mole === 'victor' ? '끝내 숨었다' : '신뢰 ' + Math.round(s.trust.victor)}</span></div><div>${av('aria', 2.2)}<span><b>ARIA</b>신뢰 ${Math.round(s.trust.aria)}</span></div></div>
+<button class="btn primary big" data-act="to-title">처음으로</button></div>`;
 }

@@ -1,3 +1,7 @@
+# Artwork (not used in the current UI)
+
+The redesigned UI intentionally uses no drawn faces (initial/orb avatars + a dot-matrix map). The notes below are kept for a future illustrated version.
+
 # Custom artwork (optional)
 
 The game ships with procedurally drawn SVG portraits as placeholders. To use real illustrations:

@@ -14,10 +14,9 @@ execFileSync('npx', ['--yes', 'esbuild@0.25.5', join(root, 'js/main.js'), '--bun
 
 const js = readFileSync(bundle, 'utf8').replace(/<\/script/gi, '<\\/script');
 const css = readFileSync(join(root, 'css/style.css'), 'utf8');
-const fonts = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@600;900&display=swap';
-const tokens = ':root{--ink:#2b1d10;--gold:#d8b25e;--gold2:#f3d98f;--leather:#2a1b11;--leather2:#1a110a;--paper:#e9dcb8;color-scheme:dark}#loading{position:absolute;inset:0;background:#140d07;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;color:#d8b25e;font-family:Cinzel,serif;letter-spacing:6px;z-index:99}#loading small{font-family:"Noto Sans KR",sans-serif;letter-spacing:0;color:#9a8a68;font-size:14px}body{background:#140d07}';
-const dom = '<div id="stage"><canvas id="bg" class="dim"></canvas><div id="screen"></div><div id="loading"><div style="font-size:34px">THE COMPACT</div><small>세계 지도를 그리는 중…</small></div></div><div id="rotate">📱↻<br>가로 화면에서 플레이해 주세요<br><small style="opacity:.7">PC 또는 가로로 눕힌 태블릿을 권장합니다</small></div>';
-const body = `<link rel="stylesheet" href="${fonts}">\n<style>${tokens}\n${css}</style>\n${dom}\n<script>window.COMPACT_NO_ART=true;</script>\n<script>${js}</script>`;
+const fonts = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;900&display=swap';
+const dom = '<div id="app"></div><div class="loading" id="loading">THE COMPACT</div><div id="rotate">기기를 가로로 눕혀 주세요<br>PC 브라우저를 권장합니다</div>';
+const body = `<link rel="stylesheet" href="${fonts}">\n<style>${css}</style>\n${dom}\n<script>window.COMPACT_NO_ART=true;</script>\n<script>${js}</script>`;
 
 const i = process.argv.indexOf('--fragment');
 if (i > 0) {
