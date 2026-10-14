@@ -1,6 +1,7 @@
 // View templates: pure functions returning HTML strings. No drawn faces — avatars are initials / orbs.
 import { COMPANIES, CHARS, ORIGINS, SHOP, LEVERS, LETTERS, QUARTERS, TOTAL_TURNS, SUSPECTS, ENDINGS } from './data.js';
 import { art, CAMEO } from './chars.js';
+import { scene as backdrop } from './scenes.js';
 import { COMP, totalMcap, netWorth, getEvent, previewCompany, pickEnding } from './state.js';
 
 export const fmtB = (b) => { const sg = b < 0 ? '−' : '', a = Math.abs(b); return a >= 1000 ? `${sg}$${(a / 1000).toFixed(2)}T` : a >= 1 ? `${sg}$${a.toFixed(1)}B` : `${sg}$${Math.round(a * 1000)}M`; };
@@ -203,7 +204,7 @@ export function scene(step, name, idx, total) {
   const sp = who === 'narr' ? '' : `<div class="speaker">${av(who, 2.4)}<span>${CHARS[who].kr}</span><small>${CHARS[who].role}</small></div>`;
   const ch = step.choices ? `<div class="choices">${step.choices.map((c, i) => `<button class="choice" style="animation-delay:${i * 90}ms" data-act="vn-choice" data-i="${i}">${c.text}<small>${c.sub}</small></button>`).join('')}</div>` : '';
   const pt = who === 'narr' ? '' : portrait(who, 26).replace('class="portrait"', 'class="portrait big"');
-  return `<div class="screen"><div class="scene">${pt}<div class="loc">PROLOGUE · 오마하 · ${idx + 1}/${total}</div><button class="btn skip" data-act="skip-vn">건너뛰기</button>
+  return `<div class="screen"><div class="scene">${backdrop(idx < 3 ? 'office' : 'alley')}${pt}<div class="loc">PROLOGUE · 오마하 · ${idx + 1}/${total}</div><button class="btn skip" data-act="skip-vn">건너뛰기</button>
 <div class="stage-text" ${step.choices ? '' : 'data-act="vn-next"'}>${sp}<div class="line ${who === 'narr' ? 'narr' : ''}" key="${idx}">${step.text}</div>${ch}${step.choices ? '' : '<div class="hintc">클릭하거나 Enter · 계속</div>'}</div></div></div>`;
 }
 export function letterModal(id, ctx) {
