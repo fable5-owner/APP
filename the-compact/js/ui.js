@@ -17,6 +17,7 @@ const P = {
   jet: '<path d="M2 14l9-2 5-8 2 1-2 8 5 3-1 2-6-1-3 5-2-1 1-6z"/>', think: '<path d="M3 10 12 4l9 6M5 10v8M10 10v8M14 10v8M19 10v8M3 20h18"/>',
   art: '<rect x="3" y="4" width="18" height="14" rx="2"/><path d="m3 15 5-5 4 4 3-3 6 5"/>', found: '<path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/>',
   bunker: '<path d="M3 18c2-6 6-9 9-9s7 3 9 9zM12 9V5"/>', media: '<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  sound:'<path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/>', mute:'<path d="M4 9v6h4l5 4V5L8 9zM17 9l5 6M22 9l-5 6"/>',
   arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>', spark: '<path d="m12 3 2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>',
 };
 export const ic = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${P[n] || ''}</svg>`;
@@ -52,7 +53,7 @@ export function shell(s, V, inner) {
   const dm = s.last ? s.last.dM / 1000 : 0;
   const b = Math.round(s.stats.bubble), bc = b > 92 ? 'var(--bad)' : b > 80 ? 'var(--warn)' : 'var(--good)';
   const ticks = Array.from({ length: TOTAL_TURNS }, (_, i) => `<i class="${i + 1 < s.turn ? 'on' : i + 1 === s.turn ? 'cur' : ''}"></i>`).join('');
-  return `<div class="rail"><div class="logo">C</div>${NAV.map(([id, icn, lab]) => `<button class="nav ${V.screen === id ? 'on' : ''}" data-act="go" data-to="${id}">${ic(icn)}${lab}${id === 'hub' && nq ? '<span class="dot"></span>' : ''}</button>`).join('')}<div class="sp"></div></div>
+  return `<div class="rail"><div class="logo">C</div>${NAV.map(([id, icn, lab]) => `<button class="nav ${V.screen === id ? 'on' : ''}" data-act="go" data-to="${id}">${ic(icn)}${lab}${id === 'hub' && nq ? '<span class="dot"></span>' : ''}</button>`).join('')}<div class="sp"></div><button class="mute" data-act="mute" title="사운드">${ic(V.muted ? 'mute' : 'sound')}</button></div>
 <div class="top"><div class="qtr"><b>${QUARTERS[Math.min(s.turn, TOTAL_TURNS) - 1]} <span class="muted" style="font-weight:500;font-size:.78rem">· ${s.turn}/${TOTAL_TURNS}</span></b><div class="ticks">${ticks}</div></div>
 <div class="kpi"><small>제국 가치</small><b>$${(totalMcap(s) / 1000).toFixed(1)}T${s.last ? `<em class="${dm >= 0 ? 'good' : 'bad'}">${dm >= 0 ? '▲' : '▼'}${Math.abs(dm).toFixed(2)}</em>` : ''}</b></div>
 <div class="kpi"><small>그룹 현금</small><b>${fmtB(totalCash(s))}</b></div>
@@ -176,8 +177,8 @@ export function archive(s, V) {
 }
 
 // ---------- full screens ----------
-export function title(hasSave, endings) {
-  return `<div class="screen"><div class="full-map" id="mapslot"></div><div class="shade"></div>
+export function title(hasSave, endings, muted) {
+  return `<div class="screen"><button class="mute float" data-act="mute">${ic(muted ? 'mute' : 'sound')}</button><div class="full-map" id="mapslot"></div><div class="shade"></div>
 <div class="title-wrap"><div class="eyebrow">A STORY OF POWER &amp; MONEY</div><div class="wordmark">THE<br>COMPACT</div><div class="tagline">열한 개의 불, 한 사람의 손</div>
 <p class="lede">세계의 지능을 쥔 열한 개 기업이 단 한 사람에게 상속되었다.<br>회사를 키우고, 재산을 쌓고, 사람을 믿고 의심하라. 그리고 마지막 편지를 열어라.</p>
 <div class="title-actions"><button class="btn primary big" data-act="new">새 게임 ${ic('arrow')}</button><button class="btn big ${hasSave ? '' : 'off'}" data-act="continue">이어하기</button></div>
@@ -208,8 +209,8 @@ export function helpModal() {
 }
 export function earnings(s) {
   const r = s.last;
-  const rows = r.rows.map((x) => { const w = Math.max(4, Math.min(100, 50 + x.beat * 400)); return `<div class="cr"><span>${COMP[x.id].kr}</span><div class="bt"><i style="width:${w}%;background:${x.beat >= 0 ? 'var(--good)' : 'var(--bad)'}"></i><u></u></div><span class="mono">${fmtB(x.profit)}</span><span class="chip ${x.beat >= 0 ? 'good' : 'bad'}">${x.beat >= 0 ? 'BEAT' : 'MISS'}</span></div>`; }).join('');
-  return `<div class="sheet"><div><h2>EARNINGS DAY · ${r.quarter}</h2><h1>${r.crashMsg ? r.crashMsg : '분기 실적 발표'}</h1>
+  const rows = r.rows.map((x) => { const w = Math.max(6, Math.min(100, 50 + x.beat * 250)), v = x.beat >= 0.02 ? ['good', 'BEAT'] : x.beat <= -0.02 ? ['bad', 'MISS'] : ['warn', 'IN LINE']; return `<div class="cr"><span>${COMP[x.id].kr}</span><div class="bt"><i style="width:${w}%;color:var(--${v[0]});background:var(--${v[0]})"></i><u></u></div><span class="mono">${fmtB(x.profit)}</span><span class="chip ${v[0]}">${v[1]}</span></div>`; }).join('');
+  return `<div class="sheet ${r.crashMsg && r.crashMsg.includes('💥') ? 'crash' : ''}"><div><h2>EARNINGS DAY · ${r.quarter}</h2><h1>${r.crashMsg ? r.crashMsg : '분기 실적 발표'}</h1>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.6rem"><div class="bign"><small>그룹 매출</small><span data-count="${r.revenue}">${fmtB(r.revenue)}</span></div><div class="bign"><small>순이익</small><span data-count="${r.netIncome}">${fmtB(r.netIncome)}</span></div></div>
 <div class="bign" style="margin-top:1.4rem"><small>제국 가치 ${sgn(r.dM / 1000, 2)}T</small>$${(r.mcap / 1000).toFixed(2)}T</div>
 <div style="margin-top:1.6rem" class="muted">막대 가운데 선 = 시장 기대치</div>${rows}</div>

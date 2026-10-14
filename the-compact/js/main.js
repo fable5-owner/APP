@@ -3,13 +3,15 @@ import { createMap } from './map.js';
 import { PROLOGUE, ORIGINS, TOTAL_TURNS, CHARS, SUSPECTS, LETTERS } from './data.js';
 import * as S from './state.js';
 import * as UI from './ui.js';
+import { Audio } from './audio.js';
+import { FX } from './fx.js';
 
 const app = document.getElementById('app');
 const loading = document.getElementById('loading');
 const map = createMap();
 
 let G = null;
-const V = { screen: 'title', origin: 'engineer', name: '에단 류', steps: [], idx: 0, company: 'NV', suspect: 'victor', note: null, modal: null, pop: null, chat: null, earn: false, letter: null, arch: 'letters', fast: false, levSeen: false, paySeen: false };
+const V = { screen: 'title', origin: 'engineer', name: '에단 류', steps: [], idx: 0, company: 'NV', suspect: 'victor', note: null, modal: null, pop: null, chat: null, earn: false, letter: null, arch: 'letters', fast: false, muted: Audio.muted, levSeen: false, paySeen: false };
 const wait = (ms) => new Promise((r) => setTimeout(r, V.fast ? 0 : ms));
 const STANCE = { y: ['y', '찬성'], n: ['n', '반대'], h: ['h', '보류'] };
 const REACT = {
@@ -24,7 +26,7 @@ function render() {
   let html = '';
   const s = G;
   switch (V.screen) {
-    case 'title': html = UI.title(!!S.loadGame(), S.endingsUnlocked()); break;
+    case 'title': html = UI.title(!!S.loadGame(), S.endingsUnlocked(), Audio.muted); break;
     case 'origin': html = UI.origin(V.origin, V.name); break;
     case 'scene': html = UI.scene(V.steps[V.idx], V.name, V.idx, V.steps.length); break;
     case 'ending': html = UI.ending(s); break;
@@ -44,7 +46,17 @@ function render() {
     map.start(); map.resize();
   } else map.stop();
   if (V.earn) countUp();
+  setMood();
   const lg = document.getElementById('chatlog'); if (lg) lg.scrollTop = lg.scrollHeight;
+}
+
+function setMood() {
+  const b = G ? G.stats.bubble : 80;
+  if (V.earn && G && G.last) { const crash = G.last.crashMsg && G.last.crashMsg.includes('💥'); Audio.mood(crash ? 'dark' : 'major', 3, crash ? 104 : 118); return; }
+  if (V.screen === 'ending') { const e = G && S.pickEnding(G).key; Audio.mood(e === 'soft' ? 'major' : 'dark', 1, 72); return; }
+  if (V.screen === 'title' || V.screen === 'origin') { Audio.mood('minor', 2, 88); return; }
+  if (V.screen === 'scene') { Audio.mood('minor', 1, 70); return; }
+  Audio.mood(b > 95 ? 'dark' : 'minor', V.chat ? 1 : 1 + (b > 80) + (b > 92), 84 + (b > 92 ? 14 : 0));
 }
 
 function onNode(id) {
@@ -72,7 +84,7 @@ function chatHTML() {
 <div class="log" id="chatlog">${c.msgs.join('')}</div><div class="replies" id="replies">${c.replies || ''}</div></div></div>`;
 }
 function addMsg(html) {
-  V.chat.msgs.push(html);
+  V.chat.msgs.push(html); Audio.sfx('msg');
   const lg = document.getElementById('chatlog'); if (!lg) return;
   lg.insertAdjacentHTML('beforeend', html); lg.scrollTop = lg.scrollHeight;
 }
@@ -141,7 +153,7 @@ function openPending() {
   const p = G.pending;
   if (!p) { V.chat = null; render(); return; }
   if (p.kind === 'letter') { V.chat = null; V.modal = UI.letterModal(p.id); V.letterCtx = 'pending'; render(); return; }
-  startChat(p.id);
+  Audio.sfx('open'); startChat(p.id);
 }
 function afterEvent() { S.nextPending(G); V.chat = null; S.saveGame(G); if (G.pending) openPending(); else render(); }
 
@@ -160,6 +172,7 @@ function advanceScene() {
 }
 
 const actions = {
+  mute() { Audio.toggle(); V.muted = Audio.muted; render(); },
   new() { V.screen = 'origin'; render(); },
   continue() { const g = S.loadGame(); if (!g) return; G = g; V.chat = null; V.earn = G.phase === 'earnings' && !!G.last && false; V.screen = 'hub'; render(); if (G.pending) openPending(); },
   'to-title'() { V.screen = 'title'; V.chat = null; V.earn = false; render(); },
@@ -189,6 +202,9 @@ const actions = {
   'end-turn'() {
     if (G.pending) { openPending(); return; }
     S.endTurn(G); S.saveGame(G); V.earn = true; V.chat = null; render();
+    const crash = G.last.crashMsg && G.last.crashMsg.includes('💥');
+    if (crash) { Audio.sfx('crash'); FX.burst('crash', innerWidth / 2, innerHeight / 3, 220); FX.flash('255,70,90', 700); app.classList.add('shake'); setTimeout(() => app.classList.remove('shake'), 700); }
+    else { Audio.sfx(G.last.take.total > 0 ? 'win' : 'coin'); FX.burst('coin', innerWidth * 0.72, innerHeight * 0.4, 110); FX.burst('p', innerWidth * 0.25, innerHeight * 0.3, 60); }
   },
   'next-turn'() {
     V.earn = false;
@@ -200,7 +216,7 @@ const actions = {
     const ev = V.chat.ev, opt = ev.options[+d.i];
     const r = S.chooseOption(G, p.id, +d.i);
     if (!r.ok) return;
-    afterChoice(opt.label, r.result, opt.fx);
+    Audio.sfx('choose'); FX.burst('p', innerWidth / 2, innerHeight * 0.75, 40); afterChoice(opt.label, r.result, opt.fx);
   },
   intel() {
     const p = G.pending; if (!p) return;
@@ -228,6 +244,7 @@ app.addEventListener('click', (e) => {
   const el = e.target.closest('[data-act]');
   if (!el) { if (V.pop && !e.target.closest('.pop') && !e.target.closest('[data-node]')) { V.pop = null; render(); } return; }
   if (el.dataset.act === 'close-letter' && el.classList.contains('modal') && e.target.closest('.card')) return;
+  Audio.unlock(); if (el.dataset.act !== 'choose') Audio.sfx('click');
   const fn = actions[el.dataset.act]; if (fn) fn({ ...el.dataset });
 });
 app.addEventListener('input', (e) => {

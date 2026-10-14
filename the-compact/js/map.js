@@ -38,49 +38,78 @@ export function createMap({ dim = false } = {}) {
 
   const px = (lon, lat) => [(lon - LON0) * S, H / 2 - (lat - LAT_C) * S];
 
+  let bright = null, twink = [], motes = [];
   function buildBase() {
     base = document.createElement('canvas'); base.width = W * dpr; base.height = H * dpr;
-    const b = base.getContext('2d'); b.scale(dpr, dpr);
+    bright = document.createElement('canvas'); bright.width = W * dpr; bright.height = H * dpr;
+    const b = base.getContext('2d'), br = bright.getContext('2d'); b.scale(dpr, dpr); br.scale(dpr, dpr);
     const hubs = Object.values(HUB).map((h) => px(h.lon, h.lat));
+    twink = [];
     for (const p of landGrid()) {
       const [x, y] = px(p.lon, p.lat);
       let heat = 0;
       for (const [hx, hy] of hubs) heat += Math.exp(-(((x - hx) ** 2 + (y - hy) ** 2) / (2 * (S * 9) ** 2)));
-      const a = 0.3 + p.n * 0.25;
-      b.fillStyle = heat > 0.35 ? `rgba(243,201,120,${Math.min(0.95, 0.4 + heat * 0.5)})` : `rgba(134,174,252,${a + heat * 0.5})`;
-      b.beginPath(); b.arc(x, y, heat > 0.35 ? S * 0.2 : S * 0.17, 0, 6.3); b.fill();
+      const hot = heat > 0.3, r = hot ? S * 0.24 : S * 0.19;
+      b.fillStyle = hot ? `rgba(255,205,110,${Math.min(1, 0.5 + heat * 0.5)})` : `rgba(120,165,255,${0.34 + p.n * 0.3 + heat * 0.4})`;
+      b.beginPath(); b.arc(x, y, r, 0, 6.3); b.fill();
+      br.fillStyle = hot ? 'rgba(255,240,200,1)' : 'rgba(190,220,255,1)'; br.beginPath(); br.arc(x, y, r * 1.5, 0, 6.3); br.fill();
+      if (p.n > 0.93) twink.push({ x, y, ph: p.n * 90, hot });
     }
+    motes = Array.from({ length: 46 }, (_, i) => ({ x: hash(i, 3) * W, y: hash(i, 9) * H, v: 6 + hash(i, 5) * 14, r: 0.6 + hash(i, 7) * 1.6 }));
   }
 
   function resize() {
     const r = el.getBoundingClientRect();
     if (!r.width || !r.height) return;
-    dpr = Math.min(2, window.devicePixelRatio || 1);
+    dpr = Math.min(1.5, window.devicePixelRatio || 1);
     W = r.width; H = r.height; S = W / (LON1 - LON0);
     canvas.width = W * dpr; canvas.height = H * dpr; canvas.style.width = `${W}px`; canvas.style.height = `${H}px`;
     buildBase(); layout(); frame(performance.now());
   }
 
   function quad(a, b, lift) { const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2 - Math.hypot(b[0] - a[0], b[1] - a[1]) * lift; return [mx, my]; }
+  const sweep = document.createElement('canvas'), sc = sweep.getContext('2d');
   function frame(now) {
     if (!W) return;
     const t = (now - t0) / 1000;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
     if (base) ctx.drawImage(base, 0, 0, W, H);
-    if (dim) return;
+    ctx.globalCompositeOperation = 'lighter';
+    // radar sweep: brighten the dot field inside a moving band (clipped draws are cheap)
+    if (bright) {
+      const cx = (((t * 0.09) % 1.4) - 0.2) * W, bw = W * 0.05;
+      [[3, 0.18], [2, 0.3], [1, 0.5], [0.4, 0.8]].forEach(([m, al]) => { ctx.save(); ctx.beginPath(); ctx.rect(cx - bw * m, 0, bw * m * 2, H); ctx.clip(); ctx.globalAlpha = al; ctx.drawImage(bright, 0, 0, W, H); ctx.restore(); });
+    }
+    // twinkle
+    for (const q of twink) { const a = 0.5 + 0.5 * Math.sin(t * 2.2 + q.ph); if (a < 0.55) continue; ctx.fillStyle = q.hot ? `rgba(255,230,160,${a * .9})` : `rgba(200,225,255,${a * .8})`; ctx.beginPath(); ctx.arc(q.x, q.y, S * 0.34, 0, 6.3); ctx.fill(); ctx.globalAlpha = 0.18; ctx.beginPath(); ctx.arc(q.x, q.y, S * 0.9, 0, 6.3); ctx.fill(); ctx.globalAlpha = 1; }
+    ctx.shadowBlur = 0;
+    // hub halos + shockwaves
+    Object.values(HUB).forEach((h, i) => {
+      const [x, y] = px(h.lon, h.lat);
+      const g = ctx.createRadialGradient(x, y, 0, x, y, S * 11); g.addColorStop(0, `rgba(255,190,90,${0.28 + 0.1 * Math.sin(t * 2 + i)})`); g.addColorStop(1, 'rgba(255,190,90,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, S * 11, 0, 6.3); ctx.fill();
+      for (let k = 0; k < 2; k++) { const u = ((t * 0.35 + i * 0.23 + k * 0.5) % 1); ctx.strokeStyle = `rgba(255,205,120,${(1 - u) * 0.6})`; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(x, y, S * (1 + u * 9), 0, 6.3); ctx.stroke(); }
+    });
+    // arcs with comet trails
     ARCS.forEach(([a, b, lift, col], i) => {
       const A = px(HUB[a].lon, HUB[a].lat), B = px(HUB[b].lon, HUB[b].lat), C = quad(A, B, lift);
-      ctx.strokeStyle = col; ctx.globalAlpha = 0.35; ctx.lineWidth = 1.2; ctx.setLineDash([3, 5]);
-      ctx.beginPath(); ctx.moveTo(...A); ctx.quadraticCurveTo(...C, ...B); ctx.stroke(); ctx.setLineDash([]);
-      for (let k = 0; k < 2; k++) {
-        const u = ((t * 0.12 + i * 0.27 + k * 0.5) % 1), v = 1 - u;
-        const x = v * v * A[0] + 2 * v * u * C[0] + u * u * B[0], y = v * v * A[1] + 2 * v * u * C[1] + u * u * B[1];
-        ctx.globalAlpha = 0.95; ctx.fillStyle = col; ctx.shadowColor = col; ctx.shadowBlur = 10; ctx.beginPath(); ctx.arc(x, y, 2.2, 0, 6.3); ctx.fill(); ctx.shadowBlur = 0;
+      ctx.strokeStyle = col; ctx.globalAlpha = 0.5; ctx.lineWidth = 5; ctx.globalAlpha = 0.1;
+      ctx.beginPath(); ctx.moveTo(...A); ctx.quadraticCurveTo(...C, ...B); ctx.stroke(); ctx.lineWidth = 1.6; ctx.globalAlpha = 0.55; ctx.stroke();
+      for (let k = 0; k < 3; k++) {
+        const u0 = ((t * 0.13 + i * 0.27 + k / 3) % 1);
+        for (let j = 0; j < 9; j++) {
+          const u = u0 - j * 0.012; if (u < 0) continue; const v = 1 - u;
+          const x = v * v * A[0] + 2 * v * u * C[0] + u * u * B[0], y = v * v * A[1] + 2 * v * u * C[1] + u * u * B[1];
+          ctx.globalAlpha = (1 - j / 9) * 0.95; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, 3 - j * 0.2, 0, 6.3); ctx.fill(); if (!j) { ctx.globalAlpha = 0.25; ctx.beginPath(); ctx.arc(x, y, 9, 0, 6.3); ctx.fill(); }
+        }
       }
     });
+    // drifting motes
     ctx.globalAlpha = 1;
+    for (const m of motes) { const y = (m.y - t * m.v + H * 10) % H; ctx.fillStyle = 'rgba(160,200,255,.35)'; ctx.beginPath(); ctx.arc(m.x + Math.sin(t + m.v) * 8, y, m.r, 0, 6.3); ctx.fill(); }
+    ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
   }
-  function loop(now) { if (!running) return; frame(now); raf = requestAnimationFrame(loop); }
+  let lastF = 0;
+  function loop(now) { if (!running) return; if (now - lastF > 30) { lastF = now; frame(now); } raf = requestAnimationFrame(loop); }
 
   function layout() {
     layer.innerHTML = '';
