@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { profile, gallery, videos, favorites, guestbook } from './content'
 import { musicBox } from './music'
+import LyricsPlayer from './LyricsPlayer'
 import './App.css'
 
 const NAV_LINKS = [
   { id: 'gallery', label: '갤러리' },
   { id: 'films', label: '영상' },
+  { id: 'song', label: '노래' },
   { id: 'favorites', label: '좋아하는 것' },
   { id: 'archive', label: '기록' },
   { id: 'guestbook', label: '방명록' },
@@ -361,6 +363,19 @@ function Films() {
   )
 }
 
+/* ─── 노래 (가사와 함께 듣기) ───────────────────────── */
+
+function Song() {
+  return (
+    <section id="song" className="sec">
+      <SectionHead eyebrow="Sing Along" title="가사와 함께 듣기" />
+      <Reveal>
+        <LyricsPlayer />
+      </Reveal>
+    </section>
+  )
+}
+
 /* ─── 좋아하는 것 ────────────────────────────────────── */
 
 function Favorites() {
@@ -569,15 +584,18 @@ function MusicToggle() {
     const start = () => {
       if (started) return
       started = true
-      musicBox.play()
+      musicBox.autoPlay()
       remove()
     }
     const events = ['pointerdown', 'keydown', 'touchstart', 'scroll']
     const remove = () => events.forEach((e) => window.removeEventListener(e, start))
     events.forEach((e) => window.addEventListener(e, start, { once: false, passive: true }))
     // 일부 브라우저는 즉시 허용하기도 하므로 한 번 시도
-    musicBox.play()
+    musicBox.autoPlay()
+    // 가사 플레이어가 소리를 가져가면 버튼 표시도 같이 꺼진다
+    const unsub = musicBox.subscribe(setOn)
     return () => {
+      unsub()
       remove()
       musicBox.stop()
     }
@@ -603,6 +621,7 @@ export default function App() {
         <Hero />
         <Gallery />
         <Films />
+        <Song />
         <Favorites />
         <Archive />
         <Guestbook />

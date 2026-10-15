@@ -21,6 +21,18 @@ class MusicBox {
   nextNoteTime = 0
   noteIndex = 0
   ctx = null
+  // 가사 플레이어가 소리를 쓰는 동안엔 첫 터치 자동재생이 끼어들지 않게 막는다
+  held = false
+  listeners = new Set()
+
+  subscribe(fn) {
+    this.listeners.add(fn)
+    return () => this.listeners.delete(fn)
+  }
+
+  emit() {
+    this.listeners.forEach((fn) => fn(this.playing))
+  }
 
   ensureContext() {
     if (this.ctx) return
@@ -76,15 +88,29 @@ class MusicBox {
     this.playing = true
     this.nextNoteTime = this.ctx.currentTime + 0.1
     this.timerId = setInterval(this.scheduler, 120)
+    this.emit()
+  }
+
+  // 페이지 첫 상호작용에서 자동으로 시작할 때 쓰는 진입점
+  autoPlay() {
+    if (!this.held) this.play()
+  }
+
+  // 다른 오디오(가사 플레이어)에게 자리를 내준다
+  giveWay() {
+    this.held = true
+    if (this.playing) this.stop()
   }
 
   stop() {
     this.playing = false
     if (this.timerId) clearInterval(this.timerId)
     this.timerId = null
+    this.emit()
   }
 
   toggle() {
+    this.held = false
     if (this.playing) this.stop()
     else this.play()
     return this.playing
