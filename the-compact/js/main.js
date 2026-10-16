@@ -65,13 +65,30 @@ function render() {
   const lg = document.getElementById('chatlog'); if (lg) lg.scrollTop = lg.scrollHeight;
 }
 
+const EVENT_TRACK = { focus: 'tense', h200: 'tense', gpu: 'synth', ipo: 'pulse', senator: 'march', taiwan: 'crisis', short: 'pulse', audit: 'tense', hire: 'noir', rumor: 'noir', fund: 'tense', crossroads: 'crisis', accuse: 'noir', resolution: 'piano', power: 'synth', leak: 'noir', strike: 'tense', gala: 'waltz' };
+const TRACK_LABEL = { epic: '♪ Main Theme', lofi: '♪ Quiet Ledger', pulse: '♪ Market Pulse', crisis: '♪ Burst', tense: '♪ Council', piano: '♪ Elias', noir: '♪ Kestrel', funk: '♪ Beat the Street', news: '♪ Breaking', synth: '♪ Silicon Nights', march: '♪ The Hearing', waltz: '♪ Gilded Hour', warm: '♪ Soft Landing', sad: '♪ Empty Throne' };
+function pickTrack() {
+  const s = G, b = s ? s.stats.bubble : 80;
+  if (V.earn && s && s.last) return s.last.crashMsg && s.last.crashMsg.includes('💥') ? 'crisis' : 'funk';
+  if (V.inter) return 'news';
+  if (V.screen === 'ending') return s && S.pickEnding(s).key === 'soft' ? 'warm' : 'sad';
+  if (V.screen === 'title' || V.screen === 'origin') return 'epic';
+  if (V.screen === 'scene') return V.idx < 3 ? 'piano' : 'noir';
+  if (V.chat) return EVENT_TRACK[V.chat.id] || 'tense';
+  if (V.screen === 'invest') return 'noir';
+  if (V.screen === 'archive') return 'piano';
+  if (V.screen === 'wallet') return 'lofi';
+  return b > 95 ? 'crisis' : b > 82 ? 'pulse' : 'lofi';
+}
+let lastTrack = '';
 function setMood() {
-  const b = G ? G.stats.bubble : 80;
-  if (V.earn && G && G.last) { const crash = G.last.crashMsg && G.last.crashMsg.includes('💥'); Audio.mood(crash ? 'dark' : 'major', 3, crash ? 104 : 118); return; }
-  if (V.screen === 'ending') { const e = G && S.pickEnding(G).key; Audio.mood(e === 'soft' ? 'major' : 'dark', 1, 72); return; }
-  if (V.screen === 'title' || V.screen === 'origin') { Audio.mood('minor', 2, 88); return; }
-  if (V.screen === 'scene') { Audio.mood('minor', 1, 70); return; }
-  Audio.mood(b > 95 ? 'dark' : 'minor', V.chat ? 1 : 1 + (b > 80) + (b > 92), 84 + (b > 92 ? 14 : 0));
+  const t = pickTrack();
+  if (t !== lastTrack) { lastTrack = t; Audio.track(t); if (Audio.current && !Audio.muted && V.screen !== 'title') nowPlaying(TRACK_LABEL[t]); }
+}
+function nowPlaying(txt) {
+  if (!txt || !Audio.started) return;
+  let el = document.getElementById('np'); if (!el) { el = document.createElement('div'); el.id = 'np'; document.body.appendChild(el); }
+  el.textContent = txt; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
 }
 
 function onNode(id) {

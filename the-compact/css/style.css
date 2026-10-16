@@ -474,3 +474,6 @@ svg text{font-family:var(--font)}
 .scene .scene-me{position:absolute;left:55%;bottom:-3rem;transform:none;z-index:1}
 .speech{left:0;top:-4.6rem;z-index:3;width:16rem}
 .help-mira{z-index:2}
+#np{position:fixed;left:5.6rem;bottom:1.1rem;z-index:350;font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#cdd7ea;padding:.35rem .8rem;border-radius:999px;background:rgba(8,13,24,.78);border:1px solid rgba(255,255,255,.1);opacity:0;pointer-events:none;transform:translateY(.6rem)}
+#np.show{animation:np 4.2s ease both}
+@keyframes np{0%{opacity:0;transform:translateY(.6rem)}12%,80%{opacity:1;transform:none}100%{opacity:0}}
