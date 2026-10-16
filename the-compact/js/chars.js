@@ -4,26 +4,25 @@ const INK = '#23182b';
 let UID = 0;
 
 // ---------- face parts ----------
-function brows(emo, hair, y = 43) {
+function brows(emo, hair, y = 45) {
   const L = { neutral: 'M31 43q6-3 12-1', happy: 'M31 41q6-5 12-2', angry: 'M31 39l12 5', worried: 'M31 44l12-5', smug: 'M31 42q6-2 12 0', shock: 'M31 38q6-5 12-2' }[emo];
   const R = { neutral: 'M57 42q6-2 12 1', happy: 'M57 39q6-3 12 2', angry: 'M57 44l12-5', worried: 'M57 39l12 5', smug: 'M57 38q6-5 12-1', shock: 'M57 36q6-3 12 2' }[emo];
   const t = `translate(0 ${y - 43})`;
   return `<g transform="${t}" stroke="${hair}" stroke-width="2.6" stroke-linecap="round" fill="none"><path d="${L}"/><path d="${R}"/></g>`;
 }
-function eyes(emo, iris, y = 54) {
-  if (emo === 'happy') return `<g stroke="${INK}" stroke-width="2.8" fill="none" stroke-linecap="round"><path d="M32 ${y + 2}q5-7 10 0"/><path d="M58 ${y + 2}q5-7 10 0"/></g>`;
-  const ry = emo === 'angry' ? 4.2 : emo === 'shock' ? 6.8 : 6, rx = emo === 'shock' ? 4.2 : 5;
-  const one = (cx) => `<g class="eye"><ellipse cx="${cx}" cy="${y}" rx="${rx + .6}" ry="${ry + .6}" fill="#fff"/><ellipse cx="${cx}" cy="${y + .6}" rx="${rx}" ry="${ry}" fill="url(#ir__U__)"/><ellipse cx="${cx}" cy="${y + 1}" rx="${rx * .48}" ry="${ry * .55}" fill="${INK}"/><circle cx="${cx + 1.8}" cy="${y - 2.2}" r="1.9" fill="#fff"/><circle cx="${cx - 1.6}" cy="${y + 2.6}" r=".9" fill="#fff" opacity=".9"/>
-<path d="M${cx - rx - 1.6} ${y - ry * .55}q${rx + 1.6}-${ry * .95} ${(rx + 1.6) * 2} 0" stroke="${INK}" stroke-width="2.4" fill="none" stroke-linecap="round"/>${emo === 'angry' ? `<path d="M${cx - rx - 1} ${y - ry - 1}h${rx * 2 + 2}v${ry * .7}h-${rx * 2 + 2}z" fill="url(#sk__U__)"/>` : ''}</g>`;
-  return `<defs><radialGradient id="ir__U__" cx="50%" cy="35%" r="70%"><stop offset="0" stop-color="${iris}" stop-opacity=".55"/><stop offset=".6" stop-color="${iris}"/><stop offset="1" stop-color="${INK}"/></radialGradient></defs>${one(37)}${one(63)}`;
+function eyes(emo, iris, y = 57, o = {}) {
+  if (emo === 'happy') return `<g stroke="${INK}" stroke-width="2.8" fill="none" stroke-linecap="round"><path d="M30 ${y + 2}q6-9 12 0"/><path d="M58 ${y + 2}q6-9 12 0"/></g>`;
+  const ry = emo === 'angry' ? 5.6 : emo === 'shock' ? 8.6 : 7.8, rx = emo === 'shock' ? 5.4 : 6.4;
+  const one = (cx, side) => `<g class="eye"><ellipse cx="${cx}" cy="${y}" rx="${rx + .7}" ry="${ry + .7}" fill="#fff"/><ellipse cx="${cx}" cy="${y + .8}" rx="${rx}" ry="${ry}" fill="url(#ir__U__)"/><ellipse cx="${cx}" cy="${y + 1.4}" rx="${rx * .52}" ry="${ry * .58}" fill="${INK}"/><ellipse cx="${cx}" cy="${y + ry * .55}" rx="${rx * .7}" ry="${ry * .28}" fill="#fff" opacity=".28"/><circle cx="${cx + 2.2}" cy="${y - 2.6}" r="2.5" fill="#fff"/><circle cx="${cx - 2}" cy="${y + 3}" r="1.2" fill="#fff"/><path d="M${cx - rx - 2} ${y - ry * .5}q${rx + 2}-${ry * 1.05} ${(rx + 2) * 2} 0" stroke="${INK}" stroke-width="2.6" fill="none" stroke-linecap="round"/>${o.fem ? `<path d="M${cx + side * (rx + 1.6)} ${y - ry * .55}l${side * 3.4}-2.6" stroke="${INK}" stroke-width="2" stroke-linecap="round"/>` : ''}${emo === 'angry' ? `<path d="M${cx - rx - 1} ${y - ry - 1}h${rx * 2 + 2}v${ry * .7}h-${rx * 2 + 2}z" fill="url(#sk__U__)"/>` : ''}</g>`;
+  return `<defs><radialGradient id="ir__U__" cx="50%" cy="30%" r="75%"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".25" stop-color="${iris}"/><stop offset=".8" stop-color="${iris}"/><stop offset="1" stop-color="${INK}"/></radialGradient></defs>${one(36, -1)}${one(64, 1)}`;
 }
 function mouth(emo) {
   return {
-    neutral: '<path d="M45 68q5 3.6 10 0" stroke="#7a2f3a" stroke-width="2.2" fill="none" stroke-linecap="round"/>',
+    neutral: '<path d="M45.5 70q2.2 3 4.5 0q2.3 3 4.5 0" stroke="#7a2f3a" stroke-width="2" fill="none" stroke-linecap="round"/>',
     happy: '<path d="M42 65.5q8 1.4 16 0q-1 9-8 9t-8-9z" fill="#8a2a3c" stroke="#5a1a28" stroke-width="1.2"/><path d="M43.6 66.4q6.4 1 12.8 0v1.6q-6.4 1-12.8 0z" fill="#fff"/><path d="M46 72q4 2.4 8 0q-1 2.4-4 2.4t-4-2.4z" fill="#ff8aa0"/>',
     angry: '<path d="M43 71q3-4 7-2t7 2" stroke="#7a2f3a" stroke-width="2.4" fill="none" stroke-linecap="round"/>',
     worried: '<path d="M44 70q2-2.4 4 0t4 0 4 0" stroke="#7a2f3a" stroke-width="2" fill="none" stroke-linecap="round"/>',
-    smug: '<path d="M44 68.5q7 3 13-3" stroke="#7a2f3a" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M56 65.2l1.6 1" stroke="#7a2f3a" stroke-width="1.6" stroke-linecap="round"/>',
+    smug: '<path d="M44.5 70q7 3 12-3" stroke="#7a2f3a" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M56 65.2l1.6 1" stroke="#7a2f3a" stroke-width="1.6" stroke-linecap="round"/>',
     shock: '<ellipse cx="50" cy="70" rx="3.6" ry="4.4" fill="#5a1a28"/><ellipse cx="50" cy="71.6" rx="2.2" ry="1.8" fill="#ff8aa0"/>',
   }[emo];
 }
@@ -54,8 +53,8 @@ const BACK = {
 
 // ---------- accessories ----------
 const ACC = {
-  glasses: `<g fill="rgba(200,230,255,.18)" stroke="${INK}" stroke-width="2.2"><rect x="28" y="47" width="18" height="14" rx="6"/><rect x="54" y="47" width="18" height="14" rx="6"/><path d="M46 53h8" fill="none"/></g><path d="M31 50l5-2M57 50l5-2" stroke="#fff" stroke-width="1.4" opacity=".7"/>`,
-  roundglasses: `<g fill="rgba(255,240,200,.15)" stroke="#8a6a2a" stroke-width="2"><circle cx="37" cy="54" r="8.6"/><circle cx="63" cy="54" r="8.6"/><path d="M45.6 54h8.8" fill="none"/></g>`,
+  glasses: `<g fill="rgba(220,240,255,.10)" stroke="#4a3a5a" stroke-width="1.8"><rect x="25" y="47" width="23" height="20" rx="8"/><rect x="52" y="47" width="23" height="20" rx="8"/><path d="M48 55h4" fill="none"/></g><path d="M31 50l5-2M57 50l5-2" stroke="#fff" stroke-width="1.4" opacity=".7"/>`,
+  roundglasses: `<g fill="rgba(255,240,200,.15)" stroke="#8a6a2a" stroke-width="2"><circle cx="36" cy="57" r="11"/><circle cx="64" cy="57" r="11"/><path d="M47 57h6" fill="none"/></g>`,
   monocle: '<g fill="rgba(255,240,200,.15)" stroke="#d9b24c" stroke-width="2.4"><circle cx="63" cy="54" r="9.4"/><path d="M71 60q6 14 1 26" fill="none"/></g><path d="M58 49l4-2" stroke="#fff" stroke-width="1.4"/>',
   headband: `<path d="M18 37q32-15 64 0v7q-32-14-64 0z" fill="#3ec27a" stroke="${INK}" stroke-width="1.4"/><rect x="44" y="29" width="12" height="10" rx="2" fill="#163b28" stroke="#9dffc4" stroke-width="1"/><path d="M47 32v4M50 32v4M53 32v4" stroke="#9dffc4" stroke-width="1.1"/>`,
   goggles: `<path d="M17 37q33-13 66 0v9q-33-12-66 0z" fill="#33424f" stroke="${INK}" stroke-width="1.4"/><circle cx="36" cy="39" r="7.4" fill="#7fe7ff" stroke="#e8f6ff" stroke-width="2.2"/><circle cx="64" cy="39" r="7.4" fill="#7fe7ff" stroke="#e8f6ff" stroke-width="2.2"/><path d="M32 36l3-2M60 36l3-2" stroke="#fff" stroke-width="1.6"/>`,
@@ -70,7 +69,7 @@ const ACC = {
 // ---------- body / outfits ----------
 function body(o) {
   const out = o.outfit, sh = o.outfit2 || shade(out, -0.28);
-  let d = `<path d="M10 101q1-22 22-26h36q21 4 22 26z" fill="url(#ou__U__)" stroke="${INK}" stroke-width="1.6"/>`;
+  let d = `<path d="M16 101q1-18 20-21h28q19 3 20 21z" fill="url(#ou__U__)" stroke="${INK}" stroke-width="1.6"/>`;
   if (o.kind === 'suit' || o.kind === 'blazer') d += `<path d="M38 75l12 15 12-15" fill="${o.shirt || '#f4f6fa'}" stroke="${INK}" stroke-width="1.2"/><path d="M32 76l14 24M68 76l-14 24" stroke="${sh}" stroke-width="3" fill="none"/>${o.tie ? `<path d="M47.5 79h5l-1 3 2.6 16-4.1 3-4.1-3 2.6-16z" fill="${o.tie}" stroke="${INK}" stroke-width="1"/>` : ''}`;
   if (o.kind === 'hoodie') d += `<path d="M30 77q20 14 40 0" stroke="${sh}" stroke-width="4" fill="none"/><path d="M44 83v10M56 83v10" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>`;
   if (o.kind === 'lab') d += `<path d="M38 75l12 12 12-12" fill="#7aa8ff" stroke="${INK}" stroke-width="1.2"/><path d="M38 75l-4 26M62 75l4 26" stroke="#c9d3e0" stroke-width="2"/><rect x="62" y="88" width="9" height="6" rx="1" fill="#cfe3ff" stroke="#8aa0c0" stroke-width=".8"/>`;
@@ -92,17 +91,18 @@ function person(o, emo) {
   return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="chsvg">${defs}
 ${o.style === 'bun' ? `<path d="${BACK.bun}" fill="url(#hr__U__)" stroke="${INK}" stroke-width="1.6"/>` : ''}${BACK[o.back] ? `<path d="${BACK[o.back]}" fill="url(#hr__U__)" stroke="${INK}" stroke-width="1.6"/>` : ''}
 ${body(o)}
-<path d="M43 68h14v10q-7 4-14 0z" fill="${shade(skin, -.12)}"/>
+<path d="M43 70h14v10q-7 4-14 0z" fill="${shade(skin, -.12)}"/>
+<g transform="translate(50 64) scale(1.16) translate(-50 -64)">
 <circle cx="19.5" cy="56" r="6.2" fill="url(#sk__U__)" stroke="${INK}" stroke-width="1.5"/><circle cx="80.5" cy="56" r="6.2" fill="url(#sk__U__)" stroke="${INK}" stroke-width="1.5"/>
 <path d="M19 54C19 34 32 25 50 25s31 9 31 29c0 18-13 30-31 30S19 72 19 54z" fill="url(#sk__U__)" stroke="${INK}" stroke-width="1.7"/>
 ${o.beard ? ACC.beard : ''}
-<ellipse cx="32" cy="64" rx="5.6" ry="3.2" fill="#ff7b9c" opacity="${emo === 'angry' ? .6 : .36}"/><ellipse cx="68" cy="64" rx="5.6" ry="3.2" fill="#ff7b9c" opacity="${emo === 'angry' ? .6 : .36}"/>
-${o.sun ? '' : eyes(emo, o.iris || '#4a3426')}
+<ellipse cx="29" cy="68" rx="7" ry="4" fill="#ff6f9a" opacity="${emo === 'angry' ? .65 : .45}"/><ellipse cx="71" cy="68" rx="7" ry="4" fill="#ff6f9a" opacity="${emo === 'angry' ? .65 : .45}"/><g stroke="#fff" stroke-width="1" opacity=".6" stroke-linecap="round"><path d="M26 67l1.6 3M29.4 66.4l1.6 3M71 66.4l1.6 3M74.4 67l1.6 3"/></g>
+${o.sun ? '' : eyes(emo, o.iris || '#4a3426', 57, o)}
 ${o.sun ? '' : brows(emo, shade(hair, -.3))}
-${mouth(emo)}
+<g transform="translate(0 2.5)">${mouth(emo)}</g>
 ${hairPath ? `<path d="${hairPath}" fill="url(#hr__U__)" stroke="${INK}" stroke-width="1.7" stroke-linejoin="round"/><path d="M28 34q12-11 30-10" stroke="#fff" stroke-width="2.6" opacity=".28" fill="none" stroke-linecap="round"/>` : `<path d="M22 48q-1-8 4-14M78 48q1-8-4-14" stroke="${hair}" stroke-width="6" stroke-linecap="round" fill="none"/>`}
-${(o.acc || []).map((a) => ACC[a]).join('')}${fxMark(emo)}
-</svg>`;
+${(o.acc || []).map((a) => ACC[a]).join('')}${o.fem ? '<path d="M50 24q-4-9 3-11q-2 4 0 11z" fill="url(#hr__U__)" stroke="'+INK+'" stroke-width="1.2"/>' : ''}${fxMark(emo)}
+</g></svg>`;
 }
 
 function orb(o, emo) {
@@ -133,13 +133,13 @@ const EARS = {
 function mascot(id, o, emo) {
   const c = o.color;
   const ey = emo === 'happy' ? `<g stroke="${INK}" stroke-width="2.8" fill="none" stroke-linecap="round"><path d="M31 51q5-6 10 0"/><path d="M59 51q5-6 10 0"/></g>`
-    : [36, 64].map((x) => `<g class="eye"><ellipse cx="${x}" cy="50" rx="4.6" ry="5.6" fill="${INK}"/><circle cx="${x + 1.6}" cy="48" r="1.8" fill="#fff"/></g>`).join('');
+    : [35, 65].map((x) => `<g class="eye"><ellipse cx="${x}" cy="50" rx="6.4" ry="7.6" fill="${INK}"/><ellipse cx="${x}" cy="54" rx="4" ry="2.6" fill="#5a4a8a" opacity=".6"/><circle cx="${x + 2.2}" cy="47" r="2.6" fill="#fff"/><circle cx="${x - 2}" cy="53" r="1.3" fill="#fff"/></g>`).join('');
   return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="chsvg"><defs><radialGradient id="ms__U__" cx="38%" cy="30%" r="80%"><stop offset="0" stop-color="${shade(c, .35)}"/><stop offset=".7" stop-color="${c}"/><stop offset="1" stop-color="${shade(c, -.25)}"/></radialGradient></defs>
 ${EARS[o.ears](o.dark || c)}
 <path d="M14 101q2-22 24-25h24q22 3 24 25z" fill="url(#ms__U__)" stroke="${INK}" stroke-width="1.6"/><circle cx="50" cy="88" r="9.4" fill="#fff" stroke="${INK}" stroke-width="1.2"/><text x="50" y="91.4" text-anchor="middle" font-size="9" font-weight="800" fill="${shade(c, -.2)}" font-family="Inter,sans-serif">${id}</text>
 <ellipse cx="50" cy="53" rx="34" ry="29" fill="url(#ms__U__)" stroke="${INK}" stroke-width="1.7"/><ellipse cx="50" cy="61" rx="22" ry="16" fill="#fff" opacity=".9"/>
 ${ey}<ellipse cx="50" cy="58" rx="3.8" ry="2.7" fill="${INK}"/><path d="M50 61v2.6M44 65q6 5 12 0" stroke="${INK}" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-<ellipse cx="29" cy="60" rx="5" ry="3" fill="#ff7b9c" opacity=".5"/><ellipse cx="71" cy="60" rx="5" ry="3" fill="#ff7b9c" opacity=".5"/>${o.hat || ''}
+<ellipse cx="27" cy="61" rx="6.4" ry="3.8" fill="#ff6f9a" opacity=".6"/><ellipse cx="73" cy="61" rx="6.4" ry="3.8" fill="#ff6f9a" opacity=".6"/>${o.hat || ''}
 <path d="M26 38q8-10 20-11" stroke="#fff" stroke-width="2.4" opacity=".35" fill="none" stroke-linecap="round"/>
 </svg>`;
 }
@@ -150,18 +150,18 @@ const P = {
   hero_auditor: { skin: '#f7d6b8', hair: '#1c2233', style: 'side', outfit: '#4a5262', kind: 'suit', tie: '#2a3a6c', acc: ['glasses'], iris: '#3a5aa8', base: 'smug' },
   hero_engineer: { skin: '#f7d6b8', hair: '#1c2233', style: 'spiky', outfit: '#2b3445', kind: 'hoodie', acc: ['headband'], iris: '#3a5aa8', base: 'smug' },
   hero_analyst: { skin: '#f7d6b8', hair: '#1c2233', style: 'slick', outfit: '#1e2a44', kind: 'blazer', shirt: '#f4f6fa', tie: '#8a2432', iris: '#3a5aa8', base: 'smug' },
-  mira: { skin: '#d9a07a', hair: '#2b1b30', back: 'bob', style: 'bun', outfit: '#c9689b', kind: 'blazer', shirt: '#fff3f8', acc: ['glasses', 'earring'], iris: '#5a3a2a' },
+  mira: { fem: true, skin: '#e8b08a', hair: '#2b1b30', back: 'bob', style: 'bun', outfit: '#c9689b', kind: 'blazer', shirt: '#fff3f8', acc: ['glasses', 'earring'], iris: '#5a3a2a' },
   victor: { skin: '#f2d2b4', hair: '#a7b0c0', style: 'slick', outfit: '#2c313f', kind: 'suit', tie: '#7aa8ff', acc: ['monocle'], iris: '#5a6a7a', base: 'smug' },
   jonah: { skin: '#cf956b', hair: '#3a2716', style: 'spiky', outfit: '#2f8f5b', kind: 'hoodie', acc: ['headband'], iris: '#3a7a4a', base: 'happy' },
-  lin: { skin: '#f4d9c2', hair: '#14141c', back: 'bob', style: 'bob', outfit: '#e9eef5', kind: 'lab', acc: ['goggles'], iris: '#3a3030' },
-  dana: { skin: '#a8714f', hair: '#1f1a1a', back: 'wave', style: 'wave', outfit: '#a63b46', kind: 'blazer', shirt: '#fff', acc: ['pin'], iris: '#3a2a1a' },
+  lin: { fem: true, skin: '#f8dcc8', hair: '#14141c', back: 'bob', style: 'bob', outfit: '#e9eef5', kind: 'lab', acc: ['goggles'], iris: '#3a3030' },
+  dana: { fem: true, skin: '#b87c58', hair: '#1f1a1a', back: 'wave', style: 'wave', outfit: '#a63b46', kind: 'blazer', shirt: '#fff', acc: ['pin'], iris: '#3a2a1a' },
   elias: { skin: '#f1d5bb', hair: '#e8e4dc', style: 'bald', outfit: '#6b5a44', kind: 'cardigan', acc: ['roundglasses'], beard: true, iris: '#5a6a7a', base: 'happy' },
 };
 const CAMEO_P = {
   anchor: { skin: '#efc6a2', hair: '#2a2a33', style: 'slick', outfit: '#34466e', kind: 'suit', tie: '#ffd24a', acc: ['headset'], iris: '#4a3426', base: 'shock' },
-  intern: { skin: '#f8dcc4', hair: '#8a3a22', style: 'short', outfit: '#6a7aa8', kind: 'cardigan', iris: '#6a4a2a', base: 'worried' },
+  intern: { fem: true, skin: '#fbe0cc', hair: '#8a3a22', style: 'short', outfit: '#6a7aa8', kind: 'cardigan', iris: '#6a4a2a', base: 'worried' },
   chef: { skin: '#e3b48a', hair: '#ffffff', style: 'bald', outfit: '#f2f2f2', kind: 'chef', acc: ['chefhat'], iris: '#3a2a1a', base: 'happy' },
-  quant: { skin: '#f1d2b6', hair: '#4a2a6a', back: 'bob', style: 'bob', outfit: '#3a2a5a', kind: 'blazer', acc: ['glasses'], iris: '#6a3aa8', base: 'smug' },
+  quant: { fem: true, skin: '#f5d8c0', hair: '#4a2a6a', back: 'bob', style: 'bob', outfit: '#3a2a5a', kind: 'blazer', acc: ['glasses'], iris: '#6a3aa8', base: 'smug' },
   guard: { skin: '#c99870', hair: '#111', style: 'short', outfit: '#15171c', kind: 'suit', tie: '#15171c', acc: ['sun'], sun: true, base: 'neutral' },
 };
 export const CAMEO = {
