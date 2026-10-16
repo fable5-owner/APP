@@ -78,7 +78,7 @@ export function createMap({ dim = false } = {}) {
     // radar sweep: brighten the dot field inside a moving band (clipped draws are cheap)
     if (bright) {
       const cx = (((t * 0.09) % 1.4) - 0.2) * W, bw = W * 0.05;
-      [[3, 0.18], [2, 0.3], [1, 0.5], [0.4, 0.8]].forEach(([m, al]) => { ctx.save(); ctx.beginPath(); ctx.rect(cx - bw * m, 0, bw * m * 2, H); ctx.clip(); ctx.globalAlpha = al; ctx.drawImage(bright, 0, 0, W, H); ctx.restore(); });
+      [[2.4, 0.28], [0.8, 0.6]].forEach(([m, al]) => { ctx.save(); ctx.beginPath(); ctx.rect(cx - bw * m, 0, bw * m * 2, H); ctx.clip(); ctx.globalAlpha = al; ctx.drawImage(bright, 0, 0, W, H); ctx.restore(); });
     }
     // twinkle
     for (const q of twink) { const a = 0.5 + 0.5 * Math.sin(t * 2.2 + q.ph); if (a < 0.55) continue; ctx.fillStyle = q.hot ? `rgba(255,230,160,${a * .9})` : `rgba(200,225,255,${a * .8})`; ctx.beginPath(); ctx.arc(q.x, q.y, S * 0.34, 0, 6.3); ctx.fill(); ctx.globalAlpha = 0.18; ctx.beginPath(); ctx.arc(q.x, q.y, S * 0.9, 0, 6.3); ctx.fill(); ctx.globalAlpha = 1; }

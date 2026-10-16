@@ -1,7 +1,8 @@
 // View templates: pure functions returning HTML strings. No drawn faces — avatars are initials / orbs.
 import { COMPANIES, CHARS, ORIGINS, SHOP, LEVERS, LETTERS, QUARTERS, TOTAL_TURNS, SUSPECTS, ENDINGS } from './data.js';
-import { art, CAMEO } from './chars.js';
-import { scene as backdrop } from './scenes.js';
+import { art, CAMEO, emoOfTrust, EMO_OF_STANCE } from './chars.js';
+import { scene as backdrop, SCENE_OF } from './scenes.js';
+export { backdrop, SCENE_OF };
 import { COMP, totalMcap, netWorth, getEvent, previewCompany, pickEnding } from './state.js';
 
 export const fmtB = (b) => { const sg = b < 0 ? '−' : '', a = Math.abs(b); return a >= 1000 ? `${sg}$${(a / 1000).toFixed(2)}T` : a >= 1 ? `${sg}$${a.toFixed(1)}B` : `${sg}$${Math.round(a * 1000)}M`; };
@@ -25,16 +26,18 @@ const P = {
 export const ic = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${P[n] || ''}</svg>`;
 
 // ---------- avatars ----------
-const AVC = { mira: '#f0a6ca', victor: '#9db4d6', jonah: '#6fcf97', lin: '#7fc4d9', dana: '#e58a7a', aria: '#ffb259', sage: '#7aa8ff', elias: '#d9d2c0', hero: '#cbd5e1' };
+const AVC = { hero_auditor: '#cbd5e1', hero_engineer: '#cbd5e1', hero_analyst: '#cbd5e1', mira: '#f0a6ca', victor: '#9db4d6', jonah: '#6fcf97', lin: '#7fc4d9', dana: '#e58a7a', aria: '#ffb259', sage: '#7aa8ff', elias: '#d9d2c0', hero: '#cbd5e1' };
 const INI = { mira: 'M', victor: 'V', jonah: 'J', lin: 'L', dana: 'D', elias: 'E', hero: 'E' };
-export function av(id, size = 2.4) {
-  const key = id === 'hero' || SPEC_HAS(id) ? id : 'hero';
+export function av(id, size = 2.4, emo) {
+  const key = id.startsWith('hero') || SPEC_HAS(id) ? id : 'hero';
   const bg = AVC[id] || (CAMEO[id.replace('cm_', '')] || {}).c || '#9db4d6';
-  return `<div class="av ch" style="--s:${size}rem;--c:${bg}" title="${id === 'hero' ? '' : (CHARS[id] ? CHARS[id].kr : (CAMEO[id.replace('cm_', '')] || {}).kr || '')}">${art(key)}</div>`;
+  return `<div class="av ch" style="--s:${size}rem;--c:${bg}" title="${id === 'hero' ? '' : (CHARS[id] ? CHARS[id].kr : (CAMEO[id.replace('cm_', '')] || {}).kr || '')}">${art(key, emo)}</div>`;
 }
 const SPEC_HAS = (id) => !!(CHARS[id] || id.startsWith('cm_'));
-export const coAv = (id, size = 2.4) => `<div class="av ch sq" style="--s:${size}rem;--c:${COMP[id].color}">${art(id)}</div>`;
-export const portrait = (id, h = 18) => `<div class="portrait" style="--h:${h}rem;--c:${AVC[id] || '#9db4d6'}">${art(id)}</div>`;
+export const coAv = (id, size = 2.4, emo) => `<div class="av ch sq" style="--s:${size}rem;--c:${COMP[id].color}">${art(id, emo)}</div>`;
+export const portrait = (id, h = 18, emo, cls = '') => `<div class="portrait ${cls}" style="--h:${h}rem;--c:${AVC[id] || (CAMEO[id.replace('cm_', '')] || {}).c || '#9db4d6'}">${art(id, emo)}</div>`;
+export { AVC };
+export const heroId = (s) => (s && s.origin ? 'hero_' + s.origin : 'hero');
 
 // ---------- effect chips ----------
 const SL = { gov: '정부', tech: '기술', talent: '인재', bubble: '거품', intel: '정보', audit: '감사 위험' };
@@ -91,15 +94,16 @@ export function hub(s, V) {
     const ev = getEvent(s, it.id), who = (ev.advisors || []).map((a) => a.who);
     const stack = who.length ? `<div class="stack">${who.slice(0, 3).map((w) => av(w, 2.2)).join('')}</div>` : av('mira', 2.6);
     return `<div class="thread ${it.cur ? 'unread' : ''}" ${it.cur ? 'data-act="open-pending"' : ''}>${stack}<div class="t"><b>${ev.title}</b><p>${ev.body}</p></div>${it.cur ? '<span class="badge">1</span>' : '<span class="chip">대기</span>'}</div>`;
-  }).join('') : `<div style="padding:1.2rem .8rem;color:var(--muted);font-size:.84rem;line-height:1.8">처리할 대화가 없습니다.<br>회사 레버와 배당을 점검한 뒤 <b style="color:var(--text)">분기 마감</b>을 누르세요.</div>`;
+  }).join('') : `<div class="empty-hero">${portrait(heroId(s), 8, 'happy')}<div>처리할 대화가 없습니다.<br>회사 레버와 배당을 점검한 뒤<br><b style="color:var(--text)">분기 마감</b>을 누르세요.</div></div>`;
   const goals = [
     [!s.pending && !s.eventQueue.length && !s.letterQueue.length, '대화 모두 처리', '자문단의 의견을 듣고 결정한다'],
     [V.levSeen, '회사 레버 점검', '기대치(전분기 이익 × 성장)를 넘길 수 있는지 확인'],
     [V.paySeen, '배당 비율 확인', `지금 ${s.payout}% · 40% 초과 시 감사 위험`],
   ].map(([d, t, sub]) => `<div class="goal ${d ? 'done' : ''}"><i>${d ? '✓' : ''}</i><div>${t}<small>${sub}</small></div></div>`).join('');
   const news = s.last ? `<div class="goal" style="border-top:1px solid var(--line);margin-top:.3rem"><i style="border:0"></i><div>지난 분기 ${s.last.quarter}<small>순이익 ${fmtB(s.last.netIncome)} · 제국 가치 ${sgn(s.last.dM / 1000, 2)}T${s.last.crashMsg ? ' · ' + s.last.crashMsg : ''}</small></div></div>` : '';
-  const ppl = ['mira', 'victor', 'jonah', 'lin', 'dana', 'sage', 'aria'].map((k) => { const v = Math.round(s.trust[k]), c = v >= 60 ? 'var(--good)' : v >= 40 ? 'var(--warn)' : 'var(--bad)'; return `<div class="row">${av(k, 1.9)}<div class="nm">${CHARS[k].kr.split(' ')[0]}<small>${CHARS[k].tag}</small></div><div class="meter"><i style="width:${v}%;background:${c}"></i></div><span class="mono muted" style="width:1.6rem;text-align:right">${v}</span></div>`; }).join('');
-  return `<div class="hub"><div class="mapslot" id="mapslot"></div>
+  const ppl = ['mira', 'victor', 'jonah', 'lin', 'dana', 'sage', 'aria'].map((k) => { const v = Math.round(s.trust[k]), c = v >= 60 ? 'var(--good)' : v >= 40 ? 'var(--warn)' : 'var(--bad)'; return `<div class="row">${av(k, 1.9, emoOfTrust(v))}<div class="nm">${CHARS[k].kr.split(' ')[0]}<small>${CHARS[k].tag}</small></div><div class="meter"><i style="width:${v}%;background:${c}"></i></div><span class="mono muted" style="width:1.6rem;text-align:right">${v}</span></div>`; }).join('');
+  const hl = headlines(s).map((h) => `<span>${h}</span>`).join('');
+  return `<div class="hub"><div class="mapslot" id="mapslot"><div class="ticker"><b>LIVE</b><div class="tk"><div class="tk-in">${hl}${hl}</div></div></div></div>
 <div class="dock"><div class="panel"><div class="ph"><span>대화함</span><span class="chip ${q.length ? 'acc' : ''}">${q.length}</span></div><div class="body">${threads}</div></div>
 <div class="panel"><div class="ph"><span>이번 분기</span></div><div class="body">${goals}${news}</div></div>
 <div class="panel"><div class="ph"><span>사람들 · 신뢰</span></div><div class="body">${ppl}</div></div></div>
@@ -157,7 +161,7 @@ const POS = { victor: [50, 14], mira: [84, 38], jonah: [72, 82], lin: [28, 82], 
 export function invest(s, V) {
   const sel = V.suspect, ck = SUSPECTS.map((k) => s.clues[k]);
   const lines = SUSPECTS.map((k) => `<line x1="50" y1="50" x2="${POS[k][0]}" y2="${POS[k][1]}" stroke="${k === sel ? '#86aefc' : '#fff'}" stroke-opacity="${k === sel ? 0.8 : 0.08 + Math.min(0.5, s.clues[k] * 0.07)}" stroke-width="${0.25 + Math.min(1.2, s.clues[k] * 0.15)}" ${s.clues[k] ? '' : 'stroke-dasharray="1.2 1.4"'} vector-effect="non-scaling-stroke"/>`).join('');
-  const nodes = SUSPECTS.map((k) => `<button class="gnode ${k === sel ? 'on' : ''}" style="left:${POS[k][0]}%;top:${POS[k][1]}%" data-act="pick-suspect" data-id="${k}">${av(k, 3.4)}<b>${CHARS[k].kr.split(' ')[0]}</b><small>${CHARS[k].role} · 단서 ${s.clues[k]}</small></button>`).join('');
+  const nodes = SUSPECTS.map((k) => `<button class="gnode ${k === sel ? 'on' : ''}" style="left:${POS[k][0]}%;top:${POS[k][1]}%" data-act="pick-suspect" data-id="${k}">${av(k, 3.4, k === sel ? 'worried' : emoOfTrust(s.trust[k]))}<b>${CHARS[k].kr.split(' ')[0]}</b><small>${CHARS[k].role} · 단서 ${s.clues[k]}</small></button>`).join('');
   const logs = s.clueLog.filter((l) => l.who === sel);
   const can = s.intel >= 1;
   return `<div class="view"><div class="graph"><div class="gwrap"><svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">${lines}</svg>
@@ -173,7 +177,7 @@ export function archive(s, V) {
   const tab = V.arch || 'letters';
   const tabs = `<div style="display:flex;gap:.4rem;padding:.2rem .4rem .6rem"><button class="chip ${tab === 'letters' ? 'acc' : ''}" data-act="arch" data-t="letters">편지 ${s.letters.length}/7</button><button class="chip ${tab === 'people' ? 'acc' : ''}" data-act="arch" data-t="people">인물</button></div>`;
   if (tab === 'people') {
-    return `<div class="view"><div style="margin-bottom:1rem">${tabs}</div><div class="people">${Object.keys(CHARS).filter((k) => k !== 'elias').map((k) => `<div class="panel pcard">${av(k, 4.4)}<div style="flex:1"><h3>${CHARS[k].kr}</h3><div class="muted" style="font-size:.78rem">${CHARS[k].role}</div><p>${CHARS[k].tag}</p><div class="meter" style="width:100%;margin-top:.7rem"><i style="width:${s.trust[k]}%;background:var(--accent)"></i></div></div><span class="mono muted">${Math.round(s.trust[k])}</span></div>`).join('')}</div></div>`;
+    return `<div class="view"><div style="margin-bottom:1rem">${tabs}</div><div class="people">${Object.keys(CHARS).filter((k) => k !== 'elias').map((k) => `<div class="panel pcard">${av(k, 4.4, emoOfTrust(s.trust[k]))}<div style="flex:1"><h3>${CHARS[k].kr}</h3><div class="muted" style="font-size:.78rem">${CHARS[k].role}</div><p>${CHARS[k].tag}</p><div class="meter" style="width:100%;margin-top:.7rem"><i style="width:${s.trust[k]}%;background:var(--accent)"></i></div></div><span class="mono muted">${Math.round(s.trust[k])}</span></div>`).join('')}</div></div>`;
   }
   const sel = V.letter && s.letters.includes(V.letter) ? V.letter : s.letters[0];
   const items = Array.from({ length: 7 }, (_, i) => { const id = 'L' + (i + 1), L = LETTERS[id], open = s.letters.includes(id); return `<div class="doc-i ${open ? '' : 'lock'} ${id === sel ? 'on' : ''}" ${open ? `data-act="read-letter" data-id="${id}"` : ''}>${av('elias', 2.2)}<div><b style="font-size:.86rem">${open && L ? L.title : '봉인된 편지 ' + (i + 1)}</b><div class="muted" style="font-size:.7rem">${open ? '열람 가능' : '아직 열 수 없음'}</div></div></div>`; }).join('');
@@ -197,43 +201,87 @@ export function origin(sel, name) {
   const opts = Object.entries(ORIGINS).map(([k, v]) => `<button class="opt ${k === sel ? 'on' : ''}" data-act="pick-origin" data-id="${k}"><b>${v.kr}</b> <span class="muted" style="font-size:.7rem;letter-spacing:.14em">${v.en}</span><small>${v.blurb}</small></button>`).join('');
   return `<div class="screen"><div class="full-map" id="mapslot"></div><div class="shade"></div><div class="origin"><div><div class="eyebrow">CHAPTER 0 · 당신은 누구였나</div><h2>상속자의 과거</h2><p class="muted" style="line-height:1.8">유언장에는 당신의 이름만 적혀 있었다. 열한 개의 불을 쥐기 전, 당신은 어떤 사람이었는가?</p>
 <div class="field"><label>이름</label><input id="nameinput" value="${name}" maxlength="12"></div>${opts}</div>
-<div style="align-self:end"><div class="panel trait"><div class="eyebrow">TRAIT</div><h3>${o.trait}</h3><p>${o.traitDesc}</p></div><div style="margin-top:1.2rem;display:flex;gap:.7rem"><button class="btn" data-act="to-title">뒤로</button><button class="btn primary big" style="flex:1" data-act="start-game">이 사람으로 시작 ${ic('arrow')}</button></div></div></div></div>`;
+<div style="align-self:end;position:relative"><div class="origin-hero">${portrait('hero_' + sel, 22, 'smug')}</div><div class="panel trait"><div class="eyebrow">TRAIT</div><h3>${o.trait}</h3><p>${o.traitDesc}</p></div><div style="margin-top:1.2rem;display:flex;gap:.7rem"><button class="btn" data-act="to-title">뒤로</button><button class="btn primary big" style="flex:1" data-act="start-game">이 사람으로 시작 ${ic('arrow')}</button></div></div></div></div>`;
 }
 export function scene(step, name, idx, total) {
   const who = step.who;
-  const sp = who === 'narr' ? '' : `<div class="speaker">${av(who, 2.4)}<span>${CHARS[who].kr}</span><small>${CHARS[who].role}</small></div>`;
+  const emo = step.emo;
+  const sp = who === 'narr' ? '' : `<div class="speaker">${av(who, 2.4, emo)}<span>${CHARS[who].kr}</span><small>${CHARS[who].role}</small></div>`;
   const ch = step.choices ? `<div class="choices">${step.choices.map((c, i) => `<button class="choice" style="animation-delay:${i * 90}ms" data-act="vn-choice" data-i="${i}">${c.text}<small>${c.sub}</small></button>`).join('')}</div>` : '';
-  const pt = who === 'narr' ? '' : portrait(who, 26).replace('class="portrait"', 'class="portrait big"');
-  return `<div class="screen"><div class="scene">${backdrop(idx < 3 ? 'office' : 'alley')}${pt}<div class="loc">PROLOGUE · 오마하 · ${idx + 1}/${total}</div><button class="btn skip" data-act="skip-vn">건너뛰기</button>
+  const pt = who === 'narr' ? '' : portrait(who, 26, emo, 'big');
+  const me = step.choices ? `<div class="scene-me">${portrait('hero_' + (window.__origin || 'engineer'), 20, 'worried')}</div>` : '';
+  return `<div class="screen"><div class="scene">${backdrop(idx < 3 ? 'office' : 'alley')}${pt}${me}<div class="loc">PROLOGUE · 오마하 · ${idx + 1}/${total}</div><button class="btn skip" data-act="skip-vn">건너뛰기</button>
 <div class="stage-text" ${step.choices ? '' : 'data-act="vn-next"'}>${sp}<div class="line ${who === 'narr' ? 'narr' : ''}" key="${idx}">${step.text}</div>${ch}${step.choices ? '' : '<div class="hintc">클릭하거나 Enter · 계속</div>'}</div></div></div>`;
 }
 export function letterModal(id, ctx) {
   const L = LETTERS[id];
-  return `<div class="modal" data-act="close-letter"><div class="card" style="max-width:40rem"><div class="eyebrow">LETTER ${L.n} / 7</div><h2>${L.title}</h2><div class="tx" style="font-family:var(--serif);font-size:1.05rem;line-height:2;white-space:pre-line;color:#d6deec;max-height:48vh;overflow:auto">${L.text}</div><div class="sig" style="margin:1rem 0;color:var(--muted);font-style:italic;font-family:var(--serif)">— ${L.sig}</div><button class="btn primary" data-act="close-letter">편지를 접는다</button></div></div>`;
+  return `<div class="modal letter-modal" data-act="close-letter"><div class="letter-wrap"><div class="letter-elias">${portrait('elias', 15, 'neutral')}<small>엘리아스 밴스<br><span>1951 — 2026</span></small></div>
+<div class="card letter-card"><div class="seal">EV</div><div class="eyebrow">LETTER ${L.n} / 7</div><h2>${L.title}</h2><div class="tx">${L.text}</div><div class="sig">— ${L.sig}</div><button class="btn primary" data-act="close-letter">편지를 접는다</button></div></div></div>`;
 }
 export function helpModal() {
-  return `<div class="modal"><div class="card"><div class="eyebrow">HOW TO PLAY</div><h2>분기마다 이렇게 진행됩니다</h2><ol><li><b>대화함</b>의 이야기를 열고 자문단의 의견을 들은 뒤 결정합니다.</li><li><b>회사</b> 탭에서 레버(투자·연구·가격…)를 조정합니다. 기대치를 넘기면 시장이 반응합니다.</li><li><b>지갑</b> 탭에서 배당과 자산을 정합니다. 40%를 넘기면 감사 위험이 쌓입니다.</li><li><b>수사</b> 탭에서 정보를 써 켈스트럴의 첩자를 추적합니다.</li><li>준비되면 오른쪽 위 <b>분기 마감</b>. 12분기 뒤에 결말이 결정됩니다.</li></ol><button class="btn primary big" style="margin-top:1.2rem" data-act="close-help">시작한다</button></div></div>`;
+  return `<div class="modal"><div class="help-wrap"><div class="help-mira">${portrait('mira', 17, 'happy')}<div class="speech">"처음이시죠? 제가 순서를 알려 드릴게요."</div></div><div class="card"><div class="eyebrow">HOW TO PLAY · 미라의 안내</div><h2>분기마다 이렇게 진행됩니다</h2><ol><li><b>대화함</b>의 이야기를 열고 자문단의 의견을 들은 뒤 결정합니다.</li><li><b>회사</b> 탭에서 레버(투자·연구·가격…)를 조정합니다. 기대치를 넘기면 시장이 반응합니다.</li><li><b>지갑</b> 탭에서 배당과 자산을 정합니다. 40%를 넘기면 감사 위험이 쌓입니다.</li><li><b>수사</b> 탭에서 정보를 써 켈스트럴의 첩자를 추적합니다.</li><li>준비되면 오른쪽 위 <b>분기 마감</b>. 12분기 뒤에 결말이 결정됩니다.</li></ol><button class="btn primary big" style="margin-top:1.2rem" data-act="close-help">시작한다</button></div></div></div>`;
 }
 export function earnings(s) {
   const r = s.last;
-  const rows = r.rows.map((x) => { const w = Math.max(6, Math.min(100, 50 + x.beat * 250)), v = x.beat >= 0.02 ? ['good', 'BEAT'] : x.beat <= -0.02 ? ['bad', 'MISS'] : ['warn', 'IN LINE']; return `<div class="cr"><span>${COMP[x.id].kr}</span><div class="bt"><i style="width:${w}%;color:var(--${v[0]});background:var(--${v[0]})"></i><u></u></div><span class="mono">${fmtB(x.profit)}</span><span class="chip ${v[0]}">${v[1]}</span></div>`; }).join('');
+  const rows = r.rows.map((x, i) => { const w = Math.max(6, Math.min(100, 50 + x.beat * 250)), v = x.beat >= 0.02 ? ['good', 'BEAT'] : x.beat <= -0.02 ? ['bad', 'MISS'] : ['warn', 'IN LINE']; return `<div class="cr" style="animation-delay:${i * 60}ms"><span class="crn">${coAv(x.id, 1.7, x.beat >= 0.02 ? 'happy' : x.beat <= -0.02 ? 'worried' : 'neutral')}${COMP[x.id].kr}</span><div class="bt"><i style="width:${w}%;color:var(--${v[0]});background:var(--${v[0]})"></i><u></u></div><span class="mono">${fmtB(x.profit)}</span><span class="chip ${v[0]}">${v[1]}</span></div>`; }).join('');
   return `<div class="sheet ${r.crashMsg && r.crashMsg.includes('💥') ? 'crash' : ''}"><div><h2>EARNINGS DAY · ${r.quarter}</h2><h1>${r.crashMsg ? r.crashMsg : '분기 실적 발표'}</h1>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.6rem"><div class="bign"><small>그룹 매출</small><span data-count="${r.revenue}">${fmtB(r.revenue)}</span></div><div class="bign"><small>순이익</small><span data-count="${r.netIncome}">${fmtB(r.netIncome)}</span></div></div>
 <div class="bign" style="margin-top:1.4rem"><small>제국 가치 ${sgn(r.dM / 1000, 2)}T</small>$${(r.mcap / 1000).toFixed(2)}T</div>
 <div style="margin-top:1.6rem" class="muted">막대 가운데 선 = 시장 기대치</div>${rows}</div>
-<div><h2>YOUR TAKE</h2><h1>이번 분기 내 몫</h1><div class="leg" style="font-size:.95rem;gap:.7rem 1rem"><span>급여</span><span>${fmtB(r.take.salary)}</span><span>배당 (${r.payout}%)</span><span>${fmtB(r.take.div)}</span><span>성과보수</span><span>${fmtB(r.take.carry)}</span><span>개인 펀드 손익</span><span class="${r.take.fund >= 0 ? 'good' : 'bad'}">${fmtB(r.take.fund)}</span>${r.take.short ? `<span>공매도 수익</span><span class="good">${fmtB(r.take.short)}</span>` : ''}</div>
+<div style="position:relative"><div class="earn-hero">${portrait(heroId(s), 13, r.crashMsg && r.crashMsg.includes('💥') ? 'shock' : r.take.total > 0.3 ? 'happy' : 'smug')}</div><h2>YOUR TAKE</h2><h1>이번 분기 내 몫</h1><div class="leg" style="font-size:.95rem;gap:.7rem 1rem"><span>급여</span><span>${fmtB(r.take.salary)}</span><span>배당 (${r.payout}%)</span><span>${fmtB(r.take.div)}</span><span>성과보수</span><span>${fmtB(r.take.carry)}</span><span>개인 펀드 손익</span><span class="${r.take.fund >= 0 ? 'good' : 'bad'}">${fmtB(r.take.fund)}</span>${r.take.short ? `<span>공매도 수익</span><span class="good">${fmtB(r.take.short)}</span>` : ''}</div>
 <div class="take"><div class="bign"><small>이번 분기 합계</small><span data-count="${r.take.total}">${fmtB(r.take.total)}</span></div></div>
 <div class="bign" style="margin-top:2rem"><small>내 순자산</small>${fmtB(r.nwBefore)} → <span class="money">${fmtB(r.nwAfter)}</span></div>
 <button class="btn primary big" style="margin-top:2.4rem" data-act="next-turn">${s.turn >= TOTAL_TURNS ? '결말을 본다' : '다음 분기로'} ${ic('arrow')}</button></div></div>`;
 }
+const END_SCENE = { soft: 'office', emperor: 'boardroom', crash: 'trading', alone: 'gala', prototype: 'alley' };
 export function ending(s) {
   const r = pickEnding(s), e = r.e;
   const sc = (l, v, g) => `<div class="panel score"><small>${l}</small><b>${v}<em>${g}</em></b></div>`;
   const hist = s.history;
-  return `<div class="ending"><div class="en">ENDING ${e.n} / 5</div><h1>${e.title}</h1><div class="sub2">${e.en}</div>
+  const cast = ['mira', 'victor', 'jonah', 'lin', 'sage', 'aria'].map((k, i) => { const mood = k === s.mole && s.flags.mole_found ? 'angry' : emoOfTrust(s.trust[k]); return `<div class="lu" style="animation-delay:${400 + i * 140}ms">${portrait(k, 12, mood)}<small>${CHARS[k].kr.split(' ')[0]} · ${Math.round(s.trust[k])}</small></div>`; }).join('');
+  const heroMood = r.key === 'soft' ? 'happy' : r.key === 'crash' ? 'shock' : r.key === 'alone' ? 'worried' : 'smug';
+  return `<div class="ending">${backdrop(END_SCENE[r.key] || 'office', { bokeh: 30 })}<div class="end-shade"></div><div class="end-in"><div class="en">ENDING ${e.n} / 5</div><h1>${e.title}</h1><div class="sub2">${e.en}</div>
 <div class="story">${e.text.map((t) => `<p>${t}</p>`).join('')}</div><div class="q">${e.quote}</div>
 <div class="scores">${sc('제국 가치', '$' + r.empire.toFixed(1) + 'T', r.grades.empire)}${sc('내 재산', fmtB(r.wealth), r.grades.wealth)}${sc('유산', Math.round(r.legacy), r.grades.legacy)}</div>
 <div class="panel" style="max-width:46rem;margin:1.4rem 0;padding:1rem 1.3rem"><div class="muted" style="font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700">제국 가치 추이</div>${spark(hist.map((h) => h / 1000), '#86aefc', 600, 90)}</div>
-<div class="after"><div>${av('mira', 2.2)}<span><b>미라</b>신뢰 ${Math.round(s.trust.mira)}</span></div><div>${av('sage', 2.2)}<span><b>SAGE</b>신뢰 ${Math.round(s.trust.sage)}</span></div><div>${av('victor', 2.2)}<span><b>헤일</b>${s.flags.mole_found ? '첩자로 밝혀짐' : s.mole === 'victor' ? '끝내 숨었다' : '신뢰 ' + Math.round(s.trust.victor)}</span></div><div>${av('aria', 2.2)}<span><b>ARIA</b>신뢰 ${Math.round(s.trust.aria)}</span></div></div>
-<button class="btn primary big" data-act="to-title">처음으로</button></div>`;
+<div class="after">${['mira', 'victor', 'jonah', 'lin', 'sage', 'aria'].map((k) => `<div>${av(k, 2.6, k === s.mole && s.flags.mole_found ? 'angry' : emoOfTrust(s.trust[k]))}<span><b>${CHARS[k].kr.split(' ')[0]}</b>신뢰 ${Math.round(s.trust[k])}${k === s.mole ? ' · 첩자' : ''}</span></div>`).join('')}</div><div class="mole-line">${s.flags.mole_found ? `켈스트럴의 첩자는 <b>${CHARS[s.mole].kr}</b>였고, 당신이 밝혀냈다.` : `켈스트럴의 첩자는 <b>${CHARS[s.mole].kr}</b>였다. ${s.flags.mole_wrong ? '당신은 엉뚱한 사람을 지목했다.' : '끝내 아무도 몰랐다.'}`}</div>
+<button class="btn primary big" data-act="to-title">처음으로</button></div>
+<div class="end-hero">${portrait(heroId(s), 24, heroMood)}</div><div class="lineup end-cast">${cast}</div></div>`;
+}
+
+// ---------- headlines / interstitial / chat banner ----------
+const FLAVOR = ['실리콘밸리 임대료 또 사상 최고', '"AI가 내 일자리를?" 여론조사 61% 우려', '오마하 스테이크하우스, 억만장자 단골 늘어', '반도체 장비 수출 규제 논의 재점화', '신주 공항, 전세기 이착륙 3배 증가', '월가 애널리스트 "컴팩트, 실체는 있는가"', '전력망 운영사 "AI 수요 예측 불가"', '대학가 AI 전공 지원자 사상 최다'];
+export function headlines(s) {
+  const h = [];
+  if (s.last) {
+    const d = s.last.dM / 1000;
+    h.push(d >= 0 ? `컴팩트 제국 가치 ${sgn(d, 2)}T — 시장 "아직 배고프다"` : `컴팩트 제국 가치 ${sgn(d, 2)}T 증발 — 투자자 불안`);
+    const best = [...s.last.rows].sort((a, b) => b.beat - a.beat)[0], worst = [...s.last.rows].sort((a, b) => a.beat - b.beat)[0];
+    h.push(`${COMP[best.id].kr} 실적 서프라이즈, 시간외 강세`);
+    if (worst.beat < -0.02) h.push(`${COMP[worst.id].kr} 기대치 하회 — "투자 부담 커졌다"`);
+    if (s.last.crashMsg) h.push(s.last.crashMsg.replace(/[💥📉] ?/, '') + ' — 긴급 속보');
+  }
+  if (s.stats.bubble > 92) h.push(`AI 거품 경고음 — 거품 지수 ${Math.round(s.stats.bubble)}`); else if (s.stats.bubble > 80) h.push('"AI 랠리 어디까지?" 낙관과 경계 교차');
+  if (s.stats.gov < 30) h.push('워싱턴, 컴팩트 겨냥 반독점 청문회 검토');
+  if (s.audit > 30) h.push('감사위원회, 배당 정책에 의문 제기');
+  if (s.log.length) { const L = s.log[s.log.length - 1]; h.push(`[${QUARTERS[L.turn - 1]}] ${L.choice}`); }
+  for (let i = 0; h.length < 6; i++) h.push(FLAVOR[(s.turn * 3 + i) % FLAVOR.length]);
+  return h;
+}
+const INTER_SCENE = ['boardroom', 'trading', 'datacenter', 'strait', 'senate', 'fab', 'office', 'gala', 'trading', 'boardroom', 'interrogate', 'office'];
+export function interstitial(s) {
+  const q = QUARTERS[Math.min(s.turn, TOTAL_TURNS) - 1], hl = headlines(s).slice(0, 3);
+  const mood = s.stats.bubble > 92 ? 'worried' : s.last && s.last.dM < 0 ? 'angry' : 'smug';
+  return `<div class="inter" data-act="inter-next">${backdrop(INTER_SCENE[(s.turn - 1) % INTER_SCENE.length], { bokeh: 26 })}<div class="inter-shade"></div>
+<div class="inter-in"><div class="eyebrow">QUARTER ${s.turn} / ${TOTAL_TURNS}</div><div class="inter-q">${q}</div><div class="inter-bar"><i style="width:${s.turn / TOTAL_TURNS * 100}%"></i></div>
+<div class="inter-hl">${hl.map((t, i) => `<div style="animation-delay:${600 + i * 220}ms"><span>${i === 0 ? 'BREAKING' : 'NEWS'}</span>${t}</div>`).join('')}</div><div class="hintc">클릭하여 계속</div></div>
+<div class="inter-hero">${portrait(heroId(s), 30, mood)}</div></div>`;
+}
+export function chatBanner(ev, id, emo = {}) {
+  const who = id === 'accuse' ? SUSPECTS : (ev.advisors || []).map((a) => a.who);
+  const kind = SCENE_OF[id] || 'office';
+  if (id === 'accuse') for (const k of SUSPECTS) emo[k] = emo[k] || 'worried';
+  const sz = who.length > 3 ? 8.2 : 10.5;
+  const cast = who.map((w, i) => `<div class="actor" data-who="${w}" style="--i:${i};animation-delay:${200 + i * 160}ms">${portrait(w, sz, emo[w] || 'neutral')}<small>${CHARS[w].kr.split(' ')[0]}</small></div>`).join('');
+  return `<div class="banner">${backdrop(kind, { bokeh: 16 })}<div class="bn-shade"></div><div class="cast">${cast}</div><div class="bn-t"><small>${ev.kicker}</small><b>${ev.title}</b></div></div>`;
 }

@@ -281,6 +281,63 @@ export const EVENTS = {
       { label: '폭락에 개인 베팅 (공매도)', who: '헤일 제안', fx: { bubble: 2, gov: -4, sec: 14, liquid: 0.6, trust: { mira: -8, sage: -5, victor: 4 }, flag: 'short_own' }, result: '당신의 지갑은 두꺼워질 것입니다. 당신의 회사가 무너질 때만.' },
     ],
   },
+  power: {
+    kicker: 'INFRASTRUCTURE · 전력', title: '데이터센터 전력이 바닥났다',
+    body: '텍사스와 버지니아의 전력망이 한계에 닿았습니다. 완공된 데이터센터 세 곳이 전기 없이 멈춰 서 있습니다. 소형 원전 장기 계약은 비싸고, 10년 동안 묶입니다.',
+    advisors: [
+      { who: 'jonah', stance: 'y', quote: '"원전 계약하죠! 칩은 전기 없이는 그냥 비싼 돌멩이예요."' },
+      { who: 'sage', stance: 'h', quote: '"같은 일을 절반의 전기로 하는 연구도 함께 봐 주세요. 더 싸고, 더 오래갑니다."' },
+      { who: 'victor', stance: 'n', quote: '"10년 계약이라… 거품이 꺼지는 날, 그 계약서가 우리 목을 조를 겁니다."' },
+    ],
+    options: [
+      { label: '소형 원전 10년 계약 체결', who: '조나 지지', fx: { comp: { MS: { g: 0.01, cash: -6 }, AM: { g: 0.01, cash: -6 } }, bubble: 4, tech: 3, trust: { jonah: 3, victor: -2 } }, result: '전력 걱정은 사라졌지만, 10년치 고정비가 장부에 새겨졌습니다.' },
+      { label: '효율화 우선 — 모델 경량화 연구', who: 'SAGE 지지', fx: { tech: 5, bubble: -2, comp: { AN: { g: 0.008 }, OA: { g: -0.004 } }, trust: { sage: 4, aria: -3 } }, result: 'SAGE 팀이 같은 연산을 절반의 전기로 해냈습니다. ARIA는 느리다며 투덜댑니다.' },
+      { label: '증설 보류 — 시장이 식기를 기다린다', who: '헤일 지지', fx: { bubble: -3, all: { g: -0.004 }, trust: { victor: 2, jonah: -3 } }, result: '공사가 멈췄습니다. 시장은 고개를 갸웃했지만, 거품 지수는 조금 내려왔습니다.' },
+    ],
+  },
+  leak: {
+    kicker: 'SECURITY · 보안 사고', title: '모델 가중치 유출 의혹',
+    body: 'OpenAI 최신 모델의 가중치 일부가 다크웹에 올라왔다는 제보가 들어왔습니다. 외부 해킹이 아니라 내부자의 손을 탄 흔적이 보입니다. 켈스트럴이 남긴 발자국일지도 모릅니다.',
+    advisors: [
+      { who: 'aria', stance: 'n', quote: '"제 잘못이 아니에요! 저는 문을 잠그라고 몇 번이나 말했다고요!"' },
+      { who: 'sage', stance: 'h', quote: '"먼저 공개하고 사과하는 것이, 길게 보면 신뢰를 지키는 길입니다."' },
+      { who: 'mira', stance: 'y', quote: '"조용히 내부 감사부터 하시죠. 범인은 아직 이 건물 안에 있습니다."' },
+    ],
+    intelAction: { cost: 1, label: '정보 1 사용 — 접속 로그 추적', reveal: '접속 로그: 유출 직전 새벽 3시, <b>ARIA의 자동화 계정</b>이 우회 경로로 쓰였습니다. 누군가 ARIA를 방패로 삼았을 수도 있습니다.', clue: { who: 'aria', n: 1 } },
+    options: [
+      { label: '즉시 공개하고 사과한다', who: 'SAGE 지지', fx: { gov: 4, comp: { OA: { rep: -8, g: -0.006 } }, trust: { sage: 4, aria: -2 } }, result: '주가는 하루 출렁였지만, 규제 당국은 당신의 투명함을 기록해 두었습니다.' },
+      { label: '조용히 내부 감사', who: '미라 지지', fx: { clueMole: true, sec: 4, trust: { mira: 3 } }, result: '감사팀이 수상한 흔적 두 개를 찾아냈습니다. 수사 탭에서 확인하세요.' },
+      { label: '경쟁사 탓으로 돌린다', who: '아무도 지지하지 않음', fx: { gov: -6, sec: 8, bubble: 2, trust: { sage: -5, dana: -4 } }, result: '언론은 경쟁사를 의심했습니다. 하지만 거짓말은 언젠가 이자를 붙여 돌아옵니다.' },
+    ],
+  },
+  strike: {
+    kicker: 'LABOR · 현장', title: '신주 팹 엔지니어들이 멈췄다',
+    body: '야간 3교대가 1년째 이어졌습니다. TSMC 신주 공장의 엔지니어 수백 명이 장비를 끄고 휴게실에 모였습니다. 린 박사가 새벽에 직접 전화를 걸어 왔습니다.',
+    advisors: [
+      { who: 'lin', stance: 'h', quote: '"그들은 지쳤을 뿐입니다. 사람을 기계처럼 돌리면, 결국 기계도 멈춥니다."' },
+      { who: 'jonah', stance: 'n', quote: '"납기가 2주만 밀려도 엔비디아 출하가 통째로 밀려요. 빨리 끝내 주세요!"' },
+      { who: 'victor', stance: 'y', quote: '"보너스로 해결하시죠. 돈으로 살 수 있는 시간은 싸게 사는 겁니다."' },
+    ],
+    options: [
+      { label: '처우 개선 + 4교대 전환', who: '린 지지', fx: { comp: { TS: { nm: -0.02, morale: 20, g: 0.004 } }, talent: 5, trust: { lin: 6, jonah: -2 } }, result: '공장은 다시 돌기 시작했고, 엔지니어들은 처음으로 회장님의 이름을 불렀습니다.' },
+      { label: '일회성 보너스 지급', who: '헤일 지지', fx: { comp: { TS: { cash: -3, morale: 8 } }, trust: { victor: 2, lin: 1 } }, result: '불은 꺼졌지만, 불씨는 남았습니다.' },
+      { label: '대체 인력 투입 — 강행', who: '조나 지지', fx: { comp: { TS: { morale: -20, rep: -10 }, NV: { g: 0.004 } }, talent: -6, gov: -3, trust: { lin: -8, jonah: 3 } }, result: '납기는 지켰습니다. 린 박사는 전화를 끊기 전, 아무 말도 하지 않았습니다.' },
+    ],
+  },
+  gala: {
+    kicker: 'SOCIETY · 사교계', title: '뉴욕 자선 갈라 — 모두가 당신을 본다',
+    body: '올해 가장 비싼 밤. 상원의원과 펀드 매니저, 기자들이 한 홀에 모였습니다. 당신의 한마디, 수표 한 장이 내일 아침의 헤드라인이 됩니다.',
+    advisors: [
+      { who: 'dana', stance: 'h', quote: '"수표의 금액보다, 그 돈이 어디로 가는지를 보겠습니다, 회장님."' },
+      { who: 'mira', stance: 'y', quote: '"선생님은 매년 조용히 기부하셨어요. 이름 없이요."' },
+      { who: 'aria', stance: 'y', quote: '"무대에 서세요! 사람들은 큰 그림을 그리는 사람을 사랑해요!"' },
+    ],
+    options: [
+      { label: '익명으로 거액 기부 ($600M)', who: '미라 지지', fx: { liquid: -0.6, gov: 3, trustAll: 2, trust: { mira: 4, dana: 2 } }, result: '이름 없는 기부. 다음 날 어느 신문도 쓰지 않았지만, 미라는 알고 있었습니다.' },
+      { label: '무대에서 비전 발표 + 기부 ($300M)', who: 'ARIA 지지', fx: { liquid: -0.3, bubble: 3, gov: 2, comp: { OA: { rep: 6 }, AN: { rep: 4 } }, trust: { aria: 4, dana: -2 } }, result: '박수가 쏟아졌고, 다음 날 AI 관련주가 일제히 올랐습니다.' },
+      { label: '얼굴만 비추고 조용히 빠진다', who: '—', fx: { intel: 1, trust: { dana: 2 } }, result: '구석에서 들은 귓속말 하나가 쓸모 있는 정보가 되었습니다.' },
+    ],
+  },
   accuse: {
     kicker: 'INVESTIGATION · 수사', title: '켈스트럴의 첩자를 지목하라',
     body: '지금까지 모은 단서로 내부의 첩자를 지목할 수 있습니다. 틀리면 그 인물은 적이 되고, 진범은 계속 숨어 있게 됩니다. 지목하지 않을 수도 있습니다.',
@@ -292,7 +349,8 @@ export const EVENTS = {
 
 export const SCRIPT_ORDER = ['focus', 'h200', 'gpu', 'ipo', 'senator', 'taiwan', 'short', null, 'crossroads', 'accuse'];
 // null = conditional/filler slot (audit if payout high, else random minor)
-export const FILLERS = ['hire', 'rumor'];
+export const FILLERS = ['hire', 'rumor', 'power', 'leak', 'strike', 'gala'];
+export const BONUS_TURNS = [3, 5, 7, 12];
 export const TOTAL_TURNS = 12;
 
 export const QUARTERS = ["Q4 '26", "Q1 '27", "Q2 '27", "Q3 '27", "Q4 '27", "Q1 '28", "Q2 '28", "Q3 '28", "Q4 '28", "Q1 '29", "Q2 '29", "Q3 '29"];
@@ -300,16 +358,16 @@ export const QUARTERS = ["Q4 '26", "Q1 '27", "Q2 '27", "Q3 '27", "Q4 '27", "Q1 '
 // ---- Prologue (visual novel) ---------------------------------------------
 export const PROLOGUE = [
   { who: 'narr', text: '2026년 10월, 오마하. 엘리아스 밴스의 낡은 법률 사무소. 저녁 노을이 긴 탁자 위의 열한 개 인장을 붉게 물들이고 있었다.' },
-  { who: 'mira', text: '"선생님은 당신의 이름만 쓰셨어요. 이유는… 저도 모릅니다."' },
+  { who: 'mira', emo: 'worried', text: '"선생님은 당신의 이름만 쓰셨어요. 이유는… 저도 모릅니다."' },
   {
-    who: 'victor', text: '"축하합니다, 류 선생. 열한 개의 불을 이어받으셨군요. 곧 이 자리가 얼마나 위험한지 아시게 될 겁니다. 그전에… 한 가지만 묻겠습니다. 선대께서 왜 당신을 고르셨는지, 짐작이 가십니까?"',
+    who: 'victor', emo: 'smug', text: '"축하합니다, 류 선생. 열한 개의 불을 이어받으셨군요. 곧 이 자리가 얼마나 위험한지 아시게 될 겁니다. 그전에… 한 가지만 묻겠습니다. 선대께서 왜 당신을 고르셨는지, 짐작이 가십니까?"',
     choices: [
-      { text: '"이 모든 걸… 저 혼자 감당하라는 건가요?"', sub: '미라 +1 · 헤일 −1', fx: { trust: { mira: 1, victor: -1 } }, reply: { who: 'mira', text: '"혼자가 아닙니다. 적어도 저는, 선생님의 마지막 부탁을 지킬 거예요."' } },
-      { text: '"왜 하필 접니까? 이유를 아십니까?"', sub: '미라 +2', fx: { trust: { mira: 2 } }, reply: { who: 'victor', text: '"…편지가 말해줄 겁니다. 일곱 통이 있다더군요. 한 통씩, 때가 되면."' } },
-      { text: '"일단 장부부터 보여주십시오."', sub: '헤일 −2 · 정보 +1', fx: { trust: { victor: -2 }, intel: 1 }, reply: { who: 'victor', text: '"…급하시군요. 좋습니다. 장부는 미라가 가져올 겁니다. 다만 숫자만 보진 마시길."' } },
+      { text: '"이 모든 걸… 저 혼자 감당하라는 건가요?"', sub: '미라 +1 · 헤일 −1', fx: { trust: { mira: 1, victor: -1 } }, reply: { who: 'mira', emo: 'happy', text: '"혼자가 아닙니다. 적어도 저는, 선생님의 마지막 부탁을 지킬 거예요."' } },
+      { text: '"왜 하필 접니까? 이유를 아십니까?"', sub: '미라 +2', fx: { trust: { mira: 2 } }, reply: { who: 'victor', emo: 'neutral', text: '"…편지가 말해줄 겁니다. 일곱 통이 있다더군요. 한 통씩, 때가 되면."' } },
+      { text: '"일단 장부부터 보여주십시오."', sub: '헤일 −2 · 정보 +1', fx: { trust: { victor: -2 }, intel: 1 }, reply: { who: 'victor', emo: 'angry', text: '"…급하시군요. 좋습니다. 장부는 미라가 가져올 겁니다. 다만 숫자만 보진 마시길."' } },
     ],
   },
-  { who: 'mira', text: '"이것이 첫 번째 편지입니다. 소리 내어 읽지는 마세요. 이 방에도 귀가 있으니까요."', letter: 'L1' },
+  { who: 'mira', emo: 'neutral', text: '"이것이 첫 번째 편지입니다. 소리 내어 읽지는 마세요. 이 방에도 귀가 있으니까요."', letter: 'L1' },
   { who: 'narr', text: '열한 개의 불이 한 사람의 손에 놓였다. 그리고 그 손은, 아직 아무것도 쥐어 본 적이 없었다.' },
 ];
 

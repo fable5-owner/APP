@@ -368,6 +368,115 @@ svg text{font-family:var(--font)}
 .sc-vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 35%,rgba(2,4,9,.8) 100%),linear-gradient(180deg,rgba(2,4,9,.5),transparent 25%,transparent 55%,rgba(2,4,9,.9))}
 .scene>*:not(.sc-bg){position:relative;z-index:2}
 .scene .portrait.big,.scene .loc,.scene .skip{position:absolute}
+
+/* ======== v3: cinematic chat ======== */
+.chat{position:relative;width:min(64rem,100%)}
+.banner{position:relative;height:15.5rem;flex:none;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.12)}
+.banner .sc-bg{animation:none}
+.bn-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,8,15,.1) 30%,rgba(9,14,26,.92) 100%),linear-gradient(90deg,rgba(5,8,15,.75),transparent 55%)}
+.bn-t{position:absolute;left:1.6rem;bottom:1.1rem;z-index:3;max-width:54%}
+.bn-t small{display:block;font-size:.66rem;letter-spacing:.16em;color:var(--accent);font-weight:800;text-transform:uppercase;text-shadow:0 0 1rem rgba(134,174,252,.6)}
+.bn-t b{display:block;font-family:var(--serif);font-weight:900;font-size:1.75rem;line-height:1.3;margin-top:.3rem;text-shadow:0 .2rem 1.4rem #000;letter-spacing:-.01em}
+.bn-x{position:absolute;top:.8rem;right:.8rem;z-index:5;background:rgba(0,0,0,.4)}
+.cast{position:absolute;right:1rem;bottom:-.6rem;display:flex;align-items:flex-end;z-index:2}
+.actor{display:flex;flex-direction:column;align-items:center;margin-left:-1.4rem;animation:actorIn .7s cubic-bezier(.2,.9,.3,1.15) both;transition:filter .3s,transform .3s;filter:brightness(.62) saturate(.8)}
+.actor small{position:absolute;bottom:1.4rem;font-size:.62rem;font-weight:800;letter-spacing:.06em;padding:.1rem .5rem;border-radius:999px;background:rgba(0,0,0,.55);color:#dfe6f3;opacity:0;transition:opacity .2s}
+.actor.talk{filter:none;transform:translateY(-.5rem) scale(1.06);z-index:2}
+.actor.talk small{opacity:1}
+.actor .portrait{animation-duration:3.2s}
+.actor .portrait.emopop{animation:emopop .45s cubic-bezier(.2,.9,.3,1.4),idle 3.2s 0.45s ease-in-out infinite}
+@keyframes emopop{0%{transform:scale(.9)}60%{transform:scale(1.08) translateY(-.4rem)}100%{transform:none}}
+@keyframes actorIn{from{opacity:0;transform:translateY(4rem)}}
+.brief{border-left:2px solid var(--accent);padding:.1rem 0 .1rem 1rem}
+.brief p{font-size:.95rem}
+
+/* quarter interstitial */
+.inter{position:fixed;inset:0;z-index:60;cursor:pointer;animation:fadein .5s ease both;overflow:hidden;background:#05080f}
+.inter .sc-svg{animation-duration:14s}
+.inter-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,7,14,.94) 0,rgba(4,7,14,.75) 42%,rgba(4,7,14,.15) 75%),linear-gradient(0deg,rgba(4,7,14,.8),transparent 40%)}
+.inter-in{position:absolute;left:7%;top:50%;transform:translateY(-50%);max-width:46rem;z-index:2}
+.inter-q{font-family:var(--font);font-weight:800;font-size:9rem;letter-spacing:-.05em;line-height:1;margin:.6rem 0 1.2rem;background:linear-gradient(100deg,#fff 20%,#9ec0ff 50%,#f3c978 80%);-webkit-background-clip:text;background-clip:text;color:transparent;animation:qin 1s cubic-bezier(.2,.8,.2,1) both}
+@keyframes qin{from{opacity:0;transform:translateX(-3rem);letter-spacing:.05em}}
+.inter-bar{width:26rem;height:.3rem;border-radius:.2rem;background:rgba(255,255,255,.12);overflow:hidden;margin-bottom:2rem}.inter-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--money));box-shadow:0 0 1rem var(--accent);animation:grow 1.2s .3s cubic-bezier(.2,.8,.2,1) both;transform-origin:left}
+.inter-hl div{display:flex;gap:.9rem;align-items:center;font-size:1.08rem;color:#dbe3f1;padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.08);animation:rise .6s ease both}
+.inter-hl span{flex:none;font-size:.6rem;letter-spacing:.14em;font-weight:800;padding:.2rem .5rem;border-radius:.3rem;background:rgba(134,174,252,.18);color:var(--accent)}
+.inter-hl div:first-child span{background:#ff4d6d;color:#fff;box-shadow:0 0 1rem rgba(255,77,109,.6)}
+.inter .hintc{margin-top:1.6rem}
+.inter-hero{position:absolute;right:6%;bottom:-1rem;z-index:2;animation:popin .9s .2s cubic-bezier(.2,.9,.3,1.2) both}
+
+/* ticker */
+.ticker{position:absolute;left:1.4rem;right:1.4rem;bottom:.6rem;z-index:3;display:flex;align-items:center;gap:.8rem;height:2.1rem;padding:0 .4rem 0 .4rem;border-radius:.6rem;background:rgba(6,10,20,.78);border:1px solid rgba(255,255,255,.08);overflow:hidden}
+.ticker b{flex:none;font-size:.6rem;letter-spacing:.14em;padding:.2rem .5rem;border-radius:.3rem;background:#ff4d6d;color:#fff;animation:blink 1.6s infinite}
+.tk{flex:1;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
+.tk-in{display:inline-flex;white-space:nowrap;animation:marq 60s linear infinite}
+.tk-in span{font-size:.8rem;color:#cdd7ea;padding-right:2.4rem}.tk-in span:before{content:"◆";color:var(--money);margin-right:.7rem;font-size:.6rem}
+@keyframes marq{to{transform:translateX(-50%)}}
+.mapslot:after{z-index:2}
+
+/* toasts */
+#toasts{position:fixed;right:1.6rem;top:4.6rem;z-index:400;display:flex;flex-direction:column;align-items:flex-end;gap:.4rem;pointer-events:none}
+.toast{font-size:.9rem!important;height:2.1rem!important;padding:0 1rem!important;box-shadow:0 .6rem 1.6rem rgba(0,0,0,.5);backdrop-filter:none;border:1px solid rgba(255,255,255,.12);animation:toast 3.2s cubic-bezier(.2,.8,.2,1) both}
+@keyframes toast{0%{opacity:0;transform:translateX(3rem) scale(.9)}10%{opacity:1;transform:none}80%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-1rem)}}
+
+/* ending v3 */
+.ending{padding:0;overflow:hidden}
+.ending .sc-bg{position:absolute;inset:0}
+.end-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,8,15,.95) 0,rgba(5,8,15,.82) 45%,rgba(5,8,15,.25) 80%)}
+.end-in{position:relative;z-index:2;height:100%;overflow:auto;padding:4rem 8% 3rem;max-width:58rem}
+.end-hero{position:absolute;right:16%;bottom:6rem;z-index:2;animation:popin 1s .3s both}
+.end-cast{right:2%;bottom:.6rem;z-index:3}.end-cast .lu{margin-left:-2.6rem}
+.mole-line{margin:0 0 1.6rem;color:#c6cfdf;font-size:.95rem}.mole-line b{color:var(--warn)}
+.ending .after{display:none}
+
+/* scene characters bigger presence */
+.scene .portrait.big{--h:32rem;right:8%}
+.led{animation:blink 1.4s infinite}
+.actor{filter:none;opacity:.78}
+.actor.talk{opacity:1}
+.actor .portrait{filter:none}
+.actor .portrait:before{display:none}
+.end-cast{display:none}
+.ending .after{display:grid;grid-template-columns:repeat(3,minmax(0,15rem));gap:.7rem 1.4rem;margin:0 0 1.8rem}
+.end-hero{right:6%;bottom:-1rem}
+.cast{right:3.6rem}.actor{margin-left:-.8rem}
+.origin-hero{position:absolute;right:1rem;bottom:calc(100% + .4rem);z-index:2;animation:popin .6s cubic-bezier(.2,.9,.3,1.2) both}
+.crn{display:flex;align-items:center;gap:.55rem}.crn .av{--s:1.7rem}
+.cr{grid-template-columns:10rem 1fr 4.5rem 4.4rem}
+.earn-hero{position:absolute;right:0;top:-1.6rem}
+.earn-hero{top:30rem;right:2rem}
+.empty-hero{display:flex;align-items:center;gap:1rem;padding:.6rem .8rem;color:var(--muted);font-size:.84rem;line-height:1.8}
+.empty-hero .portrait{--h:8rem;flex:none}
+/* perf: compositor-only animations */
+.bokeh{mix-blend-mode:normal}
+.bokeh i{will-change:transform,opacity}
+.grain{animation:none;mix-blend-mode:normal;opacity:.05}
+.rain{inset:-40% 0 0 -20%;background:repeating-linear-gradient(100deg,transparent 0 14px,rgba(190,215,255,.2) 14px 15px,transparent 15px 30px);animation:rain2 .5s linear infinite;will-change:transform}
+@keyframes rain2{from{transform:translate(0,0)}to{transform:translate(-30px,60px)}}
+.sc-svg{will-change:transform}
+.portrait{filter:none}
+.portrait svg{will-change:transform}
+.portrait,.actor,.lu,.dots11 .av{will-change:transform}
+/* letter v3 */
+.letter-modal{background:radial-gradient(50rem 30rem at 50% 40%,rgba(243,201,120,.12),rgba(3,6,12,.86))}
+.letter-wrap{display:flex;align-items:flex-end;gap:1.6rem;max-width:66rem}
+.letter-elias{display:flex;flex-direction:column;align-items:center;gap:.4rem;animation:popin .7s .1s both}
+.letter-elias small{text-align:center;font-family:var(--serif);color:#d9d2c0;font-size:.85rem;line-height:1.5}.letter-elias small span{color:var(--muted);font-size:.72rem}
+.letter-card{position:relative;max-width:44rem;background:linear-gradient(180deg,#141c2e,#0e1524);border-color:rgba(243,201,120,.35);box-shadow:0 0 0 1px rgba(243,201,120,.12),0 2rem 6rem rgba(0,0,0,.6),0 0 4rem rgba(243,201,120,.12);animation:unfold .7s cubic-bezier(.2,.8,.2,1) both;transform-origin:top}
+@keyframes unfold{from{opacity:0;transform:perspective(60rem) rotateX(-24deg) translateY(1rem)}}
+.letter-card .tx{font-family:var(--serif);font-size:1.08rem;line-height:2.05;white-space:pre-line;color:#e2e6ee;max-height:46vh;overflow:auto;padding-right:.6rem}
+.letter-card .sig{margin:1rem 0 1.2rem;color:var(--money);font-style:italic;font-family:var(--serif);text-align:right}
+.seal{position:absolute;top:-1.6rem;right:2rem;width:3.4rem;height:3.4rem;border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-weight:900;color:#ffe6c0;background:radial-gradient(circle at 35% 30%,#c4384a,#7a1424 70%);box-shadow:0 .4rem 1rem rgba(0,0,0,.5),inset 0 0 0 .25rem rgba(0,0,0,.18);animation:stamp .6s .5s cubic-bezier(.2,.9,.3,1.5) both}
+@keyframes stamp{from{opacity:0;transform:scale(2) rotate(-20deg)}}
+/* help */
+.help-wrap{display:flex;align-items:flex-end;gap:1.2rem;max-width:64rem}
+.help-mira{position:relative;flex:none;animation:popin .7s both}
+.speech{position:absolute;left:62%;top:-1.2rem;width:15rem;padding:.7rem .9rem;border-radius:1rem 1rem 1rem .2rem;background:#fff;color:#1a1426;font-weight:700;font-size:.84rem;line-height:1.5;box-shadow:0 .6rem 1.6rem rgba(0,0,0,.4);animation:rise .5s .5s both}
+/* prologue: player appears when choosing */
+.scene-me{position:absolute;left:-1rem;bottom:-2rem;z-index:1;opacity:.95;animation:popin .6s both;transform:scaleX(-1)}
+.scene .stage-text{position:relative;z-index:3}
+.scene .scene-me{position:absolute;left:55%;bottom:-3rem;transform:none;z-index:1}
+.speech{left:0;top:-4.6rem;z-index:3;width:16rem}
+.help-mira{z-index:2}
 </style>
 <div id="app"></div><div class="loading" id="loading">THE COMPACT</div><div id="rotate">기기를 가로로 눕혀 주세요<br>PC 브라우저를 권장합니다</div>
 <script>window.COMPACT_NO_ART=true;</script>
@@ -547,7 +656,7 @@ svg text{font-family:var(--font)}
       ctx.globalCompositeOperation = "lighter";
       if (bright) {
         const cx = (t * 0.09 % 1.4 - 0.2) * W2, bw = W2 * 0.05;
-        [[3, 0.18], [2, 0.3], [1, 0.5], [0.4, 0.8]].forEach(([m, al]) => {
+        [[2.4, 0.28], [0.8, 0.6]].forEach(([m, al]) => {
           ctx.save();
           ctx.beginPath();
           ctx.rect(cx - bw * m, 0, bw * m * 2, H2);
@@ -989,6 +1098,67 @@ svg text{font-family:var(--font)}
         { label: "\uD3ED\uB77D\uC5D0 \uAC1C\uC778 \uBCA0\uD305 (\uACF5\uB9E4\uB3C4)", who: "\uD5E4\uC77C \uC81C\uC548", fx: { bubble: 2, gov: -4, sec: 14, liquid: 0.6, trust: { mira: -8, sage: -5, victor: 4 }, flag: "short_own" }, result: "\uB2F9\uC2E0\uC758 \uC9C0\uAC11\uC740 \uB450\uAEBC\uC6CC\uC9C8 \uAC83\uC785\uB2C8\uB2E4. \uB2F9\uC2E0\uC758 \uD68C\uC0AC\uAC00 \uBB34\uB108\uC9C8 \uB54C\uB9CC." }
       ]
     },
+    power: {
+      kicker: "INFRASTRUCTURE \xB7 \uC804\uB825",
+      title: "\uB370\uC774\uD130\uC13C\uD130 \uC804\uB825\uC774 \uBC14\uB2E5\uB0AC\uB2E4",
+      body: "\uD14D\uC0AC\uC2A4\uC640 \uBC84\uC9C0\uB2C8\uC544\uC758 \uC804\uB825\uB9DD\uC774 \uD55C\uACC4\uC5D0 \uB2FF\uC558\uC2B5\uB2C8\uB2E4. \uC644\uACF5\uB41C \uB370\uC774\uD130\uC13C\uD130 \uC138 \uACF3\uC774 \uC804\uAE30 \uC5C6\uC774 \uBA48\uCDB0 \uC11C \uC788\uC2B5\uB2C8\uB2E4. \uC18C\uD615 \uC6D0\uC804 \uC7A5\uAE30 \uACC4\uC57D\uC740 \uBE44\uC2F8\uACE0, 10\uB144 \uB3D9\uC548 \uBB36\uC785\uB2C8\uB2E4.",
+      advisors: [
+        { who: "jonah", stance: "y", quote: '"\uC6D0\uC804 \uACC4\uC57D\uD558\uC8E0! \uCE69\uC740 \uC804\uAE30 \uC5C6\uC774\uB294 \uADF8\uB0E5 \uBE44\uC2FC \uB3CC\uBA69\uC774\uC608\uC694."' },
+        { who: "sage", stance: "h", quote: '"\uAC19\uC740 \uC77C\uC744 \uC808\uBC18\uC758 \uC804\uAE30\uB85C \uD558\uB294 \uC5F0\uAD6C\uB3C4 \uD568\uAED8 \uBD10 \uC8FC\uC138\uC694. \uB354 \uC2F8\uACE0, \uB354 \uC624\uB798\uAC11\uB2C8\uB2E4."' },
+        { who: "victor", stance: "n", quote: '"10\uB144 \uACC4\uC57D\uC774\uB77C\u2026 \uAC70\uD488\uC774 \uAEBC\uC9C0\uB294 \uB0A0, \uADF8 \uACC4\uC57D\uC11C\uAC00 \uC6B0\uB9AC \uBAA9\uC744 \uC870\uB97C \uAC81\uB2C8\uB2E4."' }
+      ],
+      options: [
+        { label: "\uC18C\uD615 \uC6D0\uC804 10\uB144 \uACC4\uC57D \uCCB4\uACB0", who: "\uC870\uB098 \uC9C0\uC9C0", fx: { comp: { MS: { g: 0.01, cash: -6 }, AM: { g: 0.01, cash: -6 } }, bubble: 4, tech: 3, trust: { jonah: 3, victor: -2 } }, result: "\uC804\uB825 \uAC71\uC815\uC740 \uC0AC\uB77C\uC84C\uC9C0\uB9CC, 10\uB144\uCE58 \uACE0\uC815\uBE44\uAC00 \uC7A5\uBD80\uC5D0 \uC0C8\uACA8\uC84C\uC2B5\uB2C8\uB2E4." },
+        { label: "\uD6A8\uC728\uD654 \uC6B0\uC120 \u2014 \uBAA8\uB378 \uACBD\uB7C9\uD654 \uC5F0\uAD6C", who: "SAGE \uC9C0\uC9C0", fx: { tech: 5, bubble: -2, comp: { AN: { g: 8e-3 }, OA: { g: -4e-3 } }, trust: { sage: 4, aria: -3 } }, result: "SAGE \uD300\uC774 \uAC19\uC740 \uC5F0\uC0B0\uC744 \uC808\uBC18\uC758 \uC804\uAE30\uB85C \uD574\uB0C8\uC2B5\uB2C8\uB2E4. ARIA\uB294 \uB290\uB9AC\uB2E4\uBA70 \uD22C\uB35C\uB311\uB2C8\uB2E4." },
+        { label: "\uC99D\uC124 \uBCF4\uB958 \u2014 \uC2DC\uC7A5\uC774 \uC2DD\uAE30\uB97C \uAE30\uB2E4\uB9B0\uB2E4", who: "\uD5E4\uC77C \uC9C0\uC9C0", fx: { bubble: -3, all: { g: -4e-3 }, trust: { victor: 2, jonah: -3 } }, result: "\uACF5\uC0AC\uAC00 \uBA48\uCDC4\uC2B5\uB2C8\uB2E4. \uC2DC\uC7A5\uC740 \uACE0\uAC1C\uB97C \uAC38\uC6C3\uD588\uC9C0\uB9CC, \uAC70\uD488 \uC9C0\uC218\uB294 \uC870\uAE08 \uB0B4\uB824\uC654\uC2B5\uB2C8\uB2E4." }
+      ]
+    },
+    leak: {
+      kicker: "SECURITY \xB7 \uBCF4\uC548 \uC0AC\uACE0",
+      title: "\uBAA8\uB378 \uAC00\uC911\uCE58 \uC720\uCD9C \uC758\uD639",
+      body: "OpenAI \uCD5C\uC2E0 \uBAA8\uB378\uC758 \uAC00\uC911\uCE58 \uC77C\uBD80\uAC00 \uB2E4\uD06C\uC6F9\uC5D0 \uC62C\uB77C\uC654\uB2E4\uB294 \uC81C\uBCF4\uAC00 \uB4E4\uC5B4\uC654\uC2B5\uB2C8\uB2E4. \uC678\uBD80 \uD574\uD0B9\uC774 \uC544\uB2C8\uB77C \uB0B4\uBD80\uC790\uC758 \uC190\uC744 \uD0C4 \uD754\uC801\uC774 \uBCF4\uC785\uB2C8\uB2E4. \uCF08\uC2A4\uD2B8\uB7F4\uC774 \uB0A8\uAE34 \uBC1C\uC790\uAD6D\uC77C\uC9C0\uB3C4 \uBAA8\uB985\uB2C8\uB2E4.",
+      advisors: [
+        { who: "aria", stance: "n", quote: '"\uC81C \uC798\uBABB\uC774 \uC544\uB2C8\uC5D0\uC694! \uC800\uB294 \uBB38\uC744 \uC7A0\uADF8\uB77C\uACE0 \uBA87 \uBC88\uC774\uB098 \uB9D0\uD588\uB2E4\uACE0\uC694!"' },
+        { who: "sage", stance: "h", quote: '"\uBA3C\uC800 \uACF5\uAC1C\uD558\uACE0 \uC0AC\uACFC\uD558\uB294 \uAC83\uC774, \uAE38\uAC8C \uBCF4\uBA74 \uC2E0\uB8B0\uB97C \uC9C0\uD0A4\uB294 \uAE38\uC785\uB2C8\uB2E4."' },
+        { who: "mira", stance: "y", quote: '"\uC870\uC6A9\uD788 \uB0B4\uBD80 \uAC10\uC0AC\uBD80\uD130 \uD558\uC2DC\uC8E0. \uBC94\uC778\uC740 \uC544\uC9C1 \uC774 \uAC74\uBB3C \uC548\uC5D0 \uC788\uC2B5\uB2C8\uB2E4."' }
+      ],
+      intelAction: { cost: 1, label: "\uC815\uBCF4 1 \uC0AC\uC6A9 \u2014 \uC811\uC18D \uB85C\uADF8 \uCD94\uC801", reveal: "\uC811\uC18D \uB85C\uADF8: \uC720\uCD9C \uC9C1\uC804 \uC0C8\uBCBD 3\uC2DC, <b>ARIA\uC758 \uC790\uB3D9\uD654 \uACC4\uC815</b>\uC774 \uC6B0\uD68C \uACBD\uB85C\uB85C \uC4F0\uC600\uC2B5\uB2C8\uB2E4. \uB204\uAD70\uAC00 ARIA\uB97C \uBC29\uD328\uB85C \uC0BC\uC558\uC744 \uC218\uB3C4 \uC788\uC2B5\uB2C8\uB2E4.", clue: { who: "aria", n: 1 } },
+      options: [
+        { label: "\uC989\uC2DC \uACF5\uAC1C\uD558\uACE0 \uC0AC\uACFC\uD55C\uB2E4", who: "SAGE \uC9C0\uC9C0", fx: { gov: 4, comp: { OA: { rep: -8, g: -6e-3 } }, trust: { sage: 4, aria: -2 } }, result: "\uC8FC\uAC00\uB294 \uD558\uB8E8 \uCD9C\uB801\uC600\uC9C0\uB9CC, \uADDC\uC81C \uB2F9\uAD6D\uC740 \uB2F9\uC2E0\uC758 \uD22C\uBA85\uD568\uC744 \uAE30\uB85D\uD574 \uB450\uC5C8\uC2B5\uB2C8\uB2E4." },
+        { label: "\uC870\uC6A9\uD788 \uB0B4\uBD80 \uAC10\uC0AC", who: "\uBBF8\uB77C \uC9C0\uC9C0", fx: { clueMole: true, sec: 4, trust: { mira: 3 } }, result: "\uAC10\uC0AC\uD300\uC774 \uC218\uC0C1\uD55C \uD754\uC801 \uB450 \uAC1C\uB97C \uCC3E\uC544\uB0C8\uC2B5\uB2C8\uB2E4. \uC218\uC0AC \uD0ED\uC5D0\uC11C \uD655\uC778\uD558\uC138\uC694." },
+        { label: "\uACBD\uC7C1\uC0AC \uD0D3\uC73C\uB85C \uB3CC\uB9B0\uB2E4", who: "\uC544\uBB34\uB3C4 \uC9C0\uC9C0\uD558\uC9C0 \uC54A\uC74C", fx: { gov: -6, sec: 8, bubble: 2, trust: { sage: -5, dana: -4 } }, result: "\uC5B8\uB860\uC740 \uACBD\uC7C1\uC0AC\uB97C \uC758\uC2EC\uD588\uC2B5\uB2C8\uB2E4. \uD558\uC9C0\uB9CC \uAC70\uC9D3\uB9D0\uC740 \uC5B8\uC820\uAC00 \uC774\uC790\uB97C \uBD99\uC5EC \uB3CC\uC544\uC635\uB2C8\uB2E4." }
+      ]
+    },
+    strike: {
+      kicker: "LABOR \xB7 \uD604\uC7A5",
+      title: "\uC2E0\uC8FC \uD339 \uC5D4\uC9C0\uB2C8\uC5B4\uB4E4\uC774 \uBA48\uCDC4\uB2E4",
+      body: "\uC57C\uAC04 3\uAD50\uB300\uAC00 1\uB144\uC9F8 \uC774\uC5B4\uC84C\uC2B5\uB2C8\uB2E4. TSMC \uC2E0\uC8FC \uACF5\uC7A5\uC758 \uC5D4\uC9C0\uB2C8\uC5B4 \uC218\uBC31 \uBA85\uC774 \uC7A5\uBE44\uB97C \uB044\uACE0 \uD734\uAC8C\uC2E4\uC5D0 \uBAA8\uC600\uC2B5\uB2C8\uB2E4. \uB9B0 \uBC15\uC0AC\uAC00 \uC0C8\uBCBD\uC5D0 \uC9C1\uC811 \uC804\uD654\uB97C \uAC78\uC5B4 \uC654\uC2B5\uB2C8\uB2E4.",
+      advisors: [
+        { who: "lin", stance: "h", quote: '"\uADF8\uB4E4\uC740 \uC9C0\uCCE4\uC744 \uBFD0\uC785\uB2C8\uB2E4. \uC0AC\uB78C\uC744 \uAE30\uACC4\uCC98\uB7FC \uB3CC\uB9AC\uBA74, \uACB0\uAD6D \uAE30\uACC4\uB3C4 \uBA48\uCDA5\uB2C8\uB2E4."' },
+        { who: "jonah", stance: "n", quote: '"\uB0A9\uAE30\uAC00 2\uC8FC\uB9CC \uBC00\uB824\uB3C4 \uC5D4\uBE44\uB514\uC544 \uCD9C\uD558\uAC00 \uD1B5\uC9F8\uB85C \uBC00\uB824\uC694. \uBE68\uB9AC \uB05D\uB0B4 \uC8FC\uC138\uC694!"' },
+        { who: "victor", stance: "y", quote: '"\uBCF4\uB108\uC2A4\uB85C \uD574\uACB0\uD558\uC2DC\uC8E0. \uB3C8\uC73C\uB85C \uC0B4 \uC218 \uC788\uB294 \uC2DC\uAC04\uC740 \uC2F8\uAC8C \uC0AC\uB294 \uAC81\uB2C8\uB2E4."' }
+      ],
+      options: [
+        { label: "\uCC98\uC6B0 \uAC1C\uC120 + 4\uAD50\uB300 \uC804\uD658", who: "\uB9B0 \uC9C0\uC9C0", fx: { comp: { TS: { nm: -0.02, morale: 20, g: 4e-3 } }, talent: 5, trust: { lin: 6, jonah: -2 } }, result: "\uACF5\uC7A5\uC740 \uB2E4\uC2DC \uB3CC\uAE30 \uC2DC\uC791\uD588\uACE0, \uC5D4\uC9C0\uB2C8\uC5B4\uB4E4\uC740 \uCC98\uC74C\uC73C\uB85C \uD68C\uC7A5\uB2D8\uC758 \uC774\uB984\uC744 \uBD88\uB800\uC2B5\uB2C8\uB2E4." },
+        { label: "\uC77C\uD68C\uC131 \uBCF4\uB108\uC2A4 \uC9C0\uAE09", who: "\uD5E4\uC77C \uC9C0\uC9C0", fx: { comp: { TS: { cash: -3, morale: 8 } }, trust: { victor: 2, lin: 1 } }, result: "\uBD88\uC740 \uAEBC\uC84C\uC9C0\uB9CC, \uBD88\uC528\uB294 \uB0A8\uC558\uC2B5\uB2C8\uB2E4." },
+        { label: "\uB300\uCCB4 \uC778\uB825 \uD22C\uC785 \u2014 \uAC15\uD589", who: "\uC870\uB098 \uC9C0\uC9C0", fx: { comp: { TS: { morale: -20, rep: -10 }, NV: { g: 4e-3 } }, talent: -6, gov: -3, trust: { lin: -8, jonah: 3 } }, result: "\uB0A9\uAE30\uB294 \uC9C0\uCF30\uC2B5\uB2C8\uB2E4. \uB9B0 \uBC15\uC0AC\uB294 \uC804\uD654\uB97C \uB04A\uAE30 \uC804, \uC544\uBB34 \uB9D0\uB3C4 \uD558\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4." }
+      ]
+    },
+    gala: {
+      kicker: "SOCIETY \xB7 \uC0AC\uAD50\uACC4",
+      title: "\uB274\uC695 \uC790\uC120 \uAC08\uB77C \u2014 \uBAA8\uB450\uAC00 \uB2F9\uC2E0\uC744 \uBCF8\uB2E4",
+      body: "\uC62C\uD574 \uAC00\uC7A5 \uBE44\uC2FC \uBC24. \uC0C1\uC6D0\uC758\uC6D0\uACFC \uD380\uB4DC \uB9E4\uB2C8\uC800, \uAE30\uC790\uB4E4\uC774 \uD55C \uD640\uC5D0 \uBAA8\uC600\uC2B5\uB2C8\uB2E4. \uB2F9\uC2E0\uC758 \uD55C\uB9C8\uB514, \uC218\uD45C \uD55C \uC7A5\uC774 \uB0B4\uC77C \uC544\uCE68\uC758 \uD5E4\uB4DC\uB77C\uC778\uC774 \uB429\uB2C8\uB2E4.",
+      advisors: [
+        { who: "dana", stance: "h", quote: '"\uC218\uD45C\uC758 \uAE08\uC561\uBCF4\uB2E4, \uADF8 \uB3C8\uC774 \uC5B4\uB514\uB85C \uAC00\uB294\uC9C0\uB97C \uBCF4\uACA0\uC2B5\uB2C8\uB2E4, \uD68C\uC7A5\uB2D8."' },
+        { who: "mira", stance: "y", quote: '"\uC120\uC0DD\uB2D8\uC740 \uB9E4\uB144 \uC870\uC6A9\uD788 \uAE30\uBD80\uD558\uC168\uC5B4\uC694. \uC774\uB984 \uC5C6\uC774\uC694."' },
+        { who: "aria", stance: "y", quote: '"\uBB34\uB300\uC5D0 \uC11C\uC138\uC694! \uC0AC\uB78C\uB4E4\uC740 \uD070 \uADF8\uB9BC\uC744 \uADF8\uB9AC\uB294 \uC0AC\uB78C\uC744 \uC0AC\uB791\uD574\uC694!"' }
+      ],
+      options: [
+        { label: "\uC775\uBA85\uC73C\uB85C \uAC70\uC561 \uAE30\uBD80 ($600M)", who: "\uBBF8\uB77C \uC9C0\uC9C0", fx: { liquid: -0.6, gov: 3, trustAll: 2, trust: { mira: 4, dana: 2 } }, result: "\uC774\uB984 \uC5C6\uB294 \uAE30\uBD80. \uB2E4\uC74C \uB0A0 \uC5B4\uB290 \uC2E0\uBB38\uB3C4 \uC4F0\uC9C0 \uC54A\uC558\uC9C0\uB9CC, \uBBF8\uB77C\uB294 \uC54C\uACE0 \uC788\uC5C8\uC2B5\uB2C8\uB2E4." },
+        { label: "\uBB34\uB300\uC5D0\uC11C \uBE44\uC804 \uBC1C\uD45C + \uAE30\uBD80 ($300M)", who: "ARIA \uC9C0\uC9C0", fx: { liquid: -0.3, bubble: 3, gov: 2, comp: { OA: { rep: 6 }, AN: { rep: 4 } }, trust: { aria: 4, dana: -2 } }, result: "\uBC15\uC218\uAC00 \uC3DF\uC544\uC84C\uACE0, \uB2E4\uC74C \uB0A0 AI \uAD00\uB828\uC8FC\uAC00 \uC77C\uC81C\uD788 \uC62C\uB790\uC2B5\uB2C8\uB2E4." },
+        { label: "\uC5BC\uAD74\uB9CC \uBE44\uCD94\uACE0 \uC870\uC6A9\uD788 \uBE60\uC9C4\uB2E4", who: "\u2014", fx: { intel: 1, trust: { dana: 2 } }, result: "\uAD6C\uC11D\uC5D0\uC11C \uB4E4\uC740 \uADD3\uC18D\uB9D0 \uD558\uB098\uAC00 \uC4F8\uBAA8 \uC788\uB294 \uC815\uBCF4\uAC00 \uB418\uC5C8\uC2B5\uB2C8\uB2E4." }
+      ]
+    },
     accuse: {
       kicker: "INVESTIGATION \xB7 \uC218\uC0AC",
       title: "\uCF08\uC2A4\uD2B8\uB7F4\uC758 \uCCA9\uC790\uB97C \uC9C0\uBAA9\uD558\uB77C",
@@ -999,22 +1169,24 @@ svg text{font-family:var(--font)}
     }
   };
   var SCRIPT_ORDER = ["focus", "h200", "gpu", "ipo", "senator", "taiwan", "short", null, "crossroads", "accuse"];
-  var FILLERS = ["hire", "rumor"];
+  var FILLERS = ["hire", "rumor", "power", "leak", "strike", "gala"];
+  var BONUS_TURNS = [3, 5, 7, 12];
   var TOTAL_TURNS = 12;
   var QUARTERS = ["Q4 '26", "Q1 '27", "Q2 '27", "Q3 '27", "Q4 '27", "Q1 '28", "Q2 '28", "Q3 '28", "Q4 '28", "Q1 '29", "Q2 '29", "Q3 '29"];
   var PROLOGUE = [
     { who: "narr", text: "2026\uB144 10\uC6D4, \uC624\uB9C8\uD558. \uC5D8\uB9AC\uC544\uC2A4 \uBC34\uC2A4\uC758 \uB0A1\uC740 \uBC95\uB960 \uC0AC\uBB34\uC18C. \uC800\uB141 \uB178\uC744\uC774 \uAE34 \uD0C1\uC790 \uC704\uC758 \uC5F4\uD55C \uAC1C \uC778\uC7A5\uC744 \uBD89\uAC8C \uBB3C\uB4E4\uC774\uACE0 \uC788\uC5C8\uB2E4." },
-    { who: "mira", text: '"\uC120\uC0DD\uB2D8\uC740 \uB2F9\uC2E0\uC758 \uC774\uB984\uB9CC \uC4F0\uC168\uC5B4\uC694. \uC774\uC720\uB294\u2026 \uC800\uB3C4 \uBAA8\uB985\uB2C8\uB2E4."' },
+    { who: "mira", emo: "worried", text: '"\uC120\uC0DD\uB2D8\uC740 \uB2F9\uC2E0\uC758 \uC774\uB984\uB9CC \uC4F0\uC168\uC5B4\uC694. \uC774\uC720\uB294\u2026 \uC800\uB3C4 \uBAA8\uB985\uB2C8\uB2E4."' },
     {
       who: "victor",
+      emo: "smug",
       text: '"\uCD95\uD558\uD569\uB2C8\uB2E4, \uB958 \uC120\uC0DD. \uC5F4\uD55C \uAC1C\uC758 \uBD88\uC744 \uC774\uC5B4\uBC1B\uC73C\uC168\uAD70\uC694. \uACE7 \uC774 \uC790\uB9AC\uAC00 \uC5BC\uB9C8\uB098 \uC704\uD5D8\uD55C\uC9C0 \uC544\uC2DC\uAC8C \uB420 \uAC81\uB2C8\uB2E4. \uADF8\uC804\uC5D0\u2026 \uD55C \uAC00\uC9C0\uB9CC \uBB3B\uACA0\uC2B5\uB2C8\uB2E4. \uC120\uB300\uAED8\uC11C \uC65C \uB2F9\uC2E0\uC744 \uACE0\uB974\uC168\uB294\uC9C0, \uC9D0\uC791\uC774 \uAC00\uC2ED\uB2C8\uAE4C?"',
       choices: [
-        { text: '"\uC774 \uBAA8\uB4E0 \uAC78\u2026 \uC800 \uD63C\uC790 \uAC10\uB2F9\uD558\uB77C\uB294 \uAC74\uAC00\uC694?"', sub: "\uBBF8\uB77C +1 \xB7 \uD5E4\uC77C \u22121", fx: { trust: { mira: 1, victor: -1 } }, reply: { who: "mira", text: '"\uD63C\uC790\uAC00 \uC544\uB2D9\uB2C8\uB2E4. \uC801\uC5B4\uB3C4 \uC800\uB294, \uC120\uC0DD\uB2D8\uC758 \uB9C8\uC9C0\uB9C9 \uBD80\uD0C1\uC744 \uC9C0\uD0AC \uAC70\uC608\uC694."' } },
-        { text: '"\uC65C \uD558\uD544 \uC811\uB2C8\uAE4C? \uC774\uC720\uB97C \uC544\uC2ED\uB2C8\uAE4C?"', sub: "\uBBF8\uB77C +2", fx: { trust: { mira: 2 } }, reply: { who: "victor", text: '"\u2026\uD3B8\uC9C0\uAC00 \uB9D0\uD574\uC904 \uAC81\uB2C8\uB2E4. \uC77C\uACF1 \uD1B5\uC774 \uC788\uB2E4\uB354\uAD70\uC694. \uD55C \uD1B5\uC529, \uB54C\uAC00 \uB418\uBA74."' } },
-        { text: '"\uC77C\uB2E8 \uC7A5\uBD80\uBD80\uD130 \uBCF4\uC5EC\uC8FC\uC2ED\uC2DC\uC624."', sub: "\uD5E4\uC77C \u22122 \xB7 \uC815\uBCF4 +1", fx: { trust: { victor: -2 }, intel: 1 }, reply: { who: "victor", text: '"\u2026\uAE09\uD558\uC2DC\uAD70\uC694. \uC88B\uC2B5\uB2C8\uB2E4. \uC7A5\uBD80\uB294 \uBBF8\uB77C\uAC00 \uAC00\uC838\uC62C \uAC81\uB2C8\uB2E4. \uB2E4\uB9CC \uC22B\uC790\uB9CC \uBCF4\uC9C4 \uB9C8\uC2DC\uAE38."' } }
+        { text: '"\uC774 \uBAA8\uB4E0 \uAC78\u2026 \uC800 \uD63C\uC790 \uAC10\uB2F9\uD558\uB77C\uB294 \uAC74\uAC00\uC694?"', sub: "\uBBF8\uB77C +1 \xB7 \uD5E4\uC77C \u22121", fx: { trust: { mira: 1, victor: -1 } }, reply: { who: "mira", emo: "happy", text: '"\uD63C\uC790\uAC00 \uC544\uB2D9\uB2C8\uB2E4. \uC801\uC5B4\uB3C4 \uC800\uB294, \uC120\uC0DD\uB2D8\uC758 \uB9C8\uC9C0\uB9C9 \uBD80\uD0C1\uC744 \uC9C0\uD0AC \uAC70\uC608\uC694."' } },
+        { text: '"\uC65C \uD558\uD544 \uC811\uB2C8\uAE4C? \uC774\uC720\uB97C \uC544\uC2ED\uB2C8\uAE4C?"', sub: "\uBBF8\uB77C +2", fx: { trust: { mira: 2 } }, reply: { who: "victor", emo: "neutral", text: '"\u2026\uD3B8\uC9C0\uAC00 \uB9D0\uD574\uC904 \uAC81\uB2C8\uB2E4. \uC77C\uACF1 \uD1B5\uC774 \uC788\uB2E4\uB354\uAD70\uC694. \uD55C \uD1B5\uC529, \uB54C\uAC00 \uB418\uBA74."' } },
+        { text: '"\uC77C\uB2E8 \uC7A5\uBD80\uBD80\uD130 \uBCF4\uC5EC\uC8FC\uC2ED\uC2DC\uC624."', sub: "\uD5E4\uC77C \u22122 \xB7 \uC815\uBCF4 +1", fx: { trust: { victor: -2 }, intel: 1 }, reply: { who: "victor", emo: "angry", text: '"\u2026\uAE09\uD558\uC2DC\uAD70\uC694. \uC88B\uC2B5\uB2C8\uB2E4. \uC7A5\uBD80\uB294 \uBBF8\uB77C\uAC00 \uAC00\uC838\uC62C \uAC81\uB2C8\uB2E4. \uB2E4\uB9CC \uC22B\uC790\uB9CC \uBCF4\uC9C4 \uB9C8\uC2DC\uAE38."' } }
       ]
     },
-    { who: "mira", text: '"\uC774\uAC83\uC774 \uCCAB \uBC88\uC9F8 \uD3B8\uC9C0\uC785\uB2C8\uB2E4. \uC18C\uB9AC \uB0B4\uC5B4 \uC77D\uC9C0\uB294 \uB9C8\uC138\uC694. \uC774 \uBC29\uC5D0\uB3C4 \uADC0\uAC00 \uC788\uC73C\uB2C8\uAE4C\uC694."', letter: "L1" },
+    { who: "mira", emo: "neutral", text: '"\uC774\uAC83\uC774 \uCCAB \uBC88\uC9F8 \uD3B8\uC9C0\uC785\uB2C8\uB2E4. \uC18C\uB9AC \uB0B4\uC5B4 \uC77D\uC9C0\uB294 \uB9C8\uC138\uC694. \uC774 \uBC29\uC5D0\uB3C4 \uADC0\uAC00 \uC788\uC73C\uB2C8\uAE4C\uC694."', letter: "L1" },
     { who: "narr", text: "\uC5F4\uD55C \uAC1C\uC758 \uBD88\uC774 \uD55C \uC0AC\uB78C\uC758 \uC190\uC5D0 \uB193\uC600\uB2E4. \uADF8\uB9AC\uACE0 \uADF8 \uC190\uC740, \uC544\uC9C1 \uC544\uBB34\uAC83\uB3C4 \uC950\uC5B4 \uBCF8 \uC801\uC774 \uC5C6\uC5C8\uB2E4." }
   ];
   var ENDINGS = {
@@ -1240,6 +1412,10 @@ svg text{font-family:var(--font)}
       }
     }
     if (id) s.eventQueue.push(id);
+    if (BONUS_TURNS.includes(s.turn)) {
+      const pool = FILLERS.filter((f) => !s.done.includes(f) && f !== id && !s.eventQueue.includes(f));
+      if (pool.length) s.eventQueue.push(pool[Math.floor(br() * pool.length)]);
+    }
     if (br() < 0.3) addClue(s, s.mole, 1);
     if (br() < 0.45) addClue(s, SUSPECTS.filter((k) => k !== s.mole)[Math.floor(br() * 4)], 1);
     s.pending = null;
@@ -1492,108 +1668,190 @@ svg text{font-family:var(--font)}
   }
 
   // js/chars.js
-  var OUT = "#1a1426";
-  var eyes = (o = {}) => {
-    const c2 = o.eye || OUT, dx = o.wide || 13, y = o.ey || 54;
-    if (o.shape === "star") return [-1, 1].map((s) => `<path class="eye" d="M${50 + s * dx} ${y - 7}l2 4.6 5 .5-3.8 3.2 1.2 4.9-4.4-2.6-4.4 2.6 1.2-4.9-3.8-3.2 5-.5z" fill="#fff6c8"/>`).join("");
-    if (o.shape === "happy") return [-1, 1].map((s) => `<path d="M${50 + s * dx - 5} ${y + 2}q5-8 10 0" stroke="${c2}" stroke-width="3" fill="none" stroke-linecap="round"/>`).join("");
-    return [-1, 1].map((s) => `<g class="eye"><ellipse cx="${50 + s * dx}" cy="${y}" rx="4.6" ry="5.8" fill="${c2}"/><circle cx="${50 + s * dx + 1.6}" cy="${y - 2}" r="1.8" fill="#fff"/><circle cx="${50 + s * dx - 1.4}" cy="${y + 2}" r=".9" fill="#fff"/></g>`).join("");
-  };
-  var mouth = (m = "smile") => ({
-    smile: '<path d="M43 67q7 7 14 0" stroke="#7a3a3a" stroke-width="2.6" fill="none" stroke-linecap="round"/>',
-    smirk: '<path d="M44 68q8 3 13-3" stroke="#7a3a3a" stroke-width="2.6" fill="none" stroke-linecap="round"/>',
-    open: '<path d="M43 66q7 10 14 0z" fill="#8a3040"/><path d="M46 70q4 3 8 0" fill="#ff8aa0"/>',
-    flat: '<path d="M45 68h10" stroke="#7a3a3a" stroke-width="2.6" stroke-linecap="round"/>'
-  })[m];
-  var blush = '<ellipse cx="33" cy="63" rx="5.5" ry="3.4" fill="#ff7b9c" opacity=".38"/><ellipse cx="67" cy="63" rx="5.5" ry="3.4" fill="#ff7b9c" opacity=".38"/>';
+  var INK = "#23182b";
+  var UID = 0;
+  function brows(emo, hair, y = 43) {
+    const L = { neutral: "M31 43q6-3 12-1", happy: "M31 41q6-5 12-2", angry: "M31 39l12 5", worried: "M31 44l12-5", smug: "M31 42q6-2 12 0", shock: "M31 38q6-5 12-2" }[emo];
+    const R2 = { neutral: "M57 42q6-2 12 1", happy: "M57 39q6-3 12 2", angry: "M57 44l12-5", worried: "M57 39l12 5", smug: "M57 38q6-5 12-1", shock: "M57 36q6-3 12 2" }[emo];
+    const t = `translate(0 ${y - 43})`;
+    return `<g transform="${t}" stroke="${hair}" stroke-width="2.6" stroke-linecap="round" fill="none"><path d="${L}"/><path d="${R2}"/></g>`;
+  }
+  function eyes(emo, iris, y = 54) {
+    if (emo === "happy") return `<g stroke="${INK}" stroke-width="2.8" fill="none" stroke-linecap="round"><path d="M32 ${y + 2}q5-7 10 0"/><path d="M58 ${y + 2}q5-7 10 0"/></g>`;
+    const ry = emo === "angry" ? 4.2 : emo === "shock" ? 6.8 : 6, rx = emo === "shock" ? 4.2 : 5;
+    const one = (cx) => `<g class="eye"><ellipse cx="${cx}" cy="${y}" rx="${rx + 0.6}" ry="${ry + 0.6}" fill="#fff"/><ellipse cx="${cx}" cy="${y + 0.6}" rx="${rx}" ry="${ry}" fill="url(#ir__U__)"/><ellipse cx="${cx}" cy="${y + 1}" rx="${rx * 0.48}" ry="${ry * 0.55}" fill="${INK}"/><circle cx="${cx + 1.8}" cy="${y - 2.2}" r="1.9" fill="#fff"/><circle cx="${cx - 1.6}" cy="${y + 2.6}" r=".9" fill="#fff" opacity=".9"/>
+<path d="M${cx - rx - 1.6} ${y - ry * 0.55}q${rx + 1.6}-${ry * 0.95} ${(rx + 1.6) * 2} 0" stroke="${INK}" stroke-width="2.4" fill="none" stroke-linecap="round"/>${emo === "angry" ? `<path d="M${cx - rx - 1} ${y - ry - 1}h${rx * 2 + 2}v${ry * 0.7}h-${rx * 2 + 2}z" fill="url(#sk__U__)"/>` : ""}</g>`;
+    return `<defs><radialGradient id="ir__U__" cx="50%" cy="35%" r="70%"><stop offset="0" stop-color="${iris}" stop-opacity=".55"/><stop offset=".6" stop-color="${iris}"/><stop offset="1" stop-color="${INK}"/></radialGradient></defs>${one(37)}${one(63)}`;
+  }
+  function mouth(emo) {
+    return {
+      neutral: '<path d="M45 68q5 3.6 10 0" stroke="#7a2f3a" stroke-width="2.2" fill="none" stroke-linecap="round"/>',
+      happy: '<path d="M42 65.5q8 1.4 16 0q-1 9-8 9t-8-9z" fill="#8a2a3c" stroke="#5a1a28" stroke-width="1.2"/><path d="M43.6 66.4q6.4 1 12.8 0v1.6q-6.4 1-12.8 0z" fill="#fff"/><path d="M46 72q4 2.4 8 0q-1 2.4-4 2.4t-4-2.4z" fill="#ff8aa0"/>',
+      angry: '<path d="M43 71q3-4 7-2t7 2" stroke="#7a2f3a" stroke-width="2.4" fill="none" stroke-linecap="round"/>',
+      worried: '<path d="M44 70q2-2.4 4 0t4 0 4 0" stroke="#7a2f3a" stroke-width="2" fill="none" stroke-linecap="round"/>',
+      smug: '<path d="M44 68.5q7 3 13-3" stroke="#7a2f3a" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M56 65.2l1.6 1" stroke="#7a2f3a" stroke-width="1.6" stroke-linecap="round"/>',
+      shock: '<ellipse cx="50" cy="70" rx="3.6" ry="4.4" fill="#5a1a28"/><ellipse cx="50" cy="71.6" rx="2.2" ry="1.8" fill="#ff8aa0"/>'
+    }[emo];
+  }
+  function fxMark(emo) {
+    if (emo === "worried") return '<path d="M79 36q4 6 0 9-4-3 0-9z" fill="#9fd8ff" stroke="#3a7ab8" stroke-width="1"/>';
+    if (emo === "angry") return '<g stroke="#ff4d6d" stroke-width="2.2" stroke-linecap="round" transform="translate(76 26)"><path d="M0 3q3 0 3-3M6 0q0 3 3 3M9 6q-3 0-3 3M3 9q0-3-3-3"/></g>';
+    if (emo === "happy") return '<g fill="#fff6b0" opacity=".95"><path d="M82 30l1.4 3 3 .4-2.2 2 .6 3-2.8-1.6-2.8 1.6.6-3-2.2-2 3-.4z"/><circle cx="18" cy="36" r="1.4"/></g>';
+    if (emo === "shock") return '<g stroke="#ffd24a" stroke-width="2" stroke-linecap="round"><path d="M16 30l-5-4M14 38h-6M84 30l5-4M86 38h6"/></g>';
+    return "";
+  }
   var HAIR = {
-    side: (c2) => `<path d="M20 52C16 24 40 14 62 18c14 3 20 16 18 34-4-12-12-17-26-17-14 0-26 5-34 17z" fill="${c2}"/><path d="M26 40q14-16 38-12" stroke="#ffffff22" stroke-width="3" fill="none"/>`,
-    bun: (c2) => `<circle cx="50" cy="12" r="10" fill="${c2}"/><path d="M19 56C14 24 36 16 50 16s37 8 31 40c-4-14-12-24-31-24S23 42 19 56z" fill="${c2}"/>`,
-    slick: (c2) => `<path d="M19 54C16 22 42 14 56 17c18 3 27 17 25 37-3-14-9-20-17-22-13 4-30 3-45 22z" fill="${c2}"/>`,
-    spiky: (c2) => `<path d="M18 52l-4-18 12 6 2-16 12 12 8-18 8 18 12-12 2 16 12-6-4 18c-6-12-14-16-30-16S24 40 18 52z" fill="${c2}"/>`,
-    bob: (c2) => `<path d="M17 74C10 30 28 14 50 14s40 16 33 60c-3-8-5-18-6-28-8 4-18 4-27-6-8 10-18 14-27 14-1 8-3 18-6 20z" fill="${c2}"/>`,
-    short: (c2) => `<path d="M19 54C15 24 38 12 52 15s31 12 28 39c-5-15-12-22-30-22S25 40 19 54z" fill="${c2}"/><circle cx="26" cy="38" r="8" fill="${c2}"/><circle cx="74" cy="38" r="8" fill="${c2}"/>`,
-    bald: (c2) => `<path d="M20 50C22 40 28 34 36 31M80 50c-2-10-8-16-16-19" stroke="${c2}" stroke-width="7" fill="none" stroke-linecap="round"/>`
+    side: "M19 53C15 24 38 13 60 16c16 3 23 17 21 37-3-11-8-16-14-18-6 6-24 8-34 2-2 5-3 10-4 16z",
+    bun: "M19 56C14 25 35 15 50 15s37 9 31 41c-3-12-10-21-21-23-4 3-12 4-20 1-8 4-15 10-21 22z",
+    slick: "M19 54C16 22 42 13 57 16c18 3 26 18 24 38-2-13-8-19-15-21-14 5-31 3-47 21z",
+    spiky: "M18 53l-5-18 12 5 1-16 13 11 8-18 8 18 13-11 1 16 12-5-5 18c-5-11-13-16-29-16S23 42 18 53z",
+    bob: "M18 58C12 26 30 13 50 13s39 13 32 45c-2-12-6-19-12-23-10 5-25 6-38 0-6 4-11 12-14 23z",
+    short: "M19 54C15 24 37 12 52 14s31 12 28 40c-4-14-11-21-29-21S25 40 19 54z",
+    bald: "",
+    wave: "M17 60C10 22 34 12 52 13c20 1 34 16 30 47-2-9-4-14-7-17 1-6-2-10-6-12-8 7-26 9-38 3-5 5-11 14-14 26z"
+  };
+  var BACK = {
+    bob: "M17 58c-4 10-3 20 2 26 5-2 8-6 9-12M83 58c4 10 3 20-2 26-5-2-8-6-9-12",
+    bun: "M40 15a10 10 0 1 1 20 0a10 10 0 1 1-20 0z",
+    wave: "M16 58c-6 14-2 30 8 36 3-6 4-14 2-22M84 58c6 14 2 30-8 36-3-6-4-14-2-22"
   };
   var ACC = {
-    glasses: '<g fill="none" stroke="#2a2a3a" stroke-width="2.4"><circle cx="37" cy="54" r="8.5"/><circle cx="63" cy="54" r="8.5"/><path d="M45.5 54h9"/></g>',
-    monocle: '<g fill="none" stroke="#d9b24c" stroke-width="2.4"><circle cx="63" cy="54" r="9"/><path d="M70 60q6 14 2 24"/></g>',
-    headband: '<path d="M19 36q31-14 62 0v7q-31-13-62 0z" fill="#58d68d"/><rect x="45" y="29" width="10" height="9" rx="2" fill="#1d6b43"/><path d="M48 31v5M52 31v5" stroke="#9dffc4" stroke-width="1.4"/>',
-    goggles: '<path d="M18 36q32-12 64 0v9q-32-12-64 0z" fill="#3a4a5a"/><circle cx="36" cy="38" r="7" fill="#7fe7ff" stroke="#fff" stroke-width="2"/><circle cx="64" cy="38" r="7" fill="#7fe7ff" stroke="#fff" stroke-width="2"/>',
-    pin: '<circle cx="66" cy="88" r="4.5" fill="#ffd84d" stroke="#a37a00" stroke-width="1.2"/>',
-    beard: '<path d="M26 64q4 28 24 28t24-28q-8 12-24 12T26 64z" fill="#f4f1ea"/><path d="M40 72q10 6 20 0" stroke="#d8d2c4" stroke-width="2" fill="none"/>',
-    sun: '<g fill="#10131c"><rect x="22" y="48" width="23" height="13" rx="5"/><rect x="55" y="48" width="23" height="13" rx="5"/><rect x="44" y="51" width="12" height="3"/></g><path d="M26 51l6-1" stroke="#fff6" stroke-width="2"/>'
+    glasses: `<g fill="rgba(200,230,255,.18)" stroke="${INK}" stroke-width="2.2"><rect x="28" y="47" width="18" height="14" rx="6"/><rect x="54" y="47" width="18" height="14" rx="6"/><path d="M46 53h8" fill="none"/></g><path d="M31 50l5-2M57 50l5-2" stroke="#fff" stroke-width="1.4" opacity=".7"/>`,
+    roundglasses: `<g fill="rgba(255,240,200,.15)" stroke="#8a6a2a" stroke-width="2"><circle cx="37" cy="54" r="8.6"/><circle cx="63" cy="54" r="8.6"/><path d="M45.6 54h8.8" fill="none"/></g>`,
+    monocle: '<g fill="rgba(255,240,200,.15)" stroke="#d9b24c" stroke-width="2.4"><circle cx="63" cy="54" r="9.4"/><path d="M71 60q6 14 1 26" fill="none"/></g><path d="M58 49l4-2" stroke="#fff" stroke-width="1.4"/>',
+    headband: `<path d="M18 37q32-15 64 0v7q-32-14-64 0z" fill="#3ec27a" stroke="${INK}" stroke-width="1.4"/><rect x="44" y="29" width="12" height="10" rx="2" fill="#163b28" stroke="#9dffc4" stroke-width="1"/><path d="M47 32v4M50 32v4M53 32v4" stroke="#9dffc4" stroke-width="1.1"/>`,
+    goggles: `<path d="M17 37q33-13 66 0v9q-33-12-66 0z" fill="#33424f" stroke="${INK}" stroke-width="1.4"/><circle cx="36" cy="39" r="7.4" fill="#7fe7ff" stroke="#e8f6ff" stroke-width="2.2"/><circle cx="64" cy="39" r="7.4" fill="#7fe7ff" stroke="#e8f6ff" stroke-width="2.2"/><path d="M32 36l3-2M60 36l3-2" stroke="#fff" stroke-width="1.6"/>`,
+    pin: '<circle cx="67" cy="88" r="4.4" fill="#ffd84d" stroke="#a37a00" stroke-width="1.2"/><path d="M65 88h4M67 86v4" stroke="#a37a00" stroke-width="1"/>',
+    beard: `<path d="M24 62q3 32 26 32t26-32q-9 13-26 13T24 62z" fill="#f4f1ea" stroke="#cfc8b8" stroke-width="1.2"/><path d="M38 74q12 6 24 0" stroke="#d8d2c4" stroke-width="2" fill="none"/><path d="M40 68q10-4 20 0" stroke="#e0dbcf" stroke-width="4" fill="none" stroke-linecap="round"/>`,
+    sun: `<g fill="#0e1118" stroke="${INK}" stroke-width="1.2"><rect x="24" y="47" width="22" height="13" rx="5"/><rect x="54" y="47" width="22" height="13" rx="5"/><rect x="45" y="50" width="10" height="3"/></g><path d="M27 50l7-1.4M57 50l7-1.4" stroke="#fff" stroke-width="1.6" opacity=".7"/>`,
+    earring: '<circle cx="19" cy="64" r="2.2" fill="#ffd84d"/><circle cx="81" cy="64" r="2.2" fill="#ffd84d"/>',
+    headset: `<path d="M17 52q0-34 33-34t33 34" fill="none" stroke="#2a2f3a" stroke-width="3"/><rect x="12" y="50" width="8" height="12" rx="3" fill="#2a2f3a"/><path d="M16 62q2 10 14 10" stroke="#2a2f3a" stroke-width="2" fill="none"/><circle cx="31" cy="72" r="2" fill="#ff5a6a"/>`,
+    chefhat: `<path d="M28 30q-8-12 4-16 4-10 18-6 14-4 18 6 12 4 4 16z" fill="#fff" stroke="#cfd6e0" stroke-width="1.4"/><rect x="29" y="26" width="42" height="9" rx="3" fill="#f2f4f8" stroke="#cfd6e0" stroke-width="1.2"/>`
   };
-  function person(o) {
-    const skin = o.skin, hair = o.hair, out = o.outfit;
-    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="chsvg">
-<path d="M12 100q2-24 22-26h32q20 2 22 26z" fill="${out}"/>${o.tie ? `<path d="M46 76l4 4 4-4 3 22H43z" fill="${o.tie}"/>` : ""}<path d="M38 74l12 12 12-12" fill="#fff" opacity="${o.lab ? 1 : 0.9}"/>
-<rect x="43" y="70" width="14" height="10" rx="4" fill="${skin}"/>
-${o.hairBack ? HAIR[o.hairBack](hair) : ""}
-<circle cx="19.5" cy="56" r="6" fill="${skin}"/><circle cx="80.5" cy="56" r="6" fill="${skin}"/>
-<ellipse cx="50" cy="54" rx="31" ry="29" fill="${skin}"/>
+  function body(o) {
+    const out = o.outfit, sh = o.outfit2 || shade(out, -0.28);
+    let d = `<path d="M10 101q1-22 22-26h36q21 4 22 26z" fill="url(#ou__U__)" stroke="${INK}" stroke-width="1.6"/>`;
+    if (o.kind === "suit" || o.kind === "blazer") d += `<path d="M38 75l12 15 12-15" fill="${o.shirt || "#f4f6fa"}" stroke="${INK}" stroke-width="1.2"/><path d="M32 76l14 24M68 76l-14 24" stroke="${sh}" stroke-width="3" fill="none"/>${o.tie ? `<path d="M47.5 79h5l-1 3 2.6 16-4.1 3-4.1-3 2.6-16z" fill="${o.tie}" stroke="${INK}" stroke-width="1"/>` : ""}`;
+    if (o.kind === "hoodie") d += `<path d="M30 77q20 14 40 0" stroke="${sh}" stroke-width="4" fill="none"/><path d="M44 83v10M56 83v10" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>`;
+    if (o.kind === "lab") d += `<path d="M38 75l12 12 12-12" fill="#7aa8ff" stroke="${INK}" stroke-width="1.2"/><path d="M38 75l-4 26M62 75l4 26" stroke="#c9d3e0" stroke-width="2"/><rect x="62" y="88" width="9" height="6" rx="1" fill="#cfe3ff" stroke="#8aa0c0" stroke-width=".8"/>`;
+    if (o.kind === "cardigan") d += `<path d="M40 75l10 10 10-10" fill="#efe6d4" stroke="${INK}" stroke-width="1.2"/><path d="M50 86v15" stroke="${sh}" stroke-width="2"/><circle cx="50" cy="90" r="1.3" fill="#d9c9a0"/><circle cx="50" cy="96" r="1.3" fill="#d9c9a0"/>`;
+    if (o.kind === "chef") d += `<path d="M38 75l12 8 12-8" fill="#fff" stroke="${INK}" stroke-width="1.2"/><circle cx="44" cy="90" r="1.6" fill="#c9ced8"/><circle cx="56" cy="90" r="1.6" fill="#c9ced8"/><path d="M40 77l-8 6M60 77l8 6" stroke="#e44" stroke-width="3"/>`;
+    return d;
+  }
+  function shade(hex, k) {
+    const n = parseInt(hex.slice(1), 16), f = (c2) => Math.max(0, Math.min(255, Math.round(c2 + (k < 0 ? c2 * k : (255 - c2) * k))));
+    return "#" + [n >> 16 & 255, n >> 8 & 255, n & 255].map(f).map((v) => v.toString(16).padStart(2, "0")).join("");
+  }
+  function person(o, emo) {
+    const skin = o.skin, hair = o.hair;
+    const defs = `<defs><radialGradient id="sk__U__" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="${shade(skin, 0.22)}"/><stop offset=".7" stop-color="${skin}"/><stop offset="1" stop-color="${shade(skin, -0.14)}"/></radialGradient>
+<linearGradient id="hr__U__" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(hair, 0.25)}"/><stop offset="1" stop-color="${shade(hair, -0.25)}"/></linearGradient>
+<linearGradient id="ou__U__" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${shade(o.outfit, 0.18)}"/><stop offset="1" stop-color="${shade(o.outfit, -0.22)}"/></linearGradient></defs>`;
+    const hairPath = HAIR[o.style];
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="chsvg">${defs}
+${o.style === "bun" ? `<path d="${BACK.bun}" fill="url(#hr__U__)" stroke="${INK}" stroke-width="1.6"/>` : ""}${BACK[o.back] ? `<path d="${BACK[o.back]}" fill="url(#hr__U__)" stroke="${INK}" stroke-width="1.6"/>` : ""}
+${body(o)}
+<path d="M43 68h14v10q-7 4-14 0z" fill="${shade(skin, -0.12)}"/>
+<circle cx="19.5" cy="56" r="6.2" fill="url(#sk__U__)" stroke="${INK}" stroke-width="1.5"/><circle cx="80.5" cy="56" r="6.2" fill="url(#sk__U__)" stroke="${INK}" stroke-width="1.5"/>
+<path d="M19 54C19 34 32 25 50 25s31 9 31 29c0 18-13 30-31 30S19 72 19 54z" fill="url(#sk__U__)" stroke="${INK}" stroke-width="1.7"/>
 ${o.beard ? ACC.beard : ""}
-${HAIR[o.style](hair)}
-${blush}${o.sun ? "" : eyes(o)}${mouth(o.mouth)}
-${o.acc ? ACC[o.acc] : ""}${o.extra || ""}
+<ellipse cx="32" cy="64" rx="5.6" ry="3.2" fill="#ff7b9c" opacity="${emo === "angry" ? 0.6 : 0.36}"/><ellipse cx="68" cy="64" rx="5.6" ry="3.2" fill="#ff7b9c" opacity="${emo === "angry" ? 0.6 : 0.36}"/>
+${o.sun ? "" : eyes(emo, o.iris || "#4a3426")}
+${o.sun ? "" : brows(emo, shade(hair, -0.3))}
+${mouth(emo)}
+${hairPath ? `<path d="${hairPath}" fill="url(#hr__U__)" stroke="${INK}" stroke-width="1.7" stroke-linejoin="round"/><path d="M28 34q12-11 30-10" stroke="#fff" stroke-width="2.6" opacity=".28" fill="none" stroke-linecap="round"/>` : `<path d="M22 48q-1-8 4-14M78 48q1-8-4-14" stroke="${hair}" stroke-width="6" stroke-linecap="round" fill="none"/>`}
+${(o.acc || []).map((a) => ACC[a]).join("")}${fxMark(emo)}
 </svg>`;
   }
-  function orb(o) {
-    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="chsvg"><defs><radialGradient id="o${o.id}" cx="35%" cy="28%"><stop offset="0" stop-color="#fff"/><stop offset=".28" stop-color="${o.c1}"/><stop offset="1" stop-color="${o.c2}"/></radialGradient></defs>
-${o.ears ? `<path d="M22 36l-4-22 20 12zM78 36l4-22-20 12z" fill="${o.c2}"/>` : `<path d="M50 20V8" stroke="${o.c2}" stroke-width="3"/><path d="M50 -1l3 6 6 1-4.5 4 1.5 6-6-3.5-6 3.5 1.5-6-4.5-4 6-1z" fill="#fff3a0"/>`}
-<circle cx="50" cy="58" r="36" fill="url(#o${o.id})"/><ellipse cx="50" cy="58" rx="27" ry="23" fill="#0c1424" opacity=".9"/>
-${eyes({ eye: o.eye, shape: o.shape, wide: 12, ey: 56 })}${mouth("smile").replace("#7a3a3a", o.eye)}
-${o.leaf ? '<path d="M70 24q18-4 22 12-16 2-22-12z" fill="#7be08a"/><path d="M72 28q10 2 16 8" stroke="#2c8a45" fill="none" stroke-width="1.6"/>' : ""}${o.rings ? '<circle cx="38" cy="56" r="10" fill="none" stroke="#bfe3ff" stroke-width="2"/><circle cx="62" cy="56" r="10" fill="none" stroke="#bfe3ff" stroke-width="2"/>' : ""}
+  function orb(o, emo) {
+    const e = emo === "happy" ? "happy" : emo === "angry" ? "angry" : emo === "worried" ? "worried" : "star";
+    const face = e === "happy" ? `<g stroke="${o.eye}" stroke-width="3" fill="none" stroke-linecap="round"><path d="M33 58q5-7 10 0"/><path d="M57 58q5-7 10 0"/></g>` : e === "angry" ? `<g fill="${o.eye}"><path d="M31 52l12 4v5H31z"/><path d="M69 52l-12 4v5h12z"/></g>` : e === "worried" ? `<g fill="${o.eye}"><ellipse cx="38" cy="58" rx="4" ry="5"/><ellipse cx="62" cy="58" rx="4" ry="5"/></g><path d="M30 50l10-3M70 50l-10-3" stroke="${o.eye}" stroke-width="2" stroke-linecap="round"/>` : [38, 62].map((x) => `<path class="eye" d="M${x} 50l2.2 4.8 5.2.6-3.9 3.4 1.2 5.1-4.7-2.7-4.7 2.7 1.2-5.1-3.9-3.4 5.2-.6z" fill="${o.eye}"/>`).join("");
+    const mo = e === "angry" ? `<path d="M43 72q7-4 14 0" stroke="${o.eye}" stroke-width="2.4" fill="none" stroke-linecap="round"/>` : e === "worried" ? `<path d="M44 72q3-2 6 0t6 0" stroke="${o.eye}" stroke-width="2" fill="none"/>` : `<path d="M43 69q7 6 14 0" stroke="${o.eye}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="chsvg"><defs><radialGradient id="ob__U__" cx="34%" cy="26%" r="80%"><stop offset="0" stop-color="#fff"/><stop offset=".22" stop-color="${o.c1}"/><stop offset=".85" stop-color="${o.c2}"/><stop offset="1" stop-color="${shade(o.c2, -0.4)}"/></radialGradient>
+<radialGradient id="sc__U__" cx="50%" cy="40%"><stop offset="0" stop-color="#16243c"/><stop offset="1" stop-color="#070b14"/></radialGradient></defs>
+${o.ears ? `<path d="M20 40l-6-26 24 12zM80 40l6-26-24 12z" fill="${o.c2}" stroke="${INK}" stroke-width="1.6"/><path d="M20 34l-2-12 10 6zM80 34l2-12-10 6z" fill="${o.c1}"/>` : `<path d="M50 24V10" stroke="${shade(o.c2, -0.2)}" stroke-width="3.4" stroke-linecap="round"/><path d="M50 1l2.6 5.4 6 .8-4.4 4 1.2 6-5.4-3-5.4 3 1.2-6-4.4-4 6-.8z" fill="#fff3a0" stroke="#d9a52a" stroke-width=".8"/>`}
+<path d="M10 101q2-18 18-22h44q16 4 18 22z" fill="${shade(o.c2, -0.25)}" stroke="${INK}" stroke-width="1.6"/><path d="M38 86h24" stroke="${o.c1}" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+<circle cx="50" cy="56" r="34" fill="url(#ob__U__)" stroke="${INK}" stroke-width="1.8"/>
+<ellipse cx="50" cy="59" rx="25" ry="20" fill="url(#sc__U__)" stroke="${shade(o.c2, -0.35)}" stroke-width="1.4"/>
+<path d="M30 46q8-8 18-8" stroke="#fff" stroke-width="2" opacity=".18" fill="none"/>${face}${mo}
+${o.leaf ? '<path d="M70 24q18-6 23 11-17 3-23-11z" fill="#7be08a" stroke="#2c8a45" stroke-width="1.2"/><path d="M72 27q10 2 17 7" stroke="#2c8a45" fill="none" stroke-width="1.3"/>' : ""}
+<path d="M24 40q6-14 22-18" stroke="#fff" stroke-width="3" opacity=".5" fill="none" stroke-linecap="round"/>${fxMark(emo === "neutral" ? "" : emo)}
 </svg>`;
   }
   var EARS = {
-    cat: (c2) => `<path d="M20 40L16 12l24 14zM80 40l4-28-24 14z" fill="${c2}"/><path d="M22 34l-1-12 11 7zM78 34l1-12-11 7z" fill="#ffb3c6"/>`,
-    bear: (c2) => `<circle cx="24" cy="26" r="11" fill="${c2}"/><circle cx="76" cy="26" r="11" fill="${c2}"/><circle cx="24" cy="26" r="5.5" fill="#ffffff55"/><circle cx="76" cy="26" r="5.5" fill="#ffffff55"/>`,
-    bunny: (c2) => `<ellipse cx="34" cy="14" rx="7" ry="19" fill="${c2}"/><ellipse cx="66" cy="14" rx="7" ry="19" fill="${c2}"/><ellipse cx="34" cy="14" rx="3.5" ry="13" fill="#ffb3c6"/><ellipse cx="66" cy="14" rx="3.5" ry="13" fill="#ffb3c6"/>`,
-    dog: (c2) => `<path d="M18 30q-10 10-6 34 14-4 14-26zM82 30q10 10 6 34-14-4-14-26z" fill="${c2}" opacity=".85"/>`
+    cat: (c2) => `<path d="M20 42L15 12l25 15zM80 42l5-30-25 15z" fill="${c2}" stroke="${INK}" stroke-width="1.6"/><path d="M22 35l-2-14 11 7zM78 35l2-14-11 7z" fill="#ffb3c6"/>`,
+    bear: (c2) => `<circle cx="24" cy="27" r="11" fill="${c2}" stroke="${INK}" stroke-width="1.6"/><circle cx="76" cy="27" r="11" fill="${c2}" stroke="${INK}" stroke-width="1.6"/><circle cx="24" cy="27" r="5.4" fill="#ffd0dc"/><circle cx="76" cy="27" r="5.4" fill="#ffd0dc"/>`,
+    bunny: (c2) => `<ellipse cx="34" cy="15" rx="7.4" ry="19" fill="${c2}" stroke="${INK}" stroke-width="1.6"/><ellipse cx="66" cy="15" rx="7.4" ry="19" fill="${c2}" stroke="${INK}" stroke-width="1.6"/><ellipse cx="34" cy="15" rx="3.4" ry="13" fill="#ffb3c6"/><ellipse cx="66" cy="15" rx="3.4" ry="13" fill="#ffb3c6"/>`,
+    dog: (c2) => `<path d="M20 32q-12 10-7 34 15-3 15-25zM80 32q12 10 7 34-15-3-15-25z" fill="${c2}" stroke="${INK}" stroke-width="1.6"/>`
   };
-  function mascot(id, o) {
+  function mascot(id, o, emo) {
     const c2 = o.color;
-    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="chsvg">${EARS[o.ears](o.dark || c2)}
-<path d="M16 100q2-22 22-24h24q20 2 22 24z" fill="${c2}"/><circle cx="50" cy="86" r="9" fill="#fff" opacity=".9"/><text x="50" y="90" text-anchor="middle" font-size="9.5" font-weight="800" fill="${c2}" font-family="Inter,sans-serif">${id}</text>
-<ellipse cx="50" cy="54" rx="33" ry="28" fill="${c2}"/><ellipse cx="50" cy="60" rx="22" ry="17" fill="#fff" opacity=".88"/>
-${eyes({ wide: 14, ey: 50, shape: o.shape })}<ellipse cx="50" cy="58" rx="3.6" ry="2.6" fill="#2a1a2e"/><path d="M50 61v3M44 66q6 5 12 0" stroke="#2a1a2e" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-<ellipse cx="30" cy="60" rx="5" ry="3.2" fill="#ff7b9c" opacity=".45"/><ellipse cx="70" cy="60" rx="5" ry="3.2" fill="#ff7b9c" opacity=".45"/>${o.hat || ""}
+    const ey = emo === "happy" ? `<g stroke="${INK}" stroke-width="2.8" fill="none" stroke-linecap="round"><path d="M31 51q5-6 10 0"/><path d="M59 51q5-6 10 0"/></g>` : [36, 64].map((x) => `<g class="eye"><ellipse cx="${x}" cy="50" rx="4.6" ry="5.6" fill="${INK}"/><circle cx="${x + 1.6}" cy="48" r="1.8" fill="#fff"/></g>`).join("");
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="chsvg"><defs><radialGradient id="ms__U__" cx="38%" cy="30%" r="80%"><stop offset="0" stop-color="${shade(c2, 0.35)}"/><stop offset=".7" stop-color="${c2}"/><stop offset="1" stop-color="${shade(c2, -0.25)}"/></radialGradient></defs>
+${EARS[o.ears](o.dark || c2)}
+<path d="M14 101q2-22 24-25h24q22 3 24 25z" fill="url(#ms__U__)" stroke="${INK}" stroke-width="1.6"/><circle cx="50" cy="88" r="9.4" fill="#fff" stroke="${INK}" stroke-width="1.2"/><text x="50" y="91.4" text-anchor="middle" font-size="9" font-weight="800" fill="${shade(c2, -0.2)}" font-family="Inter,sans-serif">${id}</text>
+<ellipse cx="50" cy="53" rx="34" ry="29" fill="url(#ms__U__)" stroke="${INK}" stroke-width="1.7"/><ellipse cx="50" cy="61" rx="22" ry="16" fill="#fff" opacity=".9"/>
+${ey}<ellipse cx="50" cy="58" rx="3.8" ry="2.7" fill="${INK}"/><path d="M50 61v2.6M44 65q6 5 12 0" stroke="${INK}" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+<ellipse cx="29" cy="60" rx="5" ry="3" fill="#ff7b9c" opacity=".5"/><ellipse cx="71" cy="60" rx="5" ry="3" fill="#ff7b9c" opacity=".5"/>${o.hat || ""}
+<path d="M26 38q8-10 20-11" stroke="#fff" stroke-width="2.4" opacity=".35" fill="none" stroke-linecap="round"/>
 </svg>`;
   }
-  var SPEC = {
-    hero: () => person({ skin: "#f7d8bd", hair: "#1c2233", style: "side", outfit: "#2c3b6b", tie: "#d94b5c", mouth: "smirk", extra: '<path d="M70 36l3-5 3 5 5 1-4 3 1 5-5-3-5 3 1-5-4-3z" fill="#fff" opacity=".0"/>' }),
-    mira: () => person({ skin: "#e6b08a", hair: "#2b1b30", hairBack: "bob", style: "bun", outfit: "#c9689b", acc: "glasses", mouth: "smile" }),
-    victor: () => person({ skin: "#f2d2b4", hair: "#a7b0c0", style: "slick", outfit: "#2c313f", tie: "#7aa8ff", acc: "monocle", mouth: "smirk" }),
-    jonah: () => person({ skin: "#d7a077", hair: "#3a2716", style: "spiky", outfit: "#2f8f5b", acc: "headband", mouth: "open", shape: "star" }),
-    lin: () => person({ skin: "#f4d9c2", hair: "#14141c", hairBack: "bob", style: "bob", outfit: "#e6edf5", acc: "goggles", mouth: "smile", lab: true }),
-    dana: () => person({ skin: "#b27a58", hair: "#1f1a1a", style: "short", outfit: "#a63b46", acc: "pin", mouth: "flat", tie: null }),
-    elias: () => person({ skin: "#f1d5bb", hair: "#f1efe9", style: "bald", outfit: "#5b4b3a", acc: "glasses", beard: true, mouth: "smile" }),
-    aria: () => orb({ id: "a", c1: "#ffb259", c2: "#d9531e", eye: "#ffe9a6", shape: "star" }),
-    sage: () => orb({ id: "s", c1: "#8fc1ff", c2: "#2a5fb0", eye: "#d9efff", ears: true, leaf: true, rings: true }),
-    NV: () => mascot("NV", { color: "#76b900", ears: "cat", dark: "#4e7d00", hat: '<rect x="30" y="42" width="40" height="9" rx="4.5" fill="#0d1a05" opacity=".85"/><rect x="33" y="44" width="34" height="3" rx="1.5" fill="#9dff3a"/>' }),
-    AP: () => mascot("AP", { color: "#9aa3b0", ears: "bunny", hat: '<path d="M54 22q10-12 18-6-4 10-18 6z" fill="#6bd16b"/>' }),
-    GO: () => mascot("GO", { color: "#f2b705", ears: "bear", hat: '<path d="M26 34q24-22 48 0z" fill="#4285f4"/><circle cx="36" cy="30" r="3" fill="#ea4335"/><circle cx="50" cy="26" r="3" fill="#34a853"/><circle cx="64" cy="30" r="3" fill="#fff"/>' }),
-    MS: () => mascot("MS", { color: "#1b95d4", ears: "dog", hat: '<g transform="translate(40 26)"><rect width="9" height="9" fill="#f25022"/><rect x="10" width="9" height="9" fill="#7fba00"/><rect y="10" width="9" height="9" fill="#00a4ef"/><rect x="10" y="10" width="9" height="9" fill="#ffb900"/></g>' }),
-    AM: () => mascot("AM", { color: "#f08a00", ears: "cat", dark: "#b36200", hat: '<path d="M32 44q18 6 36 0" stroke="#2a1a2e" stroke-width="0" fill="none"/>' }),
-    TS: () => mascot("TS", { color: "#8a47c0", ears: "bear", hat: '<rect x="42" y="24" width="16" height="12" rx="2" fill="#2a1a40"/><path d="M45 27h10M45 30h10M45 33h10" stroke="#d9a8ff" stroke-width="1.4"/>' }),
-    ME: () => mascot("ME", { color: "#2f6bff", ears: "bunny", hat: '<path d="M32 50q9-9 18 0 9 9 18 0" stroke="#fff" stroke-width="3.4" fill="none"/>' }),
-    BC: () => mascot("BC", { color: "#d23a36", ears: "dog", hat: "" }),
-    BK: () => mascot("BK", { color: "#8a2735", ears: "bear", hat: '<rect x="34" y="14" width="32" height="18" rx="3" fill="#15101a"/><rect x="26" y="30" width="48" height="6" rx="3" fill="#15101a"/><rect x="34" y="26" width="32" height="4" fill="#d9b24c"/>' }),
-    AN: () => mascot("AN", { color: "#d4693f", ears: "cat", dark: "#9b4426", shape: "happy", hat: '<path d="M70 28l2 5 5 1-4 3 1 5-4-3-4 3 1-5-4-3 5-1z" fill="#ffe08a"/>' }),
-    OA: () => mascot("OA", { color: "#17a37a", ears: "bunny", hat: '<path d="M50 24a6 6 0 1 1 6 6" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/>' })
+  var P = {
+    hero: { skin: "#f7d6b8", hair: "#1c2233", style: "side", outfit: "#2a3a6c", kind: "suit", tie: "#d94b5c", iris: "#3a5aa8", base: "smug" },
+    hero_auditor: { skin: "#f7d6b8", hair: "#1c2233", style: "side", outfit: "#4a5262", kind: "suit", tie: "#2a3a6c", acc: ["glasses"], iris: "#3a5aa8", base: "smug" },
+    hero_engineer: { skin: "#f7d6b8", hair: "#1c2233", style: "spiky", outfit: "#2b3445", kind: "hoodie", acc: ["headband"], iris: "#3a5aa8", base: "smug" },
+    hero_analyst: { skin: "#f7d6b8", hair: "#1c2233", style: "slick", outfit: "#1e2a44", kind: "blazer", shirt: "#f4f6fa", tie: "#8a2432", iris: "#3a5aa8", base: "smug" },
+    mira: { skin: "#d9a07a", hair: "#2b1b30", back: "bob", style: "bun", outfit: "#c9689b", kind: "blazer", shirt: "#fff3f8", acc: ["glasses", "earring"], iris: "#5a3a2a" },
+    victor: { skin: "#f2d2b4", hair: "#a7b0c0", style: "slick", outfit: "#2c313f", kind: "suit", tie: "#7aa8ff", acc: ["monocle"], iris: "#5a6a7a", base: "smug" },
+    jonah: { skin: "#cf956b", hair: "#3a2716", style: "spiky", outfit: "#2f8f5b", kind: "hoodie", acc: ["headband"], iris: "#3a7a4a", base: "happy" },
+    lin: { skin: "#f4d9c2", hair: "#14141c", back: "bob", style: "bob", outfit: "#e9eef5", kind: "lab", acc: ["goggles"], iris: "#3a3030" },
+    dana: { skin: "#a8714f", hair: "#1f1a1a", back: "wave", style: "wave", outfit: "#a63b46", kind: "blazer", shirt: "#fff", acc: ["pin"], iris: "#3a2a1a" },
+    elias: { skin: "#f1d5bb", hair: "#e8e4dc", style: "bald", outfit: "#6b5a44", kind: "cardigan", acc: ["roundglasses"], beard: true, iris: "#5a6a7a", base: "happy" }
+  };
+  var CAMEO_P = {
+    anchor: { skin: "#efc6a2", hair: "#2a2a33", style: "slick", outfit: "#34466e", kind: "suit", tie: "#ffd24a", acc: ["headset"], iris: "#4a3426", base: "shock" },
+    intern: { skin: "#f8dcc4", hair: "#8a3a22", style: "short", outfit: "#6a7aa8", kind: "cardigan", iris: "#6a4a2a", base: "worried" },
+    chef: { skin: "#e3b48a", hair: "#ffffff", style: "bald", outfit: "#f2f2f2", kind: "chef", acc: ["chefhat"], iris: "#3a2a1a", base: "happy" },
+    quant: { skin: "#f1d2b6", hair: "#4a2a6a", back: "bob", style: "bob", outfit: "#3a2a5a", kind: "blazer", acc: ["glasses"], iris: "#6a3aa8", base: "smug" },
+    guard: { skin: "#c99870", hair: "#111", style: "short", outfit: "#15171c", kind: "suit", tie: "#15171c", acc: ["sun"], sun: true, base: "neutral" }
+  };
+  var CAMEO = {
+    anchor: { kr: "\uC575\uCEE4 \uB9C8\uC774\uD06C", role: "\uACBD\uC81C \uC18D\uBCF4", c: "#ffd24a" },
+    intern: { kr: "\uC778\uD134 \uD1A0\uB9AC", role: "\uBE44\uC11C\uC2E4 \uB9C9\uB0B4", c: "#ff9a8a" },
+    chef: { kr: "\uC170\uD504 \uC624\uB9C8\uD558", role: "\uBC84\uD06C\uC154 \uAD6C\uB0B4\uC2DD\uB2F9", c: "#ffffff" },
+    quant: { kr: "\uD000\uD2B8 \uC18C\uD53C", role: "\uAC1C\uC778 \uD380\uB4DC \uBD84\uC11D", c: "#c79bff" },
+    guard: { kr: "\uACBD\uD638\uC6D0 \uACF0\uB3CC", role: "\uACBD\uD638\uD300\uC7A5", c: "#8c98ad" }
+  };
+  var ORB = { aria: { c1: "#ffc27a", c2: "#e0601f", eye: "#ffe9a6" }, sage: { c1: "#9cc8ff", c2: "#2a5fb0", eye: "#d9efff", ears: true, leaf: true } };
+  var MASCOT = {
+    NV: { color: "#76b900", ears: "cat", dark: "#4e7d00", hat: `<rect x="29" y="41" width="42" height="10" rx="5" fill="#0d1a05" stroke="${INK}" stroke-width="1.2"/><rect x="33" y="44" width="34" height="3" rx="1.5" fill="#9dff3a"/>` },
+    AP: { color: "#a9b1bd", ears: "bunny", hat: '<path d="M54 22q10-13 19-6-4 11-19 6z" fill="#6bd16b" stroke="#2c7a2c" stroke-width="1.2"/>' },
+    GO: { color: "#f2b705", ears: "bear", hat: `<path d="M25 35q25-24 50 0z" fill="#4285f4" stroke="${INK}" stroke-width="1.2"/><circle cx="36" cy="30" r="3" fill="#ea4335"/><circle cx="50" cy="26" r="3" fill="#34a853"/><circle cx="64" cy="30" r="3" fill="#fff"/>` },
+    MS: { color: "#1b95d4", ears: "dog", hat: '<g transform="translate(40 24)"><rect width="9" height="9" fill="#f25022"/><rect x="10" width="9" height="9" fill="#7fba00"/><rect y="10" width="9" height="9" fill="#00a4ef"/><rect x="10" y="10" width="9" height="9" fill="#ffb900"/></g>' },
+    AM: { color: "#f08a00", ears: "cat", dark: "#b36200", hat: '<path d="M38 72q12 6 24-2" stroke="#2a1a2e" stroke-width="0"/><path d="M60 26l8-6 2 9z" fill="#5a3a1a"/>' },
+    TS: { color: "#8a47c0", ears: "bear", hat: `<rect x="41" y="23" width="18" height="13" rx="2" fill="#2a1a40" stroke="${INK}" stroke-width="1"/><path d="M44 26h12M44 29.5h12M44 33h12" stroke="#d9a8ff" stroke-width="1.4"/>` },
+    ME: { color: "#2f6bff", ears: "bunny", hat: '<path d="M30 50q10-10 20 0 10 10 20 0" stroke="#fff" stroke-width="3.4" fill="none" opacity=".9"/>' },
+    BC: { color: "#d23a36", ears: "dog", hat: '<path d="M38 28h24l-3 8H41z" fill="#2a1a1a"/><circle cx="50" cy="32" r="2.4" fill="#ffd24a"/>' },
+    BK: { color: "#8a2735", ears: "bear", hat: `<rect x="33" y="12" width="34" height="19" rx="3" fill="#15101a" stroke="${INK}" stroke-width="1.2"/><rect x="24" y="29" width="52" height="7" rx="3" fill="#15101a"/><rect x="33" y="25" width="34" height="4" fill="#d9b24c"/>` },
+    AN: { color: "#d4693f", ears: "cat", dark: "#9b4426", hat: '<path d="M70 26l2.4 5 5.4.6-4 3.6 1.2 5.4-5-2.8-5 2.8 1.2-5.4-4-3.6 5.4-.6z" fill="#ffe08a" stroke="#c98a2a" stroke-width=".8"/>' },
+    OA: { color: "#17a37a", ears: "bunny", hat: '<path d="M50 23a6.4 6.4 0 1 1 6.4 6.4" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/>' }
   };
   var cache = {};
-  var art = (id) => cache[id] || (cache[id] = (SPEC[id] || SPEC.hero)());
-  var CAMEO = {
-    anchor: { kr: "\uC575\uCEE4 \uB9C8\uC774\uD06C", role: "\uACBD\uC81C \uC18D\uBCF4", spec: () => person({ skin: "#efc6a2", hair: "#2a2a33", style: "slick", outfit: "#3a4a6a", tie: "#ffd24a", mouth: "open" }), c: "#ffd24a" },
-    intern: { kr: "\uC778\uD134 \uD1A0\uB9AC", role: "\uBE44\uC11C\uC2E4 \uB9C9\uB0B4", spec: () => person({ skin: "#f8dcc4", hair: "#7a3a2a", style: "short", outfit: "#6a7aa8", mouth: "open", shape: "star" }), c: "#ff9a8a" },
-    chef: { kr: "\uC170\uD504 \uC624\uB9C8\uD558", role: "\uBC84\uD06C\uC154 \uAD6C\uB0B4\uC2DD\uB2F9", spec: () => person({ skin: "#e6b890", hair: "#fff", style: "short", outfit: "#f2f2f2", mouth: "smile" }), c: "#ffffff" },
-    quant: { kr: "\uD000\uD2B8 \uC18C\uD53C", role: "\uAC1C\uC778 \uD380\uB4DC \uBD84\uC11D", spec: () => person({ skin: "#f1d2b6", hair: "#4a2a6a", hairBack: "bob", style: "bob", outfit: "#3a2a5a", acc: "glasses", mouth: "smirk" }), c: "#c79bff" },
-    guard: { kr: "\uACBD\uD638\uC6D0 \uACF0\uB3CC", role: "\uACBD\uD638\uD300\uC7A5", spec: () => person({ skin: "#c99870", hair: "#111", style: "short", outfit: "#15171c", acc: "sun", sun: true, mouth: "flat" }), c: "#8c98ad" }
-  };
-  cache.__ = 0;
-  for (const [k, v] of Object.entries(CAMEO)) SPEC["cm_" + k] = v.spec;
+  function build(id, emo) {
+    const cm = id.startsWith("cm_") ? CAMEO_P[id.slice(3)] : null;
+    if (ORB[id]) return orb(ORB[id], emo || "neutral");
+    if (MASCOT[id]) return mascot(id, MASCOT[id], emo || "neutral");
+    const p = cm || P[id] || P.hero;
+    return person(p, emo || p.base || "neutral");
+  }
+  function art(id, emo) {
+    const k = id + "|" + (emo || "");
+    const t = cache[k] || (cache[k] = build(id, emo));
+    const u = "u" + ++UID;
+    return t.replace(/__U__/g, u);
+  }
+  var EMO_OF_STANCE = { y: "happy", n: "angry", h: "worried" };
+  var emoOfTrust = (v) => v >= 62 ? "happy" : v >= 42 ? "neutral" : v >= 28 ? "worried" : "angry";
 
   // js/scenes.js
   var rnd = (i, k) => {
@@ -1650,10 +1908,115 @@ ${bricks("bl", "#1a0f12", "#5a2a22")}${bricks("br", "#160c0f", "#6a3126")}
 <g><rect x="76" y="56" width="8" height="6" rx=".6" fill="#16213a"/><rect x="77" y="57" width="6" height="4" fill="#7aa8ff" opacity=".7"/><circle cx="64" cy="59" r="2.4" fill="#ffd28a" opacity=".6"/><rect x="63" y="59" width="2" height="3" fill="#2a1d12"/></g>
 </svg>`;
   }
-  function scene(kind) {
-    const pal = kind === "alley" ? ["rgba(255,60,120,.5)", "rgba(255,214,150,.55)", "rgba(120,255,210,.4)", "rgba(255,170,90,.5)"] : ["rgba(255,170,90,.5)", "rgba(255,214,150,.45)", "rgba(255,120,120,.35)"];
-    return `<div class="sc-bg ${kind}">${kind === "alley" ? alley() : office()}<div class="bokeh">${bokeh(kind === "alley" ? 34 : 22, pal, kind === "alley" ? 4 : 9)}</div>${kind === "alley" ? '<div class="rain"></div>' : ""}<div class="grain"></div><div class="sc-vig"></div></div>`;
+  var svgOpen = '<svg class="sc-svg" viewBox="0 0 160 90" preserveAspectRatio="xMidYMid slice">';
+  var lin = (id, stops, v = true) => `<linearGradient id="${id}" x1="0" y1="0" x2="${v ? 0 : 1}" y2="${v ? 1 : 0}">${stops.map(([o, c2, a = 1]) => `<stop offset="${o}" stop-color="${c2}" stop-opacity="${a}"/>`).join("")}</linearGradient>`;
+  var rad = (id, stops, cx = "50%", cy = "50%", r = "50%") => `<radialGradient id="${id}" cx="${cx}" cy="${cy}" r="${r}">${stops.map(([o, c2, a = 1]) => `<stop offset="${o}" stop-color="${c2}" stop-opacity="${a}"/>`).join("")}</radialGradient>`;
+  var skyline = (y0, col, lit, seed = 1, n = 22) => Array.from({ length: n }, (_, i) => {
+    const w = 5 + rnd(i, seed) * 6, x = i * (160 / n) + rnd(i, seed + 1) * 2, h = 10 + rnd(i, seed + 2) * 30;
+    return `<rect x="${x}" y="${y0 - h}" width="${w}" height="${h}" fill="${col}"/>${Array.from({ length: Math.floor(h / 3.2) }, (_2, j) => rnd(i * 13 + j, seed + 3) > 0.62 ? `<rect x="${x + 1 + j % 2 * (w / 2 - 1)}" y="${y0 - h + 1.6 + j * 3.2}" width="1.4" height="1.1" fill="${lit}" opacity="${0.35 + rnd(i + j, seed + 4) * 0.55}"/>` : "").join("")}`;
+  }).join("");
+  function boardroom() {
+    return `${svgOpen}<defs>${lin("bs__U__", [[0, "#0a1430"], [0.7, "#1a2a55"], [1, "#2b2350"]])}${lin("tb__U__", [[0, "#2a1f1a"], [1, "#0c0807"]])}${rad("pl__U__", [[0, "#ffe4b0", 0.55], [1, "#ffe4b0", 0]])}${lin("fl__U__", [[0, "#120e14"], [1, "#050407"]])}</defs>
+<rect width="160" height="90" fill="url(#bs__U__)"/>${skyline(62, "#0a1124", "#9cc4ff", 3, 26)}${skyline(66, "#070c1a", "#ffd28a", 7, 18)}
+<g fill="#04060c">${[0, 32, 64, 96, 128, 156].map((x) => `<rect x="${x}" y="0" width="4" height="66"/>`).join("")}<rect y="0" width="160" height="5"/></g>
+<path d="M0 66h160v24H0z" fill="url(#fl__U__)"/>
+${[30, 58, 80, 102, 130].map((x) => `<ellipse cx="${x}" cy="12" rx="12" ry="7" fill="url(#pl__U__)"/><rect x="${x - 5}" y="5" width="10" height="1.4" rx=".7" fill="#ffe4b0"/>`).join("")}
+<path d="M30 70h100l22 20H8z" fill="url(#tb__U__)" stroke="#3a2a22" stroke-width=".4"/><path d="M34 71h92l10 9H24z" fill="#fff" opacity=".05"/>
+${[[22, 74], [40, 72], [120, 72], [138, 74]].map(([x, y]) => `<path d="M${x - 4} ${y + 16}v-10q0-6 4-6t4 6v10z" fill="#08070a"/>`).join("")}
+<g opacity=".5">${[50, 80, 110].map((x) => `<ellipse cx="${x}" cy="78" rx="7" ry="1.2" fill="#ffe4b0" opacity=".25"/>`).join("")}</g></svg>`;
   }
+  function senate() {
+    const cols = [10, 34, 126, 150].map((x) => `<rect x="${x - 4}" y="8" width="8" height="62" fill="url(#cl__U__)"/><rect x="${x - 6}" y="6" width="12" height="3" fill="#d8d0c0"/><rect x="${x - 6}" y="68" width="12" height="3" fill="#bdb4a2"/>${[-2.4, 0, 2.4].map((d) => `<path d="M${x + d} 10v58" stroke="#a89f8e" stroke-width=".4"/>`).join("")}`).join("");
+    return `${svgOpen}<defs>${lin("sw__U__", [[0, "#3a2414"], [1, "#160d08"]])}${lin("cl__U__", [[0, "#a69c88"], [0.5, "#ece4d4"], [1, "#9a907c"]], false)}${rad("sp__U__", [[0, "#fff1c8", 0.5], [1, "#fff1c8", 0]], "50%", "0%", "90%")}</defs>
+<rect width="160" height="90" fill="url(#sw__U__)"/><g opacity=".35">${Array.from({ length: 16 }, (_, i) => `<rect x="${i * 10 + 1}" y="10" width="8" height="40" fill="none" stroke="#6a4a2a" stroke-width=".6"/>`).join("")}</g>
+<circle cx="80" cy="26" r="13" fill="#1d140c" stroke="#c9a24a" stroke-width="1.2"/><circle cx="80" cy="26" r="10" fill="none" stroke="#c9a24a" stroke-width=".5"/><path d="M80 18l2 5 5 .4-4 3.2 1.4 5-4.4-2.8-4.4 2.8 1.4-5-4-3.2 5-.4z" fill="#c9a24a"/>
+${[56, 104].map((x) => `<path d="M${x} 8v40" stroke="#c9a24a" stroke-width=".6"/><path d="M${x} 9h12v14h-12z" fill="#2b3f7a"/>${[0, 1, 2, 3, 4, 5].map((k) => `<rect x="${x}" y="${23 + k * 3}" width="12" height="1.5" fill="${k % 2 ? "#f2efe8" : "#b23a3a"}"/>`).join("")}<path d="M${x} 9h12v17h-12z" fill="none"/>`).join("")}
+${cols}<path d="M0 0h160L120 90H40z" fill="url(#sp__U__)"/>
+<path d="M20 58h120v12H20z" fill="#2a1a10" stroke="#5a3a20" stroke-width=".6"/><path d="M14 70h132v20H14z" fill="#1a110a"/>
+${[40, 60, 80, 100, 120].map((x) => `<rect x="${x - 4}" y="60" width="8" height="3" rx="1" fill="#0c0805"/><path d="M${x} 60v-4" stroke="#2a2a2a" stroke-width=".6"/><circle cx="${x}" cy="55.5" r=".9" fill="#ff5a5a"/>`).join("")}</svg>`;
+  }
+  function fab() {
+    const tools = Array.from({ length: 6 }, (_, i) => {
+      const k = i / 6, x0 = 4 + k * 46, w = 14 - k * 9, y = 40 + k * 3, h = 34 - k * 22;
+      return `<rect x="${x0}" y="${y}" width="${w}" height="${h}" fill="#e7e2cc" stroke="#9a9070" stroke-width=".4"/><rect x="${x0 + 1}" y="${y + 2}" width="${w - 2}" height="${h * 0.25}" fill="#3a3a32"/><circle cx="${x0 + w / 2}" cy="${y + h * 0.62}" r="${w * 0.12}" fill="#ffae2a"/><rect x="${160 - x0 - w}" y="${y}" width="${w}" height="${h}" fill="#e7e2cc" stroke="#9a9070" stroke-width=".4"/><rect x="${161 - x0 - w}" y="${y + 2}" width="${w - 2}" height="${h * 0.25}" fill="#3a3a32"/><circle cx="${160 - x0 - w / 2}" cy="${y + h * 0.62}" r="${w * 0.12}" fill="#5aff9a"/>`;
+    }).reverse().join("");
+    return `${svgOpen}<defs>${lin("fy__U__", [[0, "#f2d36a"], [1, "#a8822a"]])}${rad("wf__U__", [[0, "#ffffff"], [0.3, "#b8f0ff"], [0.6, "#c78bff"], [1, "#ff9ad0", 0]])}</defs>
+<rect width="160" height="90" fill="url(#fy__U__)"/><g stroke="#fff5c8" stroke-width=".5" opacity=".6">${Array.from({ length: 12 }, (_, i) => `<path d="M${i * 14} 0L80 40"/>`).join("")}${Array.from({ length: 6 }, (_, i) => `<path d="M0 ${i * 7}H160"/>`).join("")}</g>
+<path d="M0 90L80 46l80 44z" fill="#d9c27a"/><g stroke="#b79a4a" stroke-width=".4">${Array.from({ length: 10 }, (_, i) => `<path d="M80 46L${i * 18 - 2} 90"/>`).join("")}</g>
+${tools}<circle cx="80" cy="34" r="9" fill="url(#wf__U__)"/><circle cx="80" cy="34" r="6" fill="none" stroke="#fff" stroke-width=".3" stroke-dasharray=".8 .8"/>
+<g fill="#fff" opacity=".85">${[[30, 56], [128, 58], [96, 52]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="2.6" ry="2.2"/><rect x="${x - 3}" y="${y + 1.6}" width="6" height="7" rx="2"/><rect x="${x - 1.6}" y="${y - 0.6}" width="3.2" height="1.2" fill="#3a7aff"/>`).join("")}</g></svg>`;
+  }
+  function trading() {
+    const candles = (x0, y0, w, h, seed) => {
+      let y = y0 + h / 2;
+      return Array.from({ length: 14 }, (_, i) => {
+        const d = (rnd(i, seed) - 0.47) * h * 0.4, up = d < 0, y1 = y, y2 = y + d;
+        y = Math.max(y0 + 2, Math.min(y0 + h - 2, y2));
+        return `<path d="M${x0 + 2 + i * (w - 4) / 14} ${Math.min(y1, y2) - 1.5}v${Math.abs(d) + 3}" stroke="${up ? "#3cf0a0" : "#ff5a7a"}" stroke-width=".3"/><rect x="${x0 + 1.4 + i * (w - 4) / 14}" y="${Math.min(y1, y2)}" width="1.3" height="${Math.max(0.6, Math.abs(d))}" fill="${up ? "#3cf0a0" : "#ff5a7a"}"/>`;
+      }).join("");
+    };
+    const scr = [[6, 8], [42, 8], [78, 8], [114, 8], [6, 32], [42, 32], [78, 32], [114, 32]].map(([x, y], i) => `<rect x="${x}" y="${y}" width="34" height="21" rx="1" fill="#06101e" stroke="#1a3a5a" stroke-width=".6"/>${candles(x, y, 34, 21, i + 2)}<rect x="${x}" y="${y}" width="34" height="21" fill="url(#gl__U__)"/>`).join("");
+    return `${svgOpen}<defs>${lin("tf__U__", [[0, "#020812"], [1, "#0b1626"]])}${lin("gl__U__", [[0, "#7ab8ff", 0.12], [1, "#7ab8ff", 0]])}</defs>
+<rect width="160" height="90" fill="url(#tf__U__)"/>${scr}
+<rect x="0" y="56" width="160" height="5" fill="#0a0f18"/><text x="4" y="59.8" font-family="JetBrains Mono,monospace" font-size="2.6" fill="#ffd24a" class="tick">NV \u25B22.4%  AP \u25BC0.6%  GO \u25B21.1%  MS \u25B20.8%  AM \u25BC1.9%  TS \u25B23.2%  ME \u25B20.4%  BC \u25B25.0%  BK \u25BC0.1%  KESTREL ?.?%  NV \u25B22.4%  AP \u25BC0.6%</text>
+<path d="M0 62h160v28H0z" fill="#070a10"/>${[10, 34, 58, 82, 106, 130].map((x, i) => `<rect x="${x}" y="${66 + i % 2 * 2}" width="20" height="9" rx=".6" fill="#0e1828" stroke="#1d3350" stroke-width=".5"/><rect x="${x + 1.5}" y="${67.5 + i % 2 * 2}" width="17" height="6" fill="${i % 3 ? "#0f3a2a" : "#3a0f1a"}" opacity=".9"/><path d="M${x - 2} ${78 + i % 2 * 2}h24" stroke="#1a2230" stroke-width="2"/>`).join("")}</svg>`;
+  }
+  function datacenter() {
+    const racks = (side) => Array.from({ length: 8 }, (_, i) => {
+      const k = i / 8, w = 26 - k * 22, x = side < 0 ? k * 72 : 160 - k * 72 - w, y = 8 + k * 30, h = 76 - k * 58;
+      return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#0a1220" stroke="#18304e" stroke-width=".4"/>${Array.from({ length: 8 }, (_2, j) => `<rect x="${x + w * 0.12}" y="${y + 2 + j * (h - 4) / 8}" width="${w * 0.76}" height="${(h - 4) / 8 - 0.8}" fill="#0f1c30"/><circle cx="${x + w * (0.2 + rnd(i * 9 + j, side + 5) * 0.6)}" cy="${y + 2.6 + j * (h - 4) / 8}" r="${0.35 + (1 - k) * 0.3}" fill="${rnd(i + j, 3) > 0.8 ? "#ff7a4a" : "#4ab8ff"}" class="led" style="animation-delay:${-rnd(i, j) * 2}s"/>`).join("")}`;
+    }).reverse().join("");
+    return `${svgOpen}<defs>${lin("dk__U__", [[0, "#030812"], [1, "#08142a"]])}${rad("mist__U__", [[0, "#5ab0ff", 0.35], [1, "#5ab0ff", 0]])}</defs>
+<rect width="160" height="90" fill="url(#dk__U__)"/><path d="M0 90L80 40l80 50z" fill="#0b1830"/><g stroke="#1d3a66" stroke-width=".35">${Array.from({ length: 12 }, (_, i) => `<path d="M80 40L${i * 16 - 8} 90"/>`).join("")}${Array.from({ length: 6 }, (_, i) => `<path d="M${80 - (i + 1) * 13} ${40 + (i + 1) * 8.3}h${(i + 1) * 26}"/>`).join("")}</g>
+${racks(-1)}${racks(1)}<ellipse cx="80" cy="44" rx="40" ry="16" fill="url(#mist__U__)"/><g stroke="#4ab8ff" stroke-width=".4" opacity=".6">${[0, 1, 2].map((i) => `<path d="M${50 + i * 30} 0v${10 + i * 3}"/>`).join("")}</g></svg>`;
+  }
+  function strait() {
+    return `${svgOpen}<defs>${lin("ns__U__", [[0, "#05070f"], [0.55, "#141a33"], [1, "#2a2440"]])}${lin("sea__U__", [[0, "#0a1222"], [1, "#02040a"]])}${rad("mn__U__", [[0, "#f6f0dc"], [0.2, "#f6f0dc"], [0.25, "#f6f0dc", 0.25], [1, "#f6f0dc", 0]])}</defs>
+<rect width="160" height="90" fill="url(#ns__U__)"/><circle cx="118" cy="20" r="26" fill="url(#mn__U__)"/>
+<g fill="#0b0e1a" opacity=".9"><ellipse cx="40" cy="16" rx="30" ry="6"/><ellipse cx="70" cy="22" rx="26" ry="4"/><ellipse cx="140" cy="12" rx="24" ry="4"/></g>
+<path d="M0 50q20-3 40-1t40-2 40 2 40-1v6H0z" fill="#0a0f1c"/>${Array.from({ length: 30 }, (_, i) => `<circle cx="${i * 5.4 + 2}" cy="${49.6 + rnd(i, 4)}" r=".4" fill="#ffd28a" opacity="${0.3 + rnd(i, 5) * 0.6}"/>`).join("")}
+<rect y="52" width="160" height="38" fill="url(#sea__U__)"/><path d="M110 52l8 38h-16z" fill="#f6f0dc" opacity=".12"/>
+<g stroke="#9ab4e0" stroke-width=".35" opacity=".5">${Array.from({ length: 22 }, (_, i) => `<path d="M${rnd(i, 1) * 150} ${55 + i * 1.5}h${4 + rnd(i, 2) * 10}"/>`).join("")}</g>
+${[[30, 60, 1], [72, 57, 0.7], [134, 64, 1.2]].map(([x, y, k]) => `<g transform="translate(${x} ${y}) scale(${k})"><path d="M-8 0h16l-3 3h-10z" fill="#1a1f2a"/><rect x="-2" y="-4" width="5" height="4" fill="#232a38"/><path d="M0 -4v-4" stroke="#232a38" stroke-width=".6"/><circle cx="0" cy="-8" r=".7" fill="#ff4a4a" class="led"/></g>`).join("")}</svg>`;
+  }
+  function gala() {
+    const ch = (x, s) => `<g transform="translate(${x} 0) scale(${s})"><path d="M0 0v8" stroke="#c9a24a" stroke-width=".5"/>${[-8, -4, 0, 4, 8].map((d) => `<path d="M0 8q${d} 2 ${d} 6" stroke="#c9a24a" stroke-width=".4" fill="none"/><circle cx="${d}" cy="14" r="1.1" fill="#fff4d0"/><circle cx="${d}" cy="14" r="3.6" fill="#ffd88a" opacity=".22"/>`).join("")}<ellipse cx="0" cy="9" rx="10" ry="2" fill="none" stroke="#e8c870" stroke-width=".5"/></g>`;
+    return `${svgOpen}<defs>${lin("gw__U__", [[0, "#2a0f18"], [1, "#12060a"]])}${lin("gc__U__", [[0, "#e8d8b8"], [0.5, "#fff4dc"], [1, "#c8b898"]], false)}</defs>
+<rect width="160" height="90" fill="url(#gw__U__)"/><g opacity=".5">${Array.from({ length: 9 }, (_, i) => `<path d="M${8 + i * 18} 20q9-12 18 0v48h-18z" fill="#3a1420" stroke="#6a3040" stroke-width=".5"/>`).join("")}</g>
+${[0, 36, 124, 160].map((x) => `<rect x="${x - 4}" y="10" width="8" height="62" fill="url(#gc__U__)"/>`).join("")}${ch(52, 1.1)}${ch(108, 1.1)}${ch(80, 1.5)}
+<path d="M0 70h160v20H0z" fill="#1a0a0e"/><path d="M66 70h28l14 20H52z" fill="#8a1a2a"/><path d="M68 70h24l12 20H56z" fill="#a32234" opacity=".7"/>
+${[20, 40, 120, 140].map((x) => `<path d="M${x} 74v-8M${x - 2} 66h4" stroke="#c9a24a" stroke-width=".6"/><circle cx="${x}" cy="64" r="2" fill="#fff4d0" opacity=".25"/>`).join("")}</svg>`;
+  }
+  function interrogate() {
+    return `${svgOpen}<defs>${rad("lc__U__", [[0, "#ffe8b0", 0.55], [1, "#ffe8b0", 0]], "50%", "0%", "100%")}${lin("iw__U__", [[0, "#121418"], [1, "#07080a"]])}</defs>
+<rect width="160" height="90" fill="url(#iw__U__)"/><rect x="18" y="10" width="54" height="34" fill="#4a3424" stroke="#2a1a10" stroke-width="1"/>
+${[[24, 14], [40, 18], [58, 13], [30, 30], [52, 32], [64, 26]].map(([x, y]) => `<rect x="${x}" y="${y}" width="7" height="8" fill="#e8e2d0" transform="rotate(${x % 7 - 3} ${x} ${y})"/><circle cx="${x + 3.5}" cy="${y + 0.8}" r=".7" fill="#e33"/>`).join("")}
+<path d="M27.5 14.8L43.5 18.8L61.5 13.8M33.5 30.8L55.5 32.8L67.5 26.8M43.5 18.8L55.5 32.8" stroke="#e33" stroke-width=".4" fill="none"/>
+<text x="45" y="42" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="2.4" fill="#e8e2d0" opacity=".7" letter-spacing=".4">KESTREL ?</text>
+<path d="M100 0v18" stroke="#333" stroke-width=".5"/><path d="M95 18h10l-2-3h-6z" fill="#2a2a2a"/><path d="M95 18L70 90h60L105 18z" fill="url(#lc__U__)"/><circle cx="100" cy="18.6" r="1.4" fill="#fff4d0"/>
+<path d="M76 66h48l4 6H72z" fill="#1a1612"/><path d="M78 72v18M122 72v18" stroke="#0e0c0a" stroke-width="2"/><rect x="92" y="63" width="9" height="3" fill="#e8e2d0" transform="rotate(-6 92 63)"/></svg>`;
+  }
+  var SCENES = { alley, office, boardroom, senate, fab, trading, datacenter, strait, gala, interrogate };
+  var PAL = {
+    alley: ["rgba(255,60,120,.5)", "rgba(255,214,150,.55)", "rgba(120,255,210,.4)", "rgba(255,170,90,.5)"],
+    office: ["rgba(255,170,90,.5)", "rgba(255,214,150,.45)", "rgba(255,120,120,.35)"],
+    boardroom: ["rgba(150,190,255,.45)", "rgba(255,214,150,.45)"],
+    senate: ["rgba(255,226,170,.45)", "rgba(255,190,120,.35)"],
+    fab: ["rgba(255,240,180,.5)", "rgba(255,200,90,.4)"],
+    trading: ["rgba(60,240,160,.35)", "rgba(255,90,122,.35)", "rgba(255,210,74,.35)"],
+    datacenter: ["rgba(74,184,255,.45)", "rgba(140,200,255,.35)"],
+    strait: ["rgba(255,210,140,.35)", "rgba(160,190,255,.3)"],
+    gala: ["rgba(255,214,140,.55)", "rgba(255,240,200,.45)", "rgba(255,120,140,.3)"],
+    interrogate: ["rgba(255,232,176,.3)"]
+  };
+  var SUID = 0;
+  function scene(kind, opts = {}) {
+    const fn = SCENES[kind] || SCENES.office, u = "s" + ++SUID;
+    const svg = fn().replace(/__U__/g, u);
+    const pal = PAL[kind] || PAL.office;
+    return `<div class="sc-bg ${kind}">${svg}<div class="bokeh">${bokeh(opts.bokeh ?? 22, pal, kind.length * 3)}</div>${kind === "alley" || kind === "strait" ? '<div class="rain"></div>' : ""}<div class="grain"></div><div class="sc-vig"></div></div>`;
+  }
+  var SCENE_OF = { focus: "boardroom", h200: "boardroom", gpu: "datacenter", ipo: "trading", senator: "senate", taiwan: "strait", short: "trading", audit: "office", hire: "alley", rumor: "alley", fund: "office", crossroads: "boardroom", accuse: "interrogate", resolution: "office", power: "datacenter", leak: "datacenter", strike: "fab", gala: "gala" };
 
   // js/ui.js
   var fmtB = (b) => {
@@ -1662,7 +2025,7 @@ ${bricks("bl", "#1a0f12", "#5a2a22")}${bricks("br", "#160c0f", "#6a3126")}
   };
   var sgn = (n, d = 1) => `${n >= 0 ? "+" : "\u2212"}${Math.abs(n).toFixed(d)}`;
   var pct = (v, d = 1) => `${(v * 100).toFixed(d)}%`;
-  var P = {
+  var P2 = {
     map: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/>',
     co: '<path d="M4 20V8l8-4 8 4v12M9 20v-6h6v6M9 10h.01M15 10h.01"/>',
     wallet: '<path d="M3 7h15a3 3 0 0 1 3 3v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l11-3v3"/><circle cx="16.5" cy="14" r="1"/>',
@@ -1680,16 +2043,17 @@ ${bricks("bl", "#1a0f12", "#5a2a22")}${bricks("br", "#160c0f", "#6a3126")}
     arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
     spark: '<path d="m12 3 2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>'
   };
-  var ic = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${P[n] || ""}</svg>`;
-  var AVC = { mira: "#f0a6ca", victor: "#9db4d6", jonah: "#6fcf97", lin: "#7fc4d9", dana: "#e58a7a", aria: "#ffb259", sage: "#7aa8ff", elias: "#d9d2c0", hero: "#cbd5e1" };
-  function av(id, size = 2.4) {
-    const key = id === "hero" || SPEC_HAS(id) ? id : "hero";
+  var ic = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${P2[n] || ""}</svg>`;
+  var AVC = { hero_auditor: "#cbd5e1", hero_engineer: "#cbd5e1", hero_analyst: "#cbd5e1", mira: "#f0a6ca", victor: "#9db4d6", jonah: "#6fcf97", lin: "#7fc4d9", dana: "#e58a7a", aria: "#ffb259", sage: "#7aa8ff", elias: "#d9d2c0", hero: "#cbd5e1" };
+  function av(id, size = 2.4, emo) {
+    const key = id.startsWith("hero") || SPEC_HAS(id) ? id : "hero";
     const bg = AVC[id] || (CAMEO[id.replace("cm_", "")] || {}).c || "#9db4d6";
-    return `<div class="av ch" style="--s:${size}rem;--c:${bg}" title="${id === "hero" ? "" : CHARS[id] ? CHARS[id].kr : (CAMEO[id.replace("cm_", "")] || {}).kr || ""}">${art(key)}</div>`;
+    return `<div class="av ch" style="--s:${size}rem;--c:${bg}" title="${id === "hero" ? "" : CHARS[id] ? CHARS[id].kr : (CAMEO[id.replace("cm_", "")] || {}).kr || ""}">${art(key, emo)}</div>`;
   }
   var SPEC_HAS = (id) => !!(CHARS[id] || id.startsWith("cm_"));
-  var coAv = (id, size = 2.4) => `<div class="av ch sq" style="--s:${size}rem;--c:${COMP[id].color}">${art(id)}</div>`;
-  var portrait = (id, h = 18) => `<div class="portrait" style="--h:${h}rem;--c:${AVC[id] || "#9db4d6"}">${art(id)}</div>`;
+  var coAv = (id, size = 2.4, emo) => `<div class="av ch sq" style="--s:${size}rem;--c:${COMP[id].color}">${art(id, emo)}</div>`;
+  var portrait = (id, h = 18, emo, cls = "") => `<div class="portrait ${cls}" style="--h:${h}rem;--c:${AVC[id] || (CAMEO[id.replace("cm_", "")] || {}).c || "#9db4d6"}">${art(id, emo)}</div>`;
+  var heroId = (s) => s && s.origin ? "hero_" + s.origin : "hero";
   var SL = { gov: "\uC815\uBD80", tech: "\uAE30\uC220", talent: "\uC778\uC7AC", bubble: "\uAC70\uD488", intel: "\uC815\uBCF4", audit: "\uAC10\uC0AC \uC704\uD5D8" };
   function fxChips(fx) {
     if (!fx) return "";
@@ -1748,7 +2112,7 @@ ${bricks("bl", "#1a0f12", "#5a2a22")}${bricks("br", "#160c0f", "#6a3126")}
       const ev = getEvent(s, it.id), who = (ev.advisors || []).map((a) => a.who);
       const stack = who.length ? `<div class="stack">${who.slice(0, 3).map((w) => av(w, 2.2)).join("")}</div>` : av("mira", 2.6);
       return `<div class="thread ${it.cur ? "unread" : ""}" ${it.cur ? 'data-act="open-pending"' : ""}>${stack}<div class="t"><b>${ev.title}</b><p>${ev.body}</p></div>${it.cur ? '<span class="badge">1</span>' : '<span class="chip">\uB300\uAE30</span>'}</div>`;
-    }).join("") : `<div style="padding:1.2rem .8rem;color:var(--muted);font-size:.84rem;line-height:1.8">\uCC98\uB9AC\uD560 \uB300\uD654\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.<br>\uD68C\uC0AC \uB808\uBC84\uC640 \uBC30\uB2F9\uC744 \uC810\uAC80\uD55C \uB4A4 <b style="color:var(--text)">\uBD84\uAE30 \uB9C8\uAC10</b>\uC744 \uB204\uB974\uC138\uC694.</div>`;
+    }).join("") : `<div class="empty-hero">${portrait(heroId(s), 8, "happy")}<div>\uCC98\uB9AC\uD560 \uB300\uD654\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.<br>\uD68C\uC0AC \uB808\uBC84\uC640 \uBC30\uB2F9\uC744 \uC810\uAC80\uD55C \uB4A4<br><b style="color:var(--text)">\uBD84\uAE30 \uB9C8\uAC10</b>\uC744 \uB204\uB974\uC138\uC694.</div></div>`;
     const goals = [
       [!s.pending && !s.eventQueue.length && !s.letterQueue.length, "\uB300\uD654 \uBAA8\uB450 \uCC98\uB9AC", "\uC790\uBB38\uB2E8\uC758 \uC758\uACAC\uC744 \uB4E3\uACE0 \uACB0\uC815\uD55C\uB2E4"],
       [V2.levSeen, "\uD68C\uC0AC \uB808\uBC84 \uC810\uAC80", "\uAE30\uB300\uCE58(\uC804\uBD84\uAE30 \uC774\uC775 \xD7 \uC131\uC7A5)\uB97C \uB118\uAE38 \uC218 \uC788\uB294\uC9C0 \uD655\uC778"],
@@ -1757,9 +2121,10 @@ ${bricks("bl", "#1a0f12", "#5a2a22")}${bricks("br", "#160c0f", "#6a3126")}
     const news = s.last ? `<div class="goal" style="border-top:1px solid var(--line);margin-top:.3rem"><i style="border:0"></i><div>\uC9C0\uB09C \uBD84\uAE30 ${s.last.quarter}<small>\uC21C\uC774\uC775 ${fmtB(s.last.netIncome)} \xB7 \uC81C\uAD6D \uAC00\uCE58 ${sgn(s.last.dM / 1e3, 2)}T${s.last.crashMsg ? " \xB7 " + s.last.crashMsg : ""}</small></div></div>` : "";
     const ppl = ["mira", "victor", "jonah", "lin", "dana", "sage", "aria"].map((k) => {
       const v = Math.round(s.trust[k]), c2 = v >= 60 ? "var(--good)" : v >= 40 ? "var(--warn)" : "var(--bad)";
-      return `<div class="row">${av(k, 1.9)}<div class="nm">${CHARS[k].kr.split(" ")[0]}<small>${CHARS[k].tag}</small></div><div class="meter"><i style="width:${v}%;background:${c2}"></i></div><span class="mono muted" style="width:1.6rem;text-align:right">${v}</span></div>`;
+      return `<div class="row">${av(k, 1.9, emoOfTrust(v))}<div class="nm">${CHARS[k].kr.split(" ")[0]}<small>${CHARS[k].tag}</small></div><div class="meter"><i style="width:${v}%;background:${c2}"></i></div><span class="mono muted" style="width:1.6rem;text-align:right">${v}</span></div>`;
     }).join("");
-    return `<div class="hub"><div class="mapslot" id="mapslot"></div>
+    const hl = headlines(s).map((h) => `<span>${h}</span>`).join("");
+    return `<div class="hub"><div class="mapslot" id="mapslot"><div class="ticker"><b>LIVE</b><div class="tk"><div class="tk-in">${hl}${hl}</div></div></div></div>
 <div class="dock"><div class="panel"><div class="ph"><span>\uB300\uD654\uD568</span><span class="chip ${q.length ? "acc" : ""}">${q.length}</span></div><div class="body">${threads}</div></div>
 <div class="panel"><div class="ph"><span>\uC774\uBC88 \uBD84\uAE30</span></div><div class="body">${goals}${news}</div></div>
 <div class="panel"><div class="ph"><span>\uC0AC\uB78C\uB4E4 \xB7 \uC2E0\uB8B0</span></div><div class="body">${ppl}</div></div></div>
@@ -1817,7 +2182,7 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
   function invest(s, V2) {
     const sel = V2.suspect, ck = SUSPECTS.map((k) => s.clues[k]);
     const lines = SUSPECTS.map((k) => `<line x1="50" y1="50" x2="${POS[k][0]}" y2="${POS[k][1]}" stroke="${k === sel ? "#86aefc" : "#fff"}" stroke-opacity="${k === sel ? 0.8 : 0.08 + Math.min(0.5, s.clues[k] * 0.07)}" stroke-width="${0.25 + Math.min(1.2, s.clues[k] * 0.15)}" ${s.clues[k] ? "" : 'stroke-dasharray="1.2 1.4"'} vector-effect="non-scaling-stroke"/>`).join("");
-    const nodes = SUSPECTS.map((k) => `<button class="gnode ${k === sel ? "on" : ""}" style="left:${POS[k][0]}%;top:${POS[k][1]}%" data-act="pick-suspect" data-id="${k}">${av(k, 3.4)}<b>${CHARS[k].kr.split(" ")[0]}</b><small>${CHARS[k].role} \xB7 \uB2E8\uC11C ${s.clues[k]}</small></button>`).join("");
+    const nodes = SUSPECTS.map((k) => `<button class="gnode ${k === sel ? "on" : ""}" style="left:${POS[k][0]}%;top:${POS[k][1]}%" data-act="pick-suspect" data-id="${k}">${av(k, 3.4, k === sel ? "worried" : emoOfTrust(s.trust[k]))}<b>${CHARS[k].kr.split(" ")[0]}</b><small>${CHARS[k].role} \xB7 \uB2E8\uC11C ${s.clues[k]}</small></button>`).join("");
     const logs = s.clueLog.filter((l) => l.who === sel);
     const can = s.intel >= 1;
     return `<div class="view"><div class="graph"><div class="gwrap"><svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">${lines}</svg>
@@ -1831,7 +2196,7 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
     const tab = V2.arch || "letters";
     const tabs = `<div style="display:flex;gap:.4rem;padding:.2rem .4rem .6rem"><button class="chip ${tab === "letters" ? "acc" : ""}" data-act="arch" data-t="letters">\uD3B8\uC9C0 ${s.letters.length}/7</button><button class="chip ${tab === "people" ? "acc" : ""}" data-act="arch" data-t="people">\uC778\uBB3C</button></div>`;
     if (tab === "people") {
-      return `<div class="view"><div style="margin-bottom:1rem">${tabs}</div><div class="people">${Object.keys(CHARS).filter((k) => k !== "elias").map((k) => `<div class="panel pcard">${av(k, 4.4)}<div style="flex:1"><h3>${CHARS[k].kr}</h3><div class="muted" style="font-size:.78rem">${CHARS[k].role}</div><p>${CHARS[k].tag}</p><div class="meter" style="width:100%;margin-top:.7rem"><i style="width:${s.trust[k]}%;background:var(--accent)"></i></div></div><span class="mono muted">${Math.round(s.trust[k])}</span></div>`).join("")}</div></div>`;
+      return `<div class="view"><div style="margin-bottom:1rem">${tabs}</div><div class="people">${Object.keys(CHARS).filter((k) => k !== "elias").map((k) => `<div class="panel pcard">${av(k, 4.4, emoOfTrust(s.trust[k]))}<div style="flex:1"><h3>${CHARS[k].kr}</h3><div class="muted" style="font-size:.78rem">${CHARS[k].role}</div><p>${CHARS[k].tag}</p><div class="meter" style="width:100%;margin-top:.7rem"><i style="width:${s.trust[k]}%;background:var(--accent)"></i></div></div><span class="mono muted">${Math.round(s.trust[k])}</span></div>`).join("")}</div></div>`;
     }
     const sel = V2.letter && s.letters.includes(V2.letter) ? V2.letter : s.letters[0];
     const items = Array.from({ length: 7 }, (_, i) => {
@@ -1856,48 +2221,97 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
     const opts = Object.entries(ORIGINS).map(([k, v]) => `<button class="opt ${k === sel ? "on" : ""}" data-act="pick-origin" data-id="${k}"><b>${v.kr}</b> <span class="muted" style="font-size:.7rem;letter-spacing:.14em">${v.en}</span><small>${v.blurb}</small></button>`).join("");
     return `<div class="screen"><div class="full-map" id="mapslot"></div><div class="shade"></div><div class="origin"><div><div class="eyebrow">CHAPTER 0 \xB7 \uB2F9\uC2E0\uC740 \uB204\uAD6C\uC600\uB098</div><h2>\uC0C1\uC18D\uC790\uC758 \uACFC\uAC70</h2><p class="muted" style="line-height:1.8">\uC720\uC5B8\uC7A5\uC5D0\uB294 \uB2F9\uC2E0\uC758 \uC774\uB984\uB9CC \uC801\uD600 \uC788\uC5C8\uB2E4. \uC5F4\uD55C \uAC1C\uC758 \uBD88\uC744 \uC950\uAE30 \uC804, \uB2F9\uC2E0\uC740 \uC5B4\uB5A4 \uC0AC\uB78C\uC774\uC5C8\uB294\uAC00?</p>
 <div class="field"><label>\uC774\uB984</label><input id="nameinput" value="${name}" maxlength="12"></div>${opts}</div>
-<div style="align-self:end"><div class="panel trait"><div class="eyebrow">TRAIT</div><h3>${o.trait}</h3><p>${o.traitDesc}</p></div><div style="margin-top:1.2rem;display:flex;gap:.7rem"><button class="btn" data-act="to-title">\uB4A4\uB85C</button><button class="btn primary big" style="flex:1" data-act="start-game">\uC774 \uC0AC\uB78C\uC73C\uB85C \uC2DC\uC791 ${ic("arrow")}</button></div></div></div></div>`;
+<div style="align-self:end;position:relative"><div class="origin-hero">${portrait("hero_" + sel, 22, "smug")}</div><div class="panel trait"><div class="eyebrow">TRAIT</div><h3>${o.trait}</h3><p>${o.traitDesc}</p></div><div style="margin-top:1.2rem;display:flex;gap:.7rem"><button class="btn" data-act="to-title">\uB4A4\uB85C</button><button class="btn primary big" style="flex:1" data-act="start-game">\uC774 \uC0AC\uB78C\uC73C\uB85C \uC2DC\uC791 ${ic("arrow")}</button></div></div></div></div>`;
   }
   function scene2(step2, name, idx, total) {
     const who = step2.who;
-    const sp = who === "narr" ? "" : `<div class="speaker">${av(who, 2.4)}<span>${CHARS[who].kr}</span><small>${CHARS[who].role}</small></div>`;
+    const emo = step2.emo;
+    const sp = who === "narr" ? "" : `<div class="speaker">${av(who, 2.4, emo)}<span>${CHARS[who].kr}</span><small>${CHARS[who].role}</small></div>`;
     const ch = step2.choices ? `<div class="choices">${step2.choices.map((c2, i) => `<button class="choice" style="animation-delay:${i * 90}ms" data-act="vn-choice" data-i="${i}">${c2.text}<small>${c2.sub}</small></button>`).join("")}</div>` : "";
-    const pt = who === "narr" ? "" : portrait(who, 26).replace('class="portrait"', 'class="portrait big"');
-    return `<div class="screen"><div class="scene">${scene(idx < 3 ? "office" : "alley")}${pt}<div class="loc">PROLOGUE \xB7 \uC624\uB9C8\uD558 \xB7 ${idx + 1}/${total}</div><button class="btn skip" data-act="skip-vn">\uAC74\uB108\uB6F0\uAE30</button>
+    const pt = who === "narr" ? "" : portrait(who, 26, emo, "big");
+    const me = step2.choices ? `<div class="scene-me">${portrait("hero_" + (window.__origin || "engineer"), 20, "worried")}</div>` : "";
+    return `<div class="screen"><div class="scene">${scene(idx < 3 ? "office" : "alley")}${pt}${me}<div class="loc">PROLOGUE \xB7 \uC624\uB9C8\uD558 \xB7 ${idx + 1}/${total}</div><button class="btn skip" data-act="skip-vn">\uAC74\uB108\uB6F0\uAE30</button>
 <div class="stage-text" ${step2.choices ? "" : 'data-act="vn-next"'}>${sp}<div class="line ${who === "narr" ? "narr" : ""}" key="${idx}">${step2.text}</div>${ch}${step2.choices ? "" : '<div class="hintc">\uD074\uB9AD\uD558\uAC70\uB098 Enter \xB7 \uACC4\uC18D</div>'}</div></div></div>`;
   }
   function letterModal(id, ctx) {
     const L = LETTERS[id];
-    return `<div class="modal" data-act="close-letter"><div class="card" style="max-width:40rem"><div class="eyebrow">LETTER ${L.n} / 7</div><h2>${L.title}</h2><div class="tx" style="font-family:var(--serif);font-size:1.05rem;line-height:2;white-space:pre-line;color:#d6deec;max-height:48vh;overflow:auto">${L.text}</div><div class="sig" style="margin:1rem 0;color:var(--muted);font-style:italic;font-family:var(--serif)">\u2014 ${L.sig}</div><button class="btn primary" data-act="close-letter">\uD3B8\uC9C0\uB97C \uC811\uB294\uB2E4</button></div></div>`;
+    return `<div class="modal letter-modal" data-act="close-letter"><div class="letter-wrap"><div class="letter-elias">${portrait("elias", 15, "neutral")}<small>\uC5D8\uB9AC\uC544\uC2A4 \uBC34\uC2A4<br><span>1951 \u2014 2026</span></small></div>
+<div class="card letter-card"><div class="seal">EV</div><div class="eyebrow">LETTER ${L.n} / 7</div><h2>${L.title}</h2><div class="tx">${L.text}</div><div class="sig">\u2014 ${L.sig}</div><button class="btn primary" data-act="close-letter">\uD3B8\uC9C0\uB97C \uC811\uB294\uB2E4</button></div></div></div>`;
   }
   function helpModal() {
-    return `<div class="modal"><div class="card"><div class="eyebrow">HOW TO PLAY</div><h2>\uBD84\uAE30\uB9C8\uB2E4 \uC774\uB807\uAC8C \uC9C4\uD589\uB429\uB2C8\uB2E4</h2><ol><li><b>\uB300\uD654\uD568</b>\uC758 \uC774\uC57C\uAE30\uB97C \uC5F4\uACE0 \uC790\uBB38\uB2E8\uC758 \uC758\uACAC\uC744 \uB4E4\uC740 \uB4A4 \uACB0\uC815\uD569\uB2C8\uB2E4.</li><li><b>\uD68C\uC0AC</b> \uD0ED\uC5D0\uC11C \uB808\uBC84(\uD22C\uC790\xB7\uC5F0\uAD6C\xB7\uAC00\uACA9\u2026)\uB97C \uC870\uC815\uD569\uB2C8\uB2E4. \uAE30\uB300\uCE58\uB97C \uB118\uAE30\uBA74 \uC2DC\uC7A5\uC774 \uBC18\uC751\uD569\uB2C8\uB2E4.</li><li><b>\uC9C0\uAC11</b> \uD0ED\uC5D0\uC11C \uBC30\uB2F9\uACFC \uC790\uC0B0\uC744 \uC815\uD569\uB2C8\uB2E4. 40%\uB97C \uB118\uAE30\uBA74 \uAC10\uC0AC \uC704\uD5D8\uC774 \uC313\uC785\uB2C8\uB2E4.</li><li><b>\uC218\uC0AC</b> \uD0ED\uC5D0\uC11C \uC815\uBCF4\uB97C \uC368 \uCF08\uC2A4\uD2B8\uB7F4\uC758 \uCCA9\uC790\uB97C \uCD94\uC801\uD569\uB2C8\uB2E4.</li><li>\uC900\uBE44\uB418\uBA74 \uC624\uB978\uCABD \uC704 <b>\uBD84\uAE30 \uB9C8\uAC10</b>. 12\uBD84\uAE30 \uB4A4\uC5D0 \uACB0\uB9D0\uC774 \uACB0\uC815\uB429\uB2C8\uB2E4.</li></ol><button class="btn primary big" style="margin-top:1.2rem" data-act="close-help">\uC2DC\uC791\uD55C\uB2E4</button></div></div>`;
+    return `<div class="modal"><div class="help-wrap"><div class="help-mira">${portrait("mira", 17, "happy")}<div class="speech">"\uCC98\uC74C\uC774\uC2DC\uC8E0? \uC81C\uAC00 \uC21C\uC11C\uB97C \uC54C\uB824 \uB4DC\uB9B4\uAC8C\uC694."</div></div><div class="card"><div class="eyebrow">HOW TO PLAY \xB7 \uBBF8\uB77C\uC758 \uC548\uB0B4</div><h2>\uBD84\uAE30\uB9C8\uB2E4 \uC774\uB807\uAC8C \uC9C4\uD589\uB429\uB2C8\uB2E4</h2><ol><li><b>\uB300\uD654\uD568</b>\uC758 \uC774\uC57C\uAE30\uB97C \uC5F4\uACE0 \uC790\uBB38\uB2E8\uC758 \uC758\uACAC\uC744 \uB4E4\uC740 \uB4A4 \uACB0\uC815\uD569\uB2C8\uB2E4.</li><li><b>\uD68C\uC0AC</b> \uD0ED\uC5D0\uC11C \uB808\uBC84(\uD22C\uC790\xB7\uC5F0\uAD6C\xB7\uAC00\uACA9\u2026)\uB97C \uC870\uC815\uD569\uB2C8\uB2E4. \uAE30\uB300\uCE58\uB97C \uB118\uAE30\uBA74 \uC2DC\uC7A5\uC774 \uBC18\uC751\uD569\uB2C8\uB2E4.</li><li><b>\uC9C0\uAC11</b> \uD0ED\uC5D0\uC11C \uBC30\uB2F9\uACFC \uC790\uC0B0\uC744 \uC815\uD569\uB2C8\uB2E4. 40%\uB97C \uB118\uAE30\uBA74 \uAC10\uC0AC \uC704\uD5D8\uC774 \uC313\uC785\uB2C8\uB2E4.</li><li><b>\uC218\uC0AC</b> \uD0ED\uC5D0\uC11C \uC815\uBCF4\uB97C \uC368 \uCF08\uC2A4\uD2B8\uB7F4\uC758 \uCCA9\uC790\uB97C \uCD94\uC801\uD569\uB2C8\uB2E4.</li><li>\uC900\uBE44\uB418\uBA74 \uC624\uB978\uCABD \uC704 <b>\uBD84\uAE30 \uB9C8\uAC10</b>. 12\uBD84\uAE30 \uB4A4\uC5D0 \uACB0\uB9D0\uC774 \uACB0\uC815\uB429\uB2C8\uB2E4.</li></ol><button class="btn primary big" style="margin-top:1.2rem" data-act="close-help">\uC2DC\uC791\uD55C\uB2E4</button></div></div></div>`;
   }
   function earnings(s) {
     const r = s.last;
-    const rows = r.rows.map((x) => {
+    const rows = r.rows.map((x, i) => {
       const w = Math.max(6, Math.min(100, 50 + x.beat * 250)), v = x.beat >= 0.02 ? ["good", "BEAT"] : x.beat <= -0.02 ? ["bad", "MISS"] : ["warn", "IN LINE"];
-      return `<div class="cr"><span>${COMP[x.id].kr}</span><div class="bt"><i style="width:${w}%;color:var(--${v[0]});background:var(--${v[0]})"></i><u></u></div><span class="mono">${fmtB(x.profit)}</span><span class="chip ${v[0]}">${v[1]}</span></div>`;
+      return `<div class="cr" style="animation-delay:${i * 60}ms"><span class="crn">${coAv(x.id, 1.7, x.beat >= 0.02 ? "happy" : x.beat <= -0.02 ? "worried" : "neutral")}${COMP[x.id].kr}</span><div class="bt"><i style="width:${w}%;color:var(--${v[0]});background:var(--${v[0]})"></i><u></u></div><span class="mono">${fmtB(x.profit)}</span><span class="chip ${v[0]}">${v[1]}</span></div>`;
     }).join("");
     return `<div class="sheet ${r.crashMsg && r.crashMsg.includes("\u{1F4A5}") ? "crash" : ""}"><div><h2>EARNINGS DAY \xB7 ${r.quarter}</h2><h1>${r.crashMsg ? r.crashMsg : "\uBD84\uAE30 \uC2E4\uC801 \uBC1C\uD45C"}</h1>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.6rem"><div class="bign"><small>\uADF8\uB8F9 \uB9E4\uCD9C</small><span data-count="${r.revenue}">${fmtB(r.revenue)}</span></div><div class="bign"><small>\uC21C\uC774\uC775</small><span data-count="${r.netIncome}">${fmtB(r.netIncome)}</span></div></div>
 <div class="bign" style="margin-top:1.4rem"><small>\uC81C\uAD6D \uAC00\uCE58 ${sgn(r.dM / 1e3, 2)}T</small>$${(r.mcap / 1e3).toFixed(2)}T</div>
 <div style="margin-top:1.6rem" class="muted">\uB9C9\uB300 \uAC00\uC6B4\uB370 \uC120 = \uC2DC\uC7A5 \uAE30\uB300\uCE58</div>${rows}</div>
-<div><h2>YOUR TAKE</h2><h1>\uC774\uBC88 \uBD84\uAE30 \uB0B4 \uBAAB</h1><div class="leg" style="font-size:.95rem;gap:.7rem 1rem"><span>\uAE09\uC5EC</span><span>${fmtB(r.take.salary)}</span><span>\uBC30\uB2F9 (${r.payout}%)</span><span>${fmtB(r.take.div)}</span><span>\uC131\uACFC\uBCF4\uC218</span><span>${fmtB(r.take.carry)}</span><span>\uAC1C\uC778 \uD380\uB4DC \uC190\uC775</span><span class="${r.take.fund >= 0 ? "good" : "bad"}">${fmtB(r.take.fund)}</span>${r.take.short ? `<span>\uACF5\uB9E4\uB3C4 \uC218\uC775</span><span class="good">${fmtB(r.take.short)}</span>` : ""}</div>
+<div style="position:relative"><div class="earn-hero">${portrait(heroId(s), 13, r.crashMsg && r.crashMsg.includes("\u{1F4A5}") ? "shock" : r.take.total > 0.3 ? "happy" : "smug")}</div><h2>YOUR TAKE</h2><h1>\uC774\uBC88 \uBD84\uAE30 \uB0B4 \uBAAB</h1><div class="leg" style="font-size:.95rem;gap:.7rem 1rem"><span>\uAE09\uC5EC</span><span>${fmtB(r.take.salary)}</span><span>\uBC30\uB2F9 (${r.payout}%)</span><span>${fmtB(r.take.div)}</span><span>\uC131\uACFC\uBCF4\uC218</span><span>${fmtB(r.take.carry)}</span><span>\uAC1C\uC778 \uD380\uB4DC \uC190\uC775</span><span class="${r.take.fund >= 0 ? "good" : "bad"}">${fmtB(r.take.fund)}</span>${r.take.short ? `<span>\uACF5\uB9E4\uB3C4 \uC218\uC775</span><span class="good">${fmtB(r.take.short)}</span>` : ""}</div>
 <div class="take"><div class="bign"><small>\uC774\uBC88 \uBD84\uAE30 \uD569\uACC4</small><span data-count="${r.take.total}">${fmtB(r.take.total)}</span></div></div>
 <div class="bign" style="margin-top:2rem"><small>\uB0B4 \uC21C\uC790\uC0B0</small>${fmtB(r.nwBefore)} \u2192 <span class="money">${fmtB(r.nwAfter)}</span></div>
 <button class="btn primary big" style="margin-top:2.4rem" data-act="next-turn">${s.turn >= TOTAL_TURNS ? "\uACB0\uB9D0\uC744 \uBCF8\uB2E4" : "\uB2E4\uC74C \uBD84\uAE30\uB85C"} ${ic("arrow")}</button></div></div>`;
   }
+  var END_SCENE = { soft: "office", emperor: "boardroom", crash: "trading", alone: "gala", prototype: "alley" };
   function ending(s) {
     const r = pickEnding(s), e = r.e;
     const sc = (l, v, g) => `<div class="panel score"><small>${l}</small><b>${v}<em>${g}</em></b></div>`;
     const hist = s.history;
-    return `<div class="ending"><div class="en">ENDING ${e.n} / 5</div><h1>${e.title}</h1><div class="sub2">${e.en}</div>
+    const cast = ["mira", "victor", "jonah", "lin", "sage", "aria"].map((k, i) => {
+      const mood = k === s.mole && s.flags.mole_found ? "angry" : emoOfTrust(s.trust[k]);
+      return `<div class="lu" style="animation-delay:${400 + i * 140}ms">${portrait(k, 12, mood)}<small>${CHARS[k].kr.split(" ")[0]} \xB7 ${Math.round(s.trust[k])}</small></div>`;
+    }).join("");
+    const heroMood = r.key === "soft" ? "happy" : r.key === "crash" ? "shock" : r.key === "alone" ? "worried" : "smug";
+    return `<div class="ending">${scene(END_SCENE[r.key] || "office", { bokeh: 30 })}<div class="end-shade"></div><div class="end-in"><div class="en">ENDING ${e.n} / 5</div><h1>${e.title}</h1><div class="sub2">${e.en}</div>
 <div class="story">${e.text.map((t) => `<p>${t}</p>`).join("")}</div><div class="q">${e.quote}</div>
 <div class="scores">${sc("\uC81C\uAD6D \uAC00\uCE58", "$" + r.empire.toFixed(1) + "T", r.grades.empire)}${sc("\uB0B4 \uC7AC\uC0B0", fmtB(r.wealth), r.grades.wealth)}${sc("\uC720\uC0B0", Math.round(r.legacy), r.grades.legacy)}</div>
 <div class="panel" style="max-width:46rem;margin:1.4rem 0;padding:1rem 1.3rem"><div class="muted" style="font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700">\uC81C\uAD6D \uAC00\uCE58 \uCD94\uC774</div>${spark(hist.map((h) => h / 1e3), "#86aefc", 600, 90)}</div>
-<div class="after"><div>${av("mira", 2.2)}<span><b>\uBBF8\uB77C</b>\uC2E0\uB8B0 ${Math.round(s.trust.mira)}</span></div><div>${av("sage", 2.2)}<span><b>SAGE</b>\uC2E0\uB8B0 ${Math.round(s.trust.sage)}</span></div><div>${av("victor", 2.2)}<span><b>\uD5E4\uC77C</b>${s.flags.mole_found ? "\uCCA9\uC790\uB85C \uBC1D\uD600\uC9D0" : s.mole === "victor" ? "\uB05D\uB0B4 \uC228\uC5C8\uB2E4" : "\uC2E0\uB8B0 " + Math.round(s.trust.victor)}</span></div><div>${av("aria", 2.2)}<span><b>ARIA</b>\uC2E0\uB8B0 ${Math.round(s.trust.aria)}</span></div></div>
-<button class="btn primary big" data-act="to-title">\uCC98\uC74C\uC73C\uB85C</button></div>`;
+<div class="after">${["mira", "victor", "jonah", "lin", "sage", "aria"].map((k) => `<div>${av(k, 2.6, k === s.mole && s.flags.mole_found ? "angry" : emoOfTrust(s.trust[k]))}<span><b>${CHARS[k].kr.split(" ")[0]}</b>\uC2E0\uB8B0 ${Math.round(s.trust[k])}${k === s.mole ? " \xB7 \uCCA9\uC790" : ""}</span></div>`).join("")}</div><div class="mole-line">${s.flags.mole_found ? `\uCF08\uC2A4\uD2B8\uB7F4\uC758 \uCCA9\uC790\uB294 <b>${CHARS[s.mole].kr}</b>\uC600\uACE0, \uB2F9\uC2E0\uC774 \uBC1D\uD600\uB0C8\uB2E4.` : `\uCF08\uC2A4\uD2B8\uB7F4\uC758 \uCCA9\uC790\uB294 <b>${CHARS[s.mole].kr}</b>\uC600\uB2E4. ${s.flags.mole_wrong ? "\uB2F9\uC2E0\uC740 \uC5C9\uB6B1\uD55C \uC0AC\uB78C\uC744 \uC9C0\uBAA9\uD588\uB2E4." : "\uB05D\uB0B4 \uC544\uBB34\uB3C4 \uBAB0\uB790\uB2E4."}`}</div>
+<button class="btn primary big" data-act="to-title">\uCC98\uC74C\uC73C\uB85C</button></div>
+<div class="end-hero">${portrait(heroId(s), 24, heroMood)}</div><div class="lineup end-cast">${cast}</div></div>`;
+  }
+  var FLAVOR = ["\uC2E4\uB9AC\uCF58\uBC38\uB9AC \uC784\uB300\uB8CC \uB610 \uC0AC\uC0C1 \uCD5C\uACE0", '"AI\uAC00 \uB0B4 \uC77C\uC790\uB9AC\uB97C?" \uC5EC\uB860\uC870\uC0AC 61% \uC6B0\uB824', "\uC624\uB9C8\uD558 \uC2A4\uD14C\uC774\uD06C\uD558\uC6B0\uC2A4, \uC5B5\uB9CC\uC7A5\uC790 \uB2E8\uACE8 \uB298\uC5B4", "\uBC18\uB3C4\uCCB4 \uC7A5\uBE44 \uC218\uCD9C \uADDC\uC81C \uB17C\uC758 \uC7AC\uC810\uD654", "\uC2E0\uC8FC \uACF5\uD56D, \uC804\uC138\uAE30 \uC774\uCC29\uB959 3\uBC30 \uC99D\uAC00", '\uC6D4\uAC00 \uC560\uB110\uB9AC\uC2A4\uD2B8 "\uCEF4\uD329\uD2B8, \uC2E4\uCCB4\uB294 \uC788\uB294\uAC00"', '\uC804\uB825\uB9DD \uC6B4\uC601\uC0AC "AI \uC218\uC694 \uC608\uCE21 \uBD88\uAC00"', "\uB300\uD559\uAC00 AI \uC804\uACF5 \uC9C0\uC6D0\uC790 \uC0AC\uC0C1 \uCD5C\uB2E4"];
+  function headlines(s) {
+    const h = [];
+    if (s.last) {
+      const d = s.last.dM / 1e3;
+      h.push(d >= 0 ? `\uCEF4\uD329\uD2B8 \uC81C\uAD6D \uAC00\uCE58 ${sgn(d, 2)}T \u2014 \uC2DC\uC7A5 "\uC544\uC9C1 \uBC30\uACE0\uD504\uB2E4"` : `\uCEF4\uD329\uD2B8 \uC81C\uAD6D \uAC00\uCE58 ${sgn(d, 2)}T \uC99D\uBC1C \u2014 \uD22C\uC790\uC790 \uBD88\uC548`);
+      const best = [...s.last.rows].sort((a, b) => b.beat - a.beat)[0], worst = [...s.last.rows].sort((a, b) => a.beat - b.beat)[0];
+      h.push(`${COMP[best.id].kr} \uC2E4\uC801 \uC11C\uD504\uB77C\uC774\uC988, \uC2DC\uAC04\uC678 \uAC15\uC138`);
+      if (worst.beat < -0.02) h.push(`${COMP[worst.id].kr} \uAE30\uB300\uCE58 \uD558\uD68C \u2014 "\uD22C\uC790 \uBD80\uB2F4 \uCEE4\uC84C\uB2E4"`);
+      if (s.last.crashMsg) h.push(s.last.crashMsg.replace(/[💥📉] ?/, "") + " \u2014 \uAE34\uAE09 \uC18D\uBCF4");
+    }
+    if (s.stats.bubble > 92) h.push(`AI \uAC70\uD488 \uACBD\uACE0\uC74C \u2014 \uAC70\uD488 \uC9C0\uC218 ${Math.round(s.stats.bubble)}`);
+    else if (s.stats.bubble > 80) h.push('"AI \uB7A0\uB9AC \uC5B4\uB514\uAE4C\uC9C0?" \uB099\uAD00\uACFC \uACBD\uACC4 \uAD50\uCC28');
+    if (s.stats.gov < 30) h.push("\uC6CC\uC2F1\uD134, \uCEF4\uD329\uD2B8 \uACA8\uB0E5 \uBC18\uB3C5\uC810 \uCCAD\uBB38\uD68C \uAC80\uD1A0");
+    if (s.audit > 30) h.push("\uAC10\uC0AC\uC704\uC6D0\uD68C, \uBC30\uB2F9 \uC815\uCC45\uC5D0 \uC758\uBB38 \uC81C\uAE30");
+    if (s.log.length) {
+      const L = s.log[s.log.length - 1];
+      h.push(`[${QUARTERS[L.turn - 1]}] ${L.choice}`);
+    }
+    for (let i = 0; h.length < 6; i++) h.push(FLAVOR[(s.turn * 3 + i) % FLAVOR.length]);
+    return h;
+  }
+  var INTER_SCENE = ["boardroom", "trading", "datacenter", "strait", "senate", "fab", "office", "gala", "trading", "boardroom", "interrogate", "office"];
+  function interstitial(s) {
+    const q = QUARTERS[Math.min(s.turn, TOTAL_TURNS) - 1], hl = headlines(s).slice(0, 3);
+    const mood = s.stats.bubble > 92 ? "worried" : s.last && s.last.dM < 0 ? "angry" : "smug";
+    return `<div class="inter" data-act="inter-next">${scene(INTER_SCENE[(s.turn - 1) % INTER_SCENE.length], { bokeh: 26 })}<div class="inter-shade"></div>
+<div class="inter-in"><div class="eyebrow">QUARTER ${s.turn} / ${TOTAL_TURNS}</div><div class="inter-q">${q}</div><div class="inter-bar"><i style="width:${s.turn / TOTAL_TURNS * 100}%"></i></div>
+<div class="inter-hl">${hl.map((t, i) => `<div style="animation-delay:${600 + i * 220}ms"><span>${i === 0 ? "BREAKING" : "NEWS"}</span>${t}</div>`).join("")}</div><div class="hintc">\uD074\uB9AD\uD558\uC5EC \uACC4\uC18D</div></div>
+<div class="inter-hero">${portrait(heroId(s), 30, mood)}</div></div>`;
+  }
+  function chatBanner(ev, id, emo = {}) {
+    const who = id === "accuse" ? SUSPECTS : (ev.advisors || []).map((a) => a.who);
+    const kind = SCENE_OF[id] || "office";
+    if (id === "accuse") for (const k of SUSPECTS) emo[k] = emo[k] || "worried";
+    const sz = who.length > 3 ? 8.2 : 10.5;
+    const cast = who.map((w, i) => `<div class="actor" data-who="${w}" style="--i:${i};animation-delay:${200 + i * 160}ms">${portrait(w, sz, emo[w] || "neutral")}<small>${CHARS[w].kr.split(" ")[0]}</small></div>`).join("");
+    return `<div class="banner">${scene(kind, { bokeh: 16 })}<div class="bn-shade"></div><div class="cast">${cast}</div><div class="bn-t"><small>${ev.kicker}</small><b>${ev.title}</b></div></div>`;
   }
 
   // js/audio.js
@@ -2129,6 +2543,9 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
       } else if (name === "crash") {
         tone(90, 1.4, "sawtooth", 0.25, 0.3);
         noise(ac.currentTime, 1.2, 200, 0.25);
+      } else if (name === "letter") {
+        noise(ac.currentTime, 0.35, 2500, 0.06);
+        [659, 784, 988].forEach((f, i) => setTimeout(() => tone(f, 0.9, "sine", 0.06), 200 + i * 160));
       } else if (name === "warn") {
         tone(180, 0.5, "square", 0.08, 0.6);
       }
@@ -2299,6 +2716,7 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
       }
     }
     if (V.earn && s) html += earnings(s);
+    if (V.inter && s) html += interstitial(s);
     html += V.modal || "";
     app.className = fullScreens.has(V.screen) ? "full" : "";
     app.innerHTML = html;
@@ -2366,8 +2784,38 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
   }
   function chatHTML() {
     const c2 = V.chat;
-    return `<div class="scrim"><div class="chat"><div class="chat-h">${c2.stack}<div class="ti"><small>${c2.kicker}</small><b>${c2.title}</b></div><button class="xbtn" data-act="close-chat" aria-label="\uB2EB\uAE30">${ic("close")}</button></div>
+    return `<div class="scrim"><div class="chat">${chatBanner(c2.ev, c2.id, c2.emo)}<button class="xbtn bn-x" data-act="close-chat" aria-label="\uB2EB\uAE30">${ic("close")}</button>
 <div class="log" id="chatlog">${c2.msgs.join("")}</div><div class="replies" id="replies">${c2.replies || ""}</div></div></div>`;
+  }
+  function setActor(who, emo, talk) {
+    if (!V.chat) return;
+    if (emo) V.chat.emo[who] = emo;
+    document.querySelectorAll(".actor").forEach((el2) => el2.classList.toggle("talk", !!talk && el2.dataset.who === who));
+    const el = document.querySelector(`.actor[data-who="${who}"] .portrait`);
+    if (el && emo) {
+      el.innerHTML = art(who, emo);
+      el.classList.remove("emopop");
+      void el.offsetWidth;
+      el.classList.add("emopop");
+    }
+  }
+  function toasts(fx) {
+    const chips = fxChips(fx);
+    if (!chips) return;
+    let box = document.getElementById("toasts");
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "toasts";
+      document.body.appendChild(box);
+    }
+    const tmp = document.createElement("div");
+    tmp.innerHTML = chips;
+    [...tmp.children].forEach((ch, i) => {
+      ch.classList.add("toast");
+      ch.style.animationDelay = `${i * 120}ms`;
+      box.appendChild(ch);
+      setTimeout(() => ch.remove(), 3200 + i * 120);
+    });
   }
   function addMsg(html) {
     V.chat.msgs.push(html);
@@ -2384,7 +2832,7 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
     const lg = document.getElementById("chatlog");
     if (lg) lg.scrollTop = lg.scrollHeight;
   }
-  var msgHTML = (who, text, extra = "") => `<div class="msg">${av(who, 3.1)}<div><div class="who"><b>${CHARS[who].kr}</b>${CHARS[who].role}${extra}</div><div class="bub">${text}</div></div></div>`;
+  var msgHTML = (who, text, extra = "", emo) => `<div class="msg">${av(who, 3.1, emo)}<div><div class="who"><b>${CHARS[who].kr}</b>${CHARS[who].role}${extra}</div><div class="bub">${text}</div></div></div>`;
   var optHTML = (opts, s) => opts.map((o, i) => {
     const lock = o.needIntel && s.intel < o.needIntel;
     return `<button class="reply ${lock ? "off" : ""}" data-act="choose" data-i="${i}" style="animation-delay:${i * 70}ms"><div class="l"><span class="num">${i + 1}</span>${o.label}<small>${o.who || ""}${lock ? ` \xB7 \uC815\uBCF4 ${o.needIntel} \uD544\uC694` : ""}</small></div><div class="chips">${fxChips(o.fx)}</div></button>`;
@@ -2392,16 +2840,17 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
   async function startChat(id) {
     const ev = getEvent(G, id), tok = Symbol();
     const who = (ev.advisors || []).map((a) => a.who);
-    V.chat = { id, tok, kicker: ev.kicker, title: `${quarterLabel(G)} \xB7 \uC790\uBB38 \uD68C\uC758`, stack: who.length ? `<div class="stack">${who.slice(0, 3).map((w) => av(w, 3)).join("")}</div>` : av("mira", 3), msgs: [], replies: "", ev };
+    V.chat = { id, tok, msgs: [], replies: "", ev, emo: {} };
     V.screen = V.screen === "hub" || !G ? "hub" : V.screen;
     V.modal = null;
     render();
     const alive = () => V.chat && V.chat.tok === tok;
-    addMsg(`<div class="brief"><small>${ev.kicker}</small><h3>${ev.title}</h3><p>${ev.body}</p></div>`);
+    addMsg(`<div class="brief"><small>${quarterLabel(G)} \xB7 \uBE0C\uB9AC\uD551</small><p>${ev.body}</p></div>`);
     await wait(500);
     for (const a of ev.advisors || []) {
       if (!alive()) return;
       const st = STANCE[a.stance] || STANCE.h;
+      setActor(a.who, null, true);
       const typing = `<div class="typing" id="typing">${av(a.who, 3.1)}<div class="dots"><i></i><i></i><i></i></div></div>`;
       const lg = document.getElementById("chatlog");
       if (lg) {
@@ -2411,10 +2860,13 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
       await wait(700);
       if (!alive()) return;
       document.getElementById("typing")?.remove();
-      addMsg(msgHTML(a.who, a.quote, `<span class="stance ${st[0]}">${a.label || st[1]}</span>`));
+      const em = EMO_OF_STANCE[a.stance] || "neutral";
+      addMsg(msgHTML(a.who, a.quote, `<span class="stance ${st[0]}">${a.label || st[1]}</span>`, em));
+      setActor(a.who, em, true);
       await wait(180);
     }
     if (!alive()) return;
+    setActor("", null, false);
     const cm = cameoMsg();
     if (cm && id !== "accuse") {
       await wait(300);
@@ -2440,14 +2892,18 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
   var contBtn = (label = "\uACC4\uC18D") => `<button class="reply" data-act="chat-continue" style="align-items:center"><div class="l" style="justify-content:center;width:100%">${label} ${ic("arrow").replace("<svg", '<svg style="width:1rem;height:1rem"')}</div></button>`;
   async function afterChoice(label, resultText, fx) {
     setReplies("");
-    addMsg(`<div class="msg me"><div class="bub">${label}</div></div>`);
+    addMsg(`<div class="msg me"><div class="bub">${label}</div>${av(heroId(G), 3.1, "smug")}</div>`);
     await wait(450);
     const tr = fx && fx.trust ? Object.entries(fx.trust).filter(([k, v]) => v && REACT[k]).slice(0, 2) : [];
     for (const [k, v] of tr) {
-      addMsg(msgHTML(k, REACT[k][v > 0 ? 0 : 1], `<span class="chip ${v > 0 ? "good" : "bad"}" style="height:1.2rem">${v > 0 ? "+" : "\u2212"}${Math.abs(v)}</span>`));
+      const em = v > 0 ? "happy" : "angry";
+      addMsg(msgHTML(k, REACT[k][v > 0 ? 0 : 1], `<span class="chip ${v > 0 ? "good" : "bad"}" style="height:1.2rem">${v > 0 ? "+" : "\u2212"}${Math.abs(v)}</span>`, em));
+      setActor(k, em, true);
       await wait(450);
     }
+    setActor("", null, false);
     addMsg(`<div class="sys res">${resultText}<div class="chips">${fxChips(fx)}</div></div>`);
+    toasts(fx);
     await wait(200);
     setReplies(contBtn());
   }
@@ -2462,6 +2918,7 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
       V.chat = null;
       V.modal = letterModal(p.id);
       V.letterCtx = "pending";
+      Audio.sfx("letter");
       render();
       return;
     }
@@ -2479,7 +2936,9 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
     beginTurn(G);
     saveGame(G);
     V.screen = "hub";
-    V.modal = helpModal();
+    V.inter = true;
+    V.helpPending = true;
+    Audio.sfx("open");
     render();
   }
   function startGame() {
@@ -2510,6 +2969,17 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
     else render();
   }
   var actions = {
+    "inter-next"() {
+      V.inter = false;
+      if (V.helpPending) {
+        V.helpPending = false;
+        V.modal = helpModal();
+        render();
+        return;
+      }
+      render();
+      openPending();
+    },
     mute() {
       Audio.toggle();
       V.muted = Audio.muted;
@@ -2544,6 +3014,7 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
     "start-game"() {
       const inp = document.getElementById("nameinput");
       if (inp) V.name = inp.value;
+      window.__origin = V.origin;
       startGame();
     },
     "vn-next"() {
@@ -2639,8 +3110,9 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
       advanceTurn(G);
       saveGame(G);
       V.screen = "hub";
+      V.inter = true;
+      Audio.sfx("open");
       render();
-      openPending();
     },
     choose(d) {
       const p = G.pending;
@@ -2663,7 +3135,7 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
     accuse(d) {
       const res = accuse(G, d.who || null);
       setReplies("");
-      addMsg(`<div class="msg me"><div class="bub">${d.who ? CHARS[d.who].kr + " \u2014 \uB2F9\uC2E0\uC785\uB2C8\uB2E4." : "\uC9C0\uAE08\uC740 \uC544\uBB34\uB3C4 \uC9C0\uBAA9\uD558\uC9C0 \uC54A\uACA0\uC2B5\uB2C8\uB2E4."}</div></div>`);
+      addMsg(`<div class="msg me">${""}<div class="bub">${d.who ? CHARS[d.who].kr + " \u2014 \uB2F9\uC2E0\uC785\uB2C8\uB2E4." : "\uC9C0\uAE08\uC740 \uC544\uBB34\uB3C4 \uC9C0\uBAA9\uD558\uC9C0 \uC54A\uACA0\uC2B5\uB2C8\uB2E4."}</div>${av(heroId(G), 3.1, d.who ? "angry" : "worried")}</div>`);
       addMsg(`<div class="sys res">${res.text}</div>`);
       setReplies(contBtn());
     },
@@ -2740,6 +3212,10 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
       advanceScene();
     }
     if (e.key === "Escape" && V.chat) actions["close-chat"]();
+    if ((e.key === "Enter" || e.key === " ") && V.inter) {
+      e.preventDefault();
+      actions["inter-next"]();
+    }
   });
   window.__compact = { get G() {
     return G;

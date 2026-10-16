@@ -1,5 +1,5 @@
 // Game state + economy engine. No DOM here.
-import { COMPANIES, CHARS, ORIGINS, SHOP, EVENTS, SCRIPT_ORDER, FILLERS, TOTAL_TURNS, QUARTERS, SUSPECTS, LEVERS, ENDINGS } from './data.js';
+import { COMPANIES, CHARS, ORIGINS, SHOP, EVENTS, SCRIPT_ORDER, FILLERS, BONUS_TURNS, TOTAL_TURNS, QUARTERS, SUSPECTS, LEVERS, ENDINGS } from './data.js';
 
 export const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 export const COMP = Object.fromEntries(COMPANIES.map((c) => [c.id, c]));
@@ -145,6 +145,7 @@ export function beginTurn(s) {
     }
   }
   if (id) s.eventQueue.push(id);
+  if (BONUS_TURNS.includes(s.turn)) { const pool = FILLERS.filter((f) => !s.done.includes(f) && f !== id && !s.eventQueue.includes(f)); if (pool.length) s.eventQueue.push(pool[Math.floor(br() * pool.length)]); }
   // mole clue drift
   if (br() < 0.3) addClue(s, s.mole, 1);
   if (br() < 0.45) addClue(s, SUSPECTS.filter((k) => k !== s.mole)[Math.floor(br() * 4)], 1);

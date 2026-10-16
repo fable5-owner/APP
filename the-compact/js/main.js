@@ -5,7 +5,7 @@ import * as S from './state.js';
 import * as UI from './ui.js';
 import { Audio } from './audio.js';
 import { FX } from './fx.js';
-import { CAMEO } from './chars.js';
+import { CAMEO, EMO_OF_STANCE, art } from './chars.js';
 
 const app = document.getElementById('app');
 const loading = document.getElementById('loading');
@@ -50,6 +50,7 @@ function render() {
     }
   }
   if (V.earn && s) html += UI.earnings(s);
+  if (V.inter && s) html += UI.interstitial(s);
   html += V.modal || '';
   app.className = fullScreens.has(V.screen) ? 'full' : '';
   app.innerHTML = html;
@@ -94,8 +95,22 @@ function go(screen) { V.screen = screen; V.modal = null; V.note = null; V.pop = 
 // ---------- conversation ----------
 function chatHTML() {
   const c = V.chat;
-  return `<div class="scrim"><div class="chat"><div class="chat-h">${c.stack}<div class="ti"><small>${c.kicker}</small><b>${c.title}</b></div><button class="xbtn" data-act="close-chat" aria-label="닫기">${UI.ic('close')}</button></div>
+  return `<div class="scrim"><div class="chat">${UI.chatBanner(c.ev, c.id, c.emo)}<button class="xbtn bn-x" data-act="close-chat" aria-label="닫기">${UI.ic('close')}</button>
 <div class="log" id="chatlog">${c.msgs.join('')}</div><div class="replies" id="replies">${c.replies || ''}</div></div></div>`;
+}
+function setActor(who, emo, talk) {
+  if (!V.chat) return;
+  if (emo) V.chat.emo[who] = emo;
+  document.querySelectorAll('.actor').forEach((el) => el.classList.toggle('talk', !!talk && el.dataset.who === who));
+  const el = document.querySelector(`.actor[data-who="${who}"] .portrait`);
+  if (el && emo) { el.innerHTML = art(who, emo); el.classList.remove('emopop'); void el.offsetWidth; el.classList.add('emopop'); }
+}
+function toasts(fx) {
+  const chips = UI.fxChips(fx); if (!chips) return;
+  let box = document.getElementById('toasts');
+  if (!box) { box = document.createElement('div'); box.id = 'toasts'; document.body.appendChild(box); }
+  const tmp = document.createElement('div'); tmp.innerHTML = chips;
+  [...tmp.children].forEach((ch, i) => { ch.classList.add('toast'); ch.style.animationDelay = `${i * 120}ms`; box.appendChild(ch); setTimeout(() => ch.remove(), 3200 + i * 120); });
 }
 function addMsg(html) {
   V.chat.msgs.push(html); Audio.sfx('msg');
@@ -107,30 +122,33 @@ function setReplies(html) {
   const r = document.getElementById('replies'); if (r) r.innerHTML = html;
   const lg = document.getElementById('chatlog'); if (lg) lg.scrollTop = lg.scrollHeight;
 }
-const msgHTML = (who, text, extra = '') => `<div class="msg">${UI.av(who, 3.1)}<div><div class="who"><b>${CHARS[who].kr}</b>${CHARS[who].role}${extra}</div><div class="bub">${text}</div></div></div>`;
+const msgHTML = (who, text, extra = '', emo) => `<div class="msg">${UI.av(who, 3.1, emo)}<div><div class="who"><b>${CHARS[who].kr}</b>${CHARS[who].role}${extra}</div><div class="bub">${text}</div></div></div>`;
 const optHTML = (opts, s) => opts.map((o, i) => { const lock = o.needIntel && s.intel < o.needIntel; return `<button class="reply ${lock ? 'off' : ''}" data-act="choose" data-i="${i}" style="animation-delay:${i * 70}ms"><div class="l"><span class="num">${i + 1}</span>${o.label}<small>${o.who || ''}${lock ? ` · 정보 ${o.needIntel} 필요` : ''}</small></div><div class="chips">${UI.fxChips(o.fx)}</div></button>`; }).join('');
 
 async function startChat(id) {
   const ev = S.getEvent(G, id), tok = Symbol();
   const who = (ev.advisors || []).map((a) => a.who);
-  V.chat = { id, tok, kicker: ev.kicker, title: `${UI.quarterLabel(G)} · 자문 회의`, stack: who.length ? `<div class="stack">${who.slice(0, 3).map((w) => UI.av(w, 3)).join('')}</div>` : UI.av('mira', 3), msgs: [], replies: '', ev };
+  V.chat = { id, tok, msgs: [], replies: '', ev, emo: {} };
   V.screen = V.screen === 'hub' || !G ? 'hub' : V.screen; V.modal = null;
   render();
   const alive = () => V.chat && V.chat.tok === tok;
-  addMsg(`<div class="brief"><small>${ev.kicker}</small><h3>${ev.title}</h3><p>${ev.body}</p></div>`);
+  addMsg(`<div class="brief"><small>${UI.quarterLabel(G)} · 브리핑</small><p>${ev.body}</p></div>`);
   await wait(500);
   for (const a of ev.advisors || []) {
     if (!alive()) return;
     const st = STANCE[a.stance] || STANCE.h;
+    setActor(a.who, null, true);
     const typing = `<div class="typing" id="typing">${UI.av(a.who, 3.1)}<div class="dots"><i></i><i></i><i></i></div></div>`;
     const lg = document.getElementById('chatlog'); if (lg) { lg.insertAdjacentHTML('beforeend', typing); lg.scrollTop = lg.scrollHeight; }
     await wait(700);
     if (!alive()) return;
     document.getElementById('typing')?.remove();
-    addMsg(msgHTML(a.who, a.quote, `<span class="stance ${st[0]}">${a.label || st[1]}</span>`));
+    const em = EMO_OF_STANCE[a.stance] || 'neutral';
+    addMsg(msgHTML(a.who, a.quote, `<span class="stance ${st[0]}">${a.label || st[1]}</span>`, em)); setActor(a.who, em, true);
     await wait(180);
   }
   if (!alive()) return;
+  setActor('', null, false);
   const cm = cameoMsg();
   if (cm && id !== 'accuse') { await wait(300); if (!alive()) return; addMsg(cm); await wait(250); }
   if (!alive()) return;
@@ -153,15 +171,17 @@ const contBtn = (label = '계속') => `<button class="reply" data-act="chat-cont
 
 async function afterChoice(label, resultText, fx) {
   setReplies('');
-  addMsg(`<div class="msg me"><div class="bub">${label}</div></div>`);
+  addMsg(`<div class="msg me"><div class="bub">${label}</div>${UI.av(UI.heroId(G), 3.1, 'smug')}</div>`);
   await wait(450);
   // trust reactions
   const tr = fx && fx.trust ? Object.entries(fx.trust).filter(([k, v]) => v && REACT[k]).slice(0, 2) : [];
   for (const [k, v] of tr) {
-    addMsg(msgHTML(k, REACT[k][v > 0 ? 0 : 1], `<span class="chip ${v > 0 ? 'good' : 'bad'}" style="height:1.2rem">${v > 0 ? '+' : '−'}${Math.abs(v)}</span>`));
+    const em = v > 0 ? 'happy' : 'angry';
+    addMsg(msgHTML(k, REACT[k][v > 0 ? 0 : 1], `<span class="chip ${v > 0 ? 'good' : 'bad'}" style="height:1.2rem">${v > 0 ? '+' : '−'}${Math.abs(v)}</span>`, em)); setActor(k, em, true);
     await wait(450);
   }
-  addMsg(`<div class="sys res">${resultText}<div class="chips">${UI.fxChips(fx)}</div></div>`);
+  setActor('', null, false);
+  addMsg(`<div class="sys res">${resultText}<div class="chips">${UI.fxChips(fx)}</div></div>`); toasts(fx);
   await wait(200);
   setReplies(contBtn());
 }
@@ -169,13 +189,13 @@ async function afterChoice(label, resultText, fx) {
 function openPending() {
   const p = G.pending;
   if (!p) { V.chat = null; render(); return; }
-  if (p.kind === 'letter') { V.chat = null; V.modal = UI.letterModal(p.id); V.letterCtx = 'pending'; render(); return; }
+  if (p.kind === 'letter') { V.chat = null; V.modal = UI.letterModal(p.id); V.letterCtx = 'pending'; Audio.sfx('letter'); render(); return; }
   Audio.sfx('open'); startChat(p.id);
 }
 function afterEvent() { S.nextPending(G); V.chat = null; S.saveGame(G); if (G.pending) openPending(); else render(); }
 
 // ---------- prologue / flow ----------
-function finishPrologue() { S.beginTurn(G); S.saveGame(G); V.screen = 'hub'; V.modal = UI.helpModal(); render(); }
+function finishPrologue() { S.beginTurn(G); S.saveGame(G); V.screen = 'hub'; V.inter = true; V.helpPending = true; Audio.sfx('open'); render(); }
 function startGame() {
   G = S.newGame({ name: V.name.trim() || '에단 류', origin: V.origin });
   V.steps = PROLOGUE.map((x) => ({ ...x })); V.idx = 0; V.company = 'NV'; V.suspect = 'victor'; V.levSeen = false; V.paySeen = false; V.chat = null; V.earn = false;
@@ -189,12 +209,13 @@ function advanceScene() {
 }
 
 const actions = {
+  'inter-next'() { V.inter = false; if (V.helpPending) { V.helpPending = false; V.modal = UI.helpModal(); render(); return; } render(); openPending(); },
   mute() { Audio.toggle(); V.muted = Audio.muted; render(); },
   new() { V.screen = 'origin'; render(); },
   continue() { const g = S.loadGame(); if (!g) return; G = g; V.chat = null; V.earn = G.phase === 'earnings' && !!G.last && false; V.screen = 'hub'; render(); if (G.pending) openPending(); },
   'to-title'() { V.screen = 'title'; V.chat = null; V.earn = false; render(); },
   'pick-origin'(d) { const inp = document.getElementById('nameinput'); if (inp) V.name = inp.value; V.origin = d.id; render(); },
-  'start-game'() { const inp = document.getElementById('nameinput'); if (inp) V.name = inp.value; startGame(); },
+  'start-game'() { const inp = document.getElementById('nameinput'); if (inp) V.name = inp.value; window.__origin = V.origin; startGame(); },
   'vn-next'() { advanceScene(); },
   'vn-choice'(d) {
     const st = V.steps[V.idx], ch = st.choices[+d.i];
@@ -226,7 +247,7 @@ const actions = {
   'next-turn'() {
     V.earn = false;
     if (G.turn >= TOTAL_TURNS) { S.unlockEnding(S.pickEnding(G).key); V.screen = 'ending'; render(); return; }
-    S.advanceTurn(G); S.saveGame(G); V.screen = 'hub'; render(); openPending();
+    S.advanceTurn(G); S.saveGame(G); V.screen = 'hub'; V.inter = true; Audio.sfx('open'); render();
   },
   choose(d) {
     const p = G.pending; if (!p) return;
@@ -245,7 +266,7 @@ const actions = {
   accuse(d) {
     const res = S.accuse(G, d.who || null);
     setReplies('');
-    addMsg(`<div class="msg me"><div class="bub">${d.who ? CHARS[d.who].kr + ' — 당신입니다.' : '지금은 아무도 지목하지 않겠습니다.'}</div></div>`);
+    addMsg(`<div class="msg me">${''}<div class="bub">${d.who ? CHARS[d.who].kr + ' — 당신입니다.' : '지금은 아무도 지목하지 않겠습니다.'}</div>${UI.av(UI.heroId(G), 3.1, d.who ? 'angry' : 'worried')}</div>`);
     addMsg(`<div class="sys res">${res.text}</div>`);
     setReplies(contBtn());
   },
@@ -281,6 +302,7 @@ app.addEventListener('change', (e) => { if (e.target.dataset.payout) render(); }
 addEventListener('keydown', (e) => {
   if ((e.key === 'Enter' || e.key === ' ') && V.screen === 'scene' && !V.steps[V.idx].choices && !V.modal) { e.preventDefault(); advanceScene(); }
   if (e.key === 'Escape' && V.chat) actions['close-chat']();
+  if ((e.key === 'Enter' || e.key === ' ') && V.inter) { e.preventDefault(); actions['inter-next'](); }
 });
 
 window.__compact = { get G() { return G; }, V, S, actions, render };

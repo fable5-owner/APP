@@ -92,6 +92,7 @@ export const Audio = {
     else if (name === 'coin') { [988, 1319, 1760].forEach((f, i) => setTimeout(() => tone(f, 0.25, 'square', 0.05), i * 70)); }
     else if (name === 'win') { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, 0.6, 'triangle', 0.1), i * 110)); }
     else if (name === 'crash') { tone(90, 1.4, 'sawtooth', 0.25, 0.3); noise(ac.currentTime, 1.2, 200, 0.25); }
+    else if (name === 'letter') { noise(ac.currentTime, 0.35, 2500, 0.06); [659, 784, 988].forEach((f, i) => setTimeout(() => tone(f, 0.9, 'sine', 0.06), 200 + i * 160)); }
     else if (name === 'warn') { tone(180, 0.5, 'square', 0.08, 0.6); }
   },
 };
