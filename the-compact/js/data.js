@@ -378,3 +378,18 @@ export const ENDINGS = {
   alone: { n: 9, key: 'alone', title: '혼자 남은 부자', en: 'THE LONELY BILLIONAIRE', quote: '"세계에서 가장 부유한 사람이, 가장 외로운 사람이 되었다."', text: ['당신의 순자산은 어떤 순위표에서도 최상단에 올랐다.', '그러나 열한 개의 불은 서서히 식어 갔고, 사람들은 하나둘 떠났다.', '컴팩트는 남았다. 껍데기만.'] },
   prototype: { n: 1, key: 'prototype', title: '아직 끝나지 않은 이야기', en: 'TO BE CONTINUED', quote: '"마지막 편지는 아직 열리지 않았다."', text: ['열두 분기가 지났다. 이 프로토타입의 이야기는 여기까지다.', '일곱 통의 편지 중 네 통이 열렸고, 첩자와 켈스트럴의 정체는 아직 완전히 드러나지 않았다.', '당신의 선택은 기록되었다. 정식 버전에서는 마흔 분기가 이어진다.'] },
 };
+
+// ---- Tech tree (Civ-style): research points come from every company's R&D lever + the Tech stat ----
+export const TECHS = [
+  { id: 'scaling', tier: 1, row: 0, kr: '스케일링 법칙', en: 'SCALING LAWS', cost: 10, req: [], icon: 'chart', desc: '모델 규모를 키울수록 성능이 오른다는 경험칙. 전 기업 기본 성장 +0.4%p', fx: { permG: 0.004 } },
+  { id: 'dc', tier: 1, row: 1, kr: '대규모 데이터센터', en: 'HYPERSCALE DC', cost: 10, req: [], icon: 'server', desc: '표준화된 대형 센터 설계. 마이크로소프트·아마존·알파벳 성장 +0.6%p', fx: { permComp: { MS: { g: 0.006 }, AM: { g: 0.006 }, GO: { g: 0.006 } } } },
+  { id: 'rlhf', tier: 1, row: 2, kr: '정렬 기술', en: 'ALIGNMENT', cost: 12, req: [], icon: 'shield', desc: '모델을 사람의 의도에 맞춘다. 정부 +4, SAGE 신뢰 +4', fx: { gov: 4, trust: { sage: 4 } } },
+  { id: 'euv', tier: 2, row: 0.5, kr: 'High-NA EUV 공정', en: 'HIGH-NA EUV', cost: 20, req: ['dc'], icon: 'chip', desc: 'TSMC 성장 +1.2%p, 엔비디아 +0.6%p, 기술 +3', fx: { permComp: { TS: { g: 0.012 }, NV: { g: 0.006 } }, tech: 3 } },
+  { id: 'moe', tier: 2, row: 1.5, kr: '희소 전문가 모델', en: 'MIXTURE OF EXPERTS', cost: 20, req: ['scaling'], icon: 'brain', desc: '같은 성능을 절반의 연산으로. 거품 −3, Anthropic·OpenAI 성장 +1%p', fx: { bubble: -3, permComp: { AN: { g: 0.01 }, OA: { g: 0.01 } } } },
+  { id: 'sec', tier: 2, row: 2.5, kr: '보안 아키텍처', en: 'ZERO-TRUST', cost: 18, req: ['rlhf'], icon: 'lock', desc: '내부자 유출 방어. 감사 위험 −10, 켈스트럴 단서 +1', fx: { audit: -10, clue: { who: 'victor', n: 1 } } },
+  { id: 'agent', tier: 3, row: 1, kr: '자율 에이전트', en: 'AUTONOMOUS AGENTS', cost: 30, req: ['moe'], icon: 'robot', desc: '전 기업 기본 성장 +0.8%p. 단, 거품 +4', fx: { permG: 0.008, bubble: 4 } },
+  { id: 'fusion', tier: 3, row: 0, kr: '소형 원자로', en: 'SMALL MODULAR REACTOR', cost: 30, req: ['euv'], icon: 'bolt', desc: '전력 문제 해결. 전 기업 마진 +0.4%p', fx: { permNm: 0.004 } },
+  { id: 'interp', tier: 3, row: 2, kr: '해석가능성', en: 'INTERPRETABILITY', cost: 28, req: ['sec', 'moe'], icon: 'eye', desc: '모델 내부를 들여다본다. 정부 +6, SAGE 신뢰 +6', fx: { gov: 6, trust: { sage: 6 } } },
+  { id: 'agi', tier: 4, row: 0.6, kr: '범용 지능', en: 'GENERAL INTELLIGENCE', cost: 50, req: ['agent', 'fusion'], icon: 'star', desc: '전 기업 성장 +1.5%p. 거품 +10 — 불은 켜지만 불길이 커진다', fx: { permG: 0.015, bubble: 10 } },
+  { id: 'unwind', tier: 4, row: 1.8, kr: '컴팩트 해체 프로토콜', en: 'UNWIND PROTOCOL', cost: 50, req: ['interp', 'agent'], icon: 'key', desc: '선대가 남긴 마지막 열쇠. 유산 점수 +12, 정부 +8', fx: { gov: 8, flag: 'unwind' } },
+];

@@ -480,6 +480,96 @@ svg text{font-family:var(--font)}
 #np{position:fixed;left:5.6rem;bottom:1.1rem;z-index:350;font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#cdd7ea;padding:.35rem .8rem;border-radius:999px;background:rgba(8,13,24,.78);border:1px solid rgba(255,255,255,.1);opacity:0;pointer-events:none;transform:translateY(.6rem)}
 #np.show{animation:np 4.2s ease both}
 @keyframes np{0%{opacity:0;transform:translateY(.6rem)}12%,80%{opacity:1;transform:none}100%{opacity:0}}
+
+/* ======== v4: Civ-style strategic layer ======== */
+#hexhost{position:fixed;left:4.6rem;top:3.7rem;right:0;bottom:0;z-index:0;visibility:hidden;opacity:0;transition:opacity .4s}
+#hexhost.on{visibility:visible;opacity:1}
+.hexmap{position:absolute;inset:0;overflow:hidden;background:#0a2a4c;cursor:grab}
+.hexmap canvas{position:absolute;inset:0}.hx-layer{position:absolute;inset:0;pointer-events:none}.hx-layer>*{position:absolute;pointer-events:auto;transform:translate(-50%,-50%)}
+#app.hubmode{background:transparent}#app.hubmode:before,#app.hubmode:after{display:none}
+#app.hubmode .main{pointer-events:none}#app.hubmode .main>*{pointer-events:auto}
+.hub2{position:absolute;inset:0;pointer-events:none!important}.hub2>*{pointer-events:auto}
+.hx-tip{position:absolute;z-index:6;padding:.35rem .7rem;border-radius:.5rem;background:rgba(8,13,24,.92);border:1px solid rgba(255,255,255,.15);pointer-events:none;font-size:.78rem}.hx-tip small{display:block;color:var(--muted);font-size:.68rem}
+/* city */
+.city{display:flex;flex-direction:column;align-items:center;cursor:pointer;z-index:3;transform:translate(-50%,-72%)!important}
+.cico{height:calc(var(--r)*1.15);filter:drop-shadow(0 .25rem .3rem rgba(0,0,0,.5));transition:transform .2s}
+.cisvg{height:100%;display:block}
+.cb{position:absolute;bottom:calc(100% + .1rem);display:flex;align-items:center;gap:.35rem;padding:.14rem .6rem .14rem .14rem;border-radius:999px;background:linear-gradient(180deg,rgba(18,26,44,.95),rgba(9,14,26,.96));border:1.5px solid var(--c);box-shadow:0 .3rem 1rem rgba(0,0,0,.55),0 0 1.1rem color-mix(in srgb,var(--c) 40%,transparent);white-space:nowrap;transition:transform .15s}
+.city:hover .cb,.city.sel .cb{transform:translateY(-.15rem) scale(1.07);z-index:5}.city.sel .cb{box-shadow:0 0 0 2px #fff,0 0 1.6rem var(--c)}
+.cb .cpop{position:absolute;left:-.55rem;top:-.55rem;width:1.35rem;height:1.35rem;border-radius:50%;display:grid;place-items:center;font-size:.66rem;font-weight:800;color:#1a1204;background:linear-gradient(145deg,#ffe9a8,#e0a93a);border:1.5px solid #fff;font-family:var(--mono);z-index:2}
+.cb .av{--s:1.6rem}.cb b{font-size:.72rem;font-weight:800;letter-spacing:.01em}.cb em{font-style:normal;font-family:var(--mono);font-size:.66rem;font-weight:700}
+.cb.alert{border-color:#ff7b8b;animation:alertp 1.2s ease-in-out infinite}.cb .wn{position:absolute;right:-.5rem;top:-.55rem;width:1.2rem;height:1.2rem;border-radius:50%;background:#ff4d6d;color:#fff;font-style:normal;font-size:.7rem;font-weight:800;display:grid;place-items:center;border:1.5px solid #fff}
+@keyframes alertp{50%{box-shadow:0 0 1.6rem #ff4d6d}}
+.village{display:flex;flex-direction:column;align-items:center}.village i{width:.9rem;height:.9rem;border-radius:.2rem;background:#d9c9a0;border:1.5px solid #5a4a28;transform:rotate(45deg)}.village small{font-size:.58rem;color:#e8dcc0;text-shadow:0 1px 4px #000;margin-top:.15rem}.fogged{opacity:.0}
+.kcity{display:flex;flex-direction:column;align-items:center}.kc-ico{width:2.1rem;height:2.1rem;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;background:radial-gradient(circle,#7a1830,#2a0a14);border:2px solid #ff4d6d;box-shadow:0 0 1.6rem rgba(255,77,109,.7);animation:alertp 1.8s infinite}.kcity small{font-size:.62rem;font-weight:800;color:#ffb3c0;text-shadow:0 1px 4px #000;margin-top:.2rem}
+/* units */
+.unit{cursor:pointer;z-index:4;transform:translate(-50%,-60%)!important;display:flex;flex-direction:column;align-items:center;transition:transform .15s}
+.unit:hover{transform:translate(-50%,-68%) scale(1.12)!important}
+.unit .portrait{--h:3.6rem!important;animation-duration:3s;filter:drop-shadow(0 .3rem .3rem rgba(0,0,0,.5))}.unit .portrait:before{display:none}
+.uflag{position:absolute;top:-.1rem;left:50%;transform:translateX(-50%);width:.9rem;height:.6rem;background:var(--c);border:1px solid #fff;border-radius:.1rem .3rem .3rem .1rem;z-index:2;box-shadow:0 0 .6rem var(--c)}
+.unit.enemy .portrait{filter:hue-rotate(-30deg) saturate(1.4) drop-shadow(0 0 .8rem #ff4d6d)}
+/* notifications */
+.notes{position:absolute;right:1rem;top:1rem;width:19rem;display:flex;flex-direction:column;gap:.5rem;z-index:6}
+.note{display:grid;grid-template-columns:auto 1fr auto;gap:.7rem;align-items:center;text-align:left;padding:.5rem .8rem .5rem .5rem;border-radius:.9rem;background:linear-gradient(180deg,rgba(20,29,50,.95),rgba(10,16,30,.96));border:1px solid var(--line2);box-shadow:0 .5rem 1.4rem rgba(0,0,0,.5);animation:noteIn .5s cubic-bezier(.2,.9,.3,1.2) both}
+.note b{font-size:.8rem;display:block;line-height:1.3}.note small{color:var(--muted);font-size:.68rem}
+.note>span{width:1.5rem;height:1.5rem;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.8rem;background:var(--line2);color:var(--muted)}
+.note.cur{border-color:rgba(255,210,100,.7);box-shadow:0 0 1.4rem rgba(255,210,100,.28),0 .5rem 1.4rem rgba(0,0,0,.5)}.note.cur>span{background:#ffd24a;color:#241a00;animation:blink 1.2s infinite}
+.note.wait{opacity:.6;pointer-events:none}.note:hover.cur{transform:translateX(-.2rem)}
+.nico{width:2.4rem;height:2.4rem;border-radius:50%;display:grid;place-items:center;background:rgba(134,174,252,.15);color:var(--accent)}.nico svg{width:1.2rem;height:1.2rem}
+@keyframes noteIn{from{opacity:0;transform:translateX(3rem)}}
+/* city panel */
+.cpanel{position:absolute;left:1rem;bottom:1rem;width:21rem;padding:1rem 1.1rem;z-index:6;display:flex;flex-direction:column;gap:.8rem;background:linear-gradient(180deg,rgba(20,29,50,.96),rgba(9,14,26,.97))}
+.cp-h{display:flex;align-items:center;gap:.9rem}.cp-h b{font-size:1.15rem;display:block;letter-spacing:-.01em}.cp-h small{color:var(--muted);font-size:.7rem}
+.cp-y{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem}
+.cy{padding:.45rem .5rem;border-radius:.6rem;background:var(--tint);border:1px solid var(--line);display:flex;flex-direction:column;gap:.1rem}.cy svg{width:.9rem;height:.9rem;color:var(--muted)}.cy b{font-family:var(--mono);font-size:.86rem}.cy small{font-size:.6rem;color:var(--dim);letter-spacing:.06em}.cy.good b{color:var(--good)}.cy.bad b{color:var(--bad)}
+.cp-empty{display:flex;gap:.9rem;align-items:center}.cp-empty b{display:block}.cp-empty small{color:var(--muted);font-size:.72rem;line-height:1.5}
+.cp-empty .portrait{--h:5.5rem;flex:none}
+/* advisor bar */
+.advbar{position:absolute;left:23.2rem;bottom:1rem;display:flex;gap:.5rem;padding:.5rem .7rem;border-radius:999px;background:rgba(8,13,24,.86);border:1px solid var(--line2);z-index:6}
+.adv{position:relative;padding:0;transition:transform .15s}.adv:hover{transform:translateY(-.3rem)}.adv i{position:absolute;left:10%;bottom:-.25rem;height:.2rem;border-radius:.1rem}
+/* next turn */
+.nextturn{position:absolute;right:1.2rem;bottom:1.1rem;z-index:9;display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;column-gap:.9rem;align-items:center;padding:.7rem .9rem .7rem 1.5rem;border-radius:999px;background:linear-gradient(135deg,#bcd2ff,#7ea6fb 55%,#9a8bff);color:#07101f;text-align:left;box-shadow:0 0 0 2px rgba(255,255,255,.4) inset,0 .7rem 2.2rem rgba(110,150,255,.6),0 0 3rem rgba(134,174,252,.35);transition:transform .15s}
+.nextturn:hover{filter:brightness(1.1)}
+.nt-l{font-weight:800;font-size:1.1rem;grid-row:1}.nt-s{font-size:.68rem;font-weight:700;opacity:.7;grid-row:2;letter-spacing:.08em}
+.nt-i{grid-row:1/3;grid-column:2;width:2.6rem;height:2.6rem;border-radius:50%;background:#0b1630;color:#fff;display:grid;place-items:center}.nt-i svg{width:1.3rem;height:1.3rem}
+.nextturn.warn{background:linear-gradient(135deg,#ffe9a8,#f3b640);box-shadow:0 0 0 2px rgba(255,255,255,.4) inset,0 .7rem 2.2rem rgba(243,182,64,.55),0 0 3rem rgba(243,182,64,.35);animation:nt 1.6s ease-in-out infinite}
+@keyframes nt{50%{box-shadow:0 0 0 2px rgba(255,255,255,.6) inset,0 .7rem 2.2rem rgba(243,182,64,.9),0 0 4.5rem rgba(243,182,64,.7)}}
+.top .qtr{min-width:11rem}
+.yl{display:flex;gap:.5rem;align-items:center;flex:1;justify-content:flex-start;margin-left:.6rem}
+.yd{display:flex;align-items:center;gap:.5rem;padding:.3rem .8rem .3rem .55rem;border-radius:999px;background:rgba(255,255,255,.045);border:1px solid var(--line)}
+.yd>svg{width:1.25rem;height:1.25rem;color:var(--accent);flex:none}.yd.gold>svg{color:var(--money)}.yd.sci>svg{color:#86f0d0}
+.yd b{font-family:var(--mono);font-size:.92rem;font-weight:700;display:block;line-height:1.1}.yd small{font-size:.6rem;color:var(--muted);display:block;white-space:nowrap}
+.yd .gauge{margin-top:.25rem;width:3.4rem}
+/* tech tree */
+.techv{display:flex;flex-direction:column;gap:1rem;padding-bottom:1rem}
+.th{display:flex;align-items:center;gap:1.6rem;padding:.9rem 1.3rem;border-radius:1rem;background:linear-gradient(180deg,rgba(26,38,64,.7),rgba(12,19,34,.8));border:1px solid var(--line)}
+.th h2{font-size:1.25rem}.th-cur{flex:1;display:flex;align-items:center;gap:.9rem}.th-cur>svg{width:2rem;height:2rem;color:#86f0d0}.th-cur small{display:block;font-size:.62rem;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;font-weight:700}.th-cur b{font-size:1rem}
+.th-bar{flex:1;max-width:18rem;height:.5rem;border-radius:.3rem;background:var(--line2);overflow:hidden}.th-bar i{display:block;height:100%;background:linear-gradient(90deg,#86f0d0,#86aefc);box-shadow:0 0 1rem #86f0d0}
+.th-cur.warn>svg{color:var(--warn)}.th-r{text-align:right}.th-r small{display:block;font-size:.62rem;color:var(--muted);letter-spacing:.1em}.th-r b{font-size:1.4rem}
+.tree{position:relative;flex:1;min-height:34rem;border-radius:1rem;background:radial-gradient(circle at 20% 30%,rgba(91,134,216,.12),transparent 55%),var(--panel);border:1px solid var(--line);overflow:visible}
+.tree>svg{position:absolute;inset:0;width:100%;height:100%}
+.tier{position:absolute;top:1.2rem;transform:translateX(0);font-size:.66rem;letter-spacing:.2em;color:var(--dim);font-weight:800}
+.tnode{position:absolute;width:15.5rem;text-align:left;padding:.7rem .85rem;border-radius:.9rem;background:linear-gradient(180deg,rgba(24,34,58,.97),rgba(12,19,34,.98));border:1.5px solid var(--line2);display:grid;grid-template-columns:auto 1fr;gap:.2rem .7rem;transition:transform .15s,border-color .15s,box-shadow .15s}
+.ti-ico{width:2.4rem;height:2.4rem;border-radius:.7rem;display:grid;place-items:center;background:rgba(134,174,252,.12);color:var(--accent);grid-row:1/3}.ti-ico svg{width:1.3rem;height:1.3rem}
+.ti-t b{font-size:.84rem;display:block}.ti-t small{font-size:.58rem;color:var(--dim);letter-spacing:.08em}.ti-f{grid-column:1/3;display:flex;gap:.35rem;margin-top:.3rem}
+.tnode.open{border-color:rgba(134,240,208,.6);cursor:pointer}.tnode.open:hover{transform:translateY(-.15rem) scale(1.03);box-shadow:0 0 1.6rem rgba(134,240,208,.3)}.tnode.open .ti-ico{color:#86f0d0;background:rgba(134,240,208,.12)}
+.tnode.cur{border-color:#ffd24a;box-shadow:0 0 1.8rem rgba(255,210,74,.35)}.tnode.cur .ti-ico{color:#ffd24a;background:rgba(255,210,74,.14);animation:pulsebox 1.6s infinite}
+.tnode.done{border-color:rgba(98,214,161,.45);opacity:.9}.tnode.done .ti-ico{color:var(--good);background:rgba(98,214,161,.12)}
+.tnode.locked{opacity:.4;filter:grayscale(.7)}
+.tbar{grid-column:1/3;display:block;height:.3rem;border-radius:.2rem;background:var(--line2);overflow:hidden;margin-top:.3rem}.tbar u{display:block;height:100%;background:#ffd24a;box-shadow:0 0 .8rem #ffd24a}
+.tip{position:absolute;left:0;top:calc(100% + .5rem);width:19rem;padding:.7rem .9rem;border-radius:.8rem;background:#0b1220;border:1px solid var(--line2);box-shadow:0 1rem 2.4rem rgba(0,0,0,.6);z-index:20;opacity:0;pointer-events:none;transform:translateY(-.3rem);transition:opacity .15s,transform .15s}
+.tip b{font-size:.84rem}.tip p{font-size:.76rem;color:#c3cde0;line-height:1.55;margin:.25rem 0}.tip small{font-size:.66rem;color:var(--muted)}
+.tnode:hover .tip{opacity:1;transform:none}.tnode:hover{z-index:15}
+.techdone{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:450;padding:1.2rem 2.4rem;text-align:center;border-radius:1.2rem;background:linear-gradient(180deg,rgba(20,34,58,.97),rgba(8,14,26,.98));border:1.5px solid #86f0d0;box-shadow:0 0 4rem rgba(134,240,208,.5);animation:techin 5.2s cubic-bezier(.2,.9,.3,1.2) both}
+.techdone small{display:block;font-size:.66rem;letter-spacing:.3em;color:#86f0d0;font-weight:800}.techdone b{display:block;font-family:var(--serif);font-size:1.8rem;margin:.3rem 0}.techdone span{font-size:.82rem;color:#c3cde0}
+@keyframes techin{0%{opacity:0;transform:translateX(-50%) scale(.7)}8%,86%{opacity:1;transform:translateX(-50%) scale(1)}100%{opacity:0;transform:translateX(-50%) translateY(-1rem)}}
+
+#np{left:5.8rem;bottom:auto;top:4.4rem}
+#toasts{right:auto;left:5.8rem;top:7.2rem;align-items:flex-start}
+.rs-done,.rs-prog{display:flex;gap:.9rem;align-items:center;margin:1.2rem 0 0;padding:.8rem 1rem;border-radius:.9rem;background:rgba(134,240,208,.08);border:1px solid rgba(134,240,208,.4)}
+.rs-done>svg,.rs-prog>svg{width:1.8rem;height:1.8rem;color:#86f0d0;flex:none}.rs-done small,.rs-prog small{display:block;font-size:.6rem;letter-spacing:.14em;color:#86f0d0;font-weight:800}.rs-done b,.rs-prog b{font-size:1rem}.rs-done span{display:block;font-size:.74rem;color:#c3cde0}
+.rs-prog{background:rgba(255,255,255,.03);border-color:var(--line)}.rs-prog>svg{color:var(--muted)}.rs-prog small{color:var(--muted)}
+.rs-prog b .mono{font-size:.78rem;color:var(--muted);margin-left:.5rem}
 </style>
 <div id="app"></div><div class="loading" id="loading">THE COMPACT</div><div id="rotate">기기를 가로로 눕혀 주세요<br>PC 브라우저를 권장합니다</div>
 <script>window.COMPACT_NO_ART=true;</script>
@@ -496,6 +586,12 @@ svg text{font-family:var(--font)}
     h = Math.imul(h ^ h >>> 13, 1274126177);
     return ((h ^ h >>> 16) >>> 0) / 4294967295;
   }
+  function vn(x, y) {
+    const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi, s = (t) => t * t * (3 - 2 * t);
+    const a = hash(xi, yi), b = hash(xi + 1, yi), c2 = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
+    return a + (b - a) * s(xf) + (c2 - a) * s(yf) + (a - b - c2 + d) * s(xf) * s(yf);
+  }
+  var fbm = (x, y) => 0.55 * vn(x, y) + 0.3 * vn(x * 2.1, y * 2.1) + 0.15 * vn(x * 4.3, y * 4.3);
   function pip(p, x, y) {
     let i2 = false;
     for (let i = 0, j = p.length - 1; i < p.length; j = i++) {
@@ -795,6 +891,596 @@ svg text{font-family:var(--font)}
         cancelAnimationFrame(raf2);
       },
       resize: resize2
+    };
+  }
+
+  // js/hexmap.js
+  var COLS = 40;
+  var ROWS = 23;
+  var S3 = Math.sqrt(3);
+  var SITES = {
+    MS: [8, 3],
+    AM: [12, 4],
+    NV: [5, 8],
+    AP: [9, 7],
+    GO: [13, 9],
+    ME: [7, 11],
+    BC: [11, 12],
+    AN: [5, 14],
+    OA: [9, 15],
+    BK: [15, 13],
+    TS: [26, 12]
+  };
+  var KESTREL = [34, 11];
+  var VILLAGES = [[2, 5, "\uB9AC\uB178"], [20, 5, "\uB378\uD0C0 \uD56D"], [30, 5, "\uBD81\uBCBD"], [36, 17, "\uC544\uC288"], [21, 18, "\uB0A8\uC2ED\uC790"]];
+  var BLOBS = [[0.22, 0.5, 0.22, 0.52], [0.12, 0.22, 0.12, 0.26], [0.8, 0.48, 0.2, 0.55], [0.92, 0.8, 0.1, 0.22], [0.66, 0.52, 0.045, 0.12], [0.5, 0.22, 0.04, 0.07], [0.5, 0.85, 0.05, 0.08], [0.38, 0.12, 0.03, 0.05]];
+  var TNAME = { deep: "\uC2EC\uD574", shallow: "\uC5F0\uC548", plains: "\uD3C9\uC6D0", grass: "\uCD08\uC6D0", forest: "\uC232", hills: "\uAD6C\uB989", mountain: "\uC0B0\uC545", desert: "\uC0AC\uB9C9", snow: "\uC124\uC6D0" };
+  var COL = { deep: ["#0b3560", "#0e3d6c"], shallow: ["#1a6794", "#1f739f"], plains: ["#7db553", "#86bd5a"], grass: ["#62a24a", "#6aab50"], forest: ["#3d7a42", "#448349"], hills: ["#97a05c", "#a1aa64"], mountain: ["#8c8782", "#989390"], desert: ["#d8b86c", "#e0c276"], snow: ["#e6eff4", "#f0f6f9"] };
+  var cube = (c2, r) => {
+    const x = c2 - (r - (r & 1)) / 2, z = r;
+    return [x, -x - z, z];
+  };
+  var hexDist = (a, b) => {
+    const A = cube(a[0], a[1]), B2 = cube(b[0], b[1]);
+    return Math.max(Math.abs(A[0] - B2[0]), Math.abs(A[1] - B2[1]), Math.abs(A[2] - B2[2]));
+  };
+  var NB = [[[1, 0], [0, -1], [-1, -1], [-1, 0], [-1, 1], [0, 1]], [[1, 0], [1, -1], [0, -1], [-1, 0], [0, 1], [1, 1]]];
+  var neigh = (c2, r) => NB[r & 1].map(([dc, dr]) => [c2 + dc, r + dr]);
+  var inb = (c2, r) => c2 >= 0 && r >= 0 && c2 < COLS && r < ROWS;
+  var WORLD = null;
+  function world() {
+    if (WORLD) return WORLD;
+    const T = [], F = [];
+    for (let r = 0; r < ROWS; r++) for (let c2 = 0; c2 < COLS; c2++) {
+      const u = c2 / COLS, v = r / ROWS;
+      let f = -9;
+      for (const [cx, cy, rx, ry] of BLOBS) f = Math.max(f, 1 - ((u - cx) / rx) ** 2 - ((v - cy) / ry) ** 2);
+      f += (fbm(c2 * 0.19 + 3, r * 0.19 + 7) - 0.5) * 0.7;
+      F[r * COLS + c2] = f;
+    }
+    const cities = Object.values(SITES).concat([KESTREL], VILLAGES.map((v) => [v[0], v[1]]));
+    for (const [cc, cr] of cities) {
+      F[cr * COLS + cc] = Math.max(F[cr * COLS + cc], 0.35);
+      for (const [nc, nr] of neigh(cc, cr)) if (inb(nc, nr)) F[nr * COLS + nc] = Math.max(F[nr * COLS + nc], 0.12);
+    }
+    for (let r = 0; r < ROWS; r++) for (let c2 = 0; c2 < COLS; c2++) {
+      const i = r * COLS + c2, f = F[i], v = r / ROWS, m = fbm(c2 * 0.14 + 50, r * 0.14 + 50), nz = hash(c2 * 7 + 1, r * 13 + 5);
+      let t;
+      if (f < -0.28) t = "deep";
+      else if (f < 0) t = "shallow";
+      else if (v < 0.06 || v > 0.95) t = "snow";
+      else if (f > 0.85 && nz > 0.55) t = "mountain";
+      else if (f > 0.55 && nz > 0.6) t = "hills";
+      else if (m < 0.34 && v > 0.3 && v < 0.78) t = "desert";
+      else if (m > 0.6 && nz > 0.25) t = "forest";
+      else if (nz > 0.75) t = "hills";
+      else t = nz > 0.4 ? "plains" : "grass";
+      T[i] = t;
+    }
+    for (const [cc, cr] of cities) {
+      const i = cr * COLS + cc;
+      if (T[i] !== "plains" && T[i] !== "grass") T[i] = "plains";
+      for (const [nc, nr] of neigh(cc, cr)) if (inb(nc, nr)) {
+        const j = nr * COLS + nc;
+        if (T[j] === "deep" || T[j] === "shallow" || T[j] === "mountain") T[j] = "grass";
+      }
+    }
+    const O = new Array(COLS * ROWS).fill(null), ids = Object.keys(SITES);
+    for (let r = 0; r < ROWS; r++) for (let c2 = 0; c2 < COLS; c2++) {
+      const t = T[r * COLS + c2];
+      if (t === "deep" || t === "shallow") continue;
+      let best = null, bd = 3;
+      for (const id of ids) {
+        const d = hexDist([c2, r], SITES[id]);
+        if (d < bd || d === bd && best && d <= 2 && id < best) {
+          bd = d;
+          best = id;
+        }
+      }
+      if (best && bd <= 2) O[r * COLS + c2] = best;
+      else if (hexDist([c2, r], KESTREL) <= 2) O[r * COLS + c2] = "KES";
+    }
+    const RES = [];
+    for (let r = 0; r < ROWS; r++) for (let c2 = 0; c2 < COLS; c2++) {
+      const i = r * COLS + c2;
+      if (O[i] && O[i] !== "KES" && T[i] !== "deep" && hash(c2 * 3 + 9, r * 5 + 2) > 0.8 && !cities.some(([a, b]) => a === c2 && b === r)) RES.push([c2, r, ["chip", "data", "energy", "talent"][Math.floor(hash(c2, r + 40) * 4)]]);
+    }
+    WORLD = { T, F, O, RES, ids };
+    return WORLD;
+  }
+  function createHexMap() {
+    const el = document.createElement("div");
+    el.className = "hexmap";
+    const base = document.createElement("canvas"), ov = document.createElement("canvas"), layer = document.createElement("div"), tip = document.createElement("div");
+    layer.className = "hx-layer";
+    tip.className = "hx-tip hidden";
+    el.append(base, ov, layer, tip);
+    const bctx = base.getContext("2d"), octx = ov.getContext("2d");
+    let W2 = 0, H2 = 0, r = 20, ox = 0, oy = 0, dpr2 = 1, data = { cities: [], units: [], turn: 1 }, selected = null, raf2 = 0, running = false, t0 = performance.now(), cb = {}, fog = null, clouds = [], lastF = 0, lastKey = "";
+    const hc = (c2, rr) => [ox + r * S3 * (c2 + 0.5 * (rr & 1)) + r * S3 / 2, oy + r * 1.5 * rr + r];
+    const hexPath = (ctx, x, y, rad2) => {
+      ctx.beginPath();
+      for (let k = 0; k < 6; k++) {
+        const a = Math.PI / 180 * (60 * k - 30);
+        const px = x + rad2 * Math.cos(a), py = y + rad2 * Math.sin(a);
+        k ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+      }
+      ctx.closePath();
+    };
+    const corner = (x, y, k, rad2 = r) => {
+      const a = Math.PI / 180 * (60 * k - 30);
+      return [x + rad2 * Math.cos(a), y + rad2 * Math.sin(a)];
+    };
+    const edgeNb = (c2, rr, k) => {
+      const ang = 60 * k * Math.PI / 180;
+      const [x, y] = hc(c2, rr);
+      const mx = x + r * S3 * Math.cos(ang), my = y + r * S3 * Math.sin(ang);
+      let best = null, bd = 1e9;
+      for (const [nc, nr] of neigh(c2, rr)) {
+        const [nx, ny] = hc(nc, nr);
+        const d = (nx - mx) ** 2 + (ny - my) ** 2;
+        if (d < bd) {
+          bd = d;
+          best = [nc, nr];
+        }
+      }
+      return best;
+    };
+    function visDist() {
+      const t = data.turn || 1;
+      return 4.5 + t * 0.75;
+    }
+    function fogMap() {
+      const w = world(), out = new Float32Array(COLS * ROWS), vis = visDist(), srcs = Object.values(SITES).concat(data.units.map((u) => [u.col, u.row]));
+      for (let rr = 0; rr < ROWS; rr++) for (let c2 = 0; c2 < COLS; c2++) {
+        let d = 99;
+        for (const s of srcs) d = Math.min(d, hexDist([c2, rr], s));
+        out[rr * COLS + c2] = Math.max(0, Math.min(1, (d - vis) / 2.2));
+      }
+      return out;
+    }
+    function drawBase() {
+      const w = world();
+      fog = fogMap();
+      base.width = W2 * dpr2;
+      base.height = H2 * dpr2;
+      bctx.setTransform(dpr2, 0, 0, dpr2, 0, 0);
+      const g = bctx.createLinearGradient(0, 0, 0, H2);
+      g.addColorStop(0, "#0c3158");
+      g.addColorStop(1, "#0a2a4c");
+      bctx.fillStyle = g;
+      bctx.fillRect(0, 0, W2, H2);
+      for (let rr = 0; rr < ROWS; rr++) for (let c2 = 0; c2 < COLS; c2++) {
+        const i = rr * COLS + c2, t = w.T[i], [x, y] = hc(c2, rr), h = hash(c2 * 5 + 3, rr * 7 + 1), cl = COL[t][h > 0.5 ? 1 : 0];
+        hexPath(bctx, x, y, r + 0.6);
+        bctx.fillStyle = cl;
+        bctx.fill();
+        if (t === "deep" || t === "shallow") {
+          bctx.strokeStyle = t === "shallow" ? "rgba(255,255,255,.07)" : "rgba(255,255,255,.035)";
+          bctx.lineWidth = 1;
+          bctx.stroke();
+          if (h > 0.72) {
+            bctx.strokeStyle = "rgba(255,255,255,.18)";
+            bctx.lineWidth = 1.2;
+            bctx.beginPath();
+            bctx.moveTo(x - r * 0.4, y + 1);
+            bctx.quadraticCurveTo(x - r * 0.2, y - 3, x, y + 1);
+            bctx.quadraticCurveTo(x + r * 0.2, y + 5, x + r * 0.4, y + 1);
+            bctx.stroke();
+          }
+          continue;
+        }
+        bctx.strokeStyle = "rgba(20,30,10,.2)";
+        bctx.lineWidth = 1;
+        bctx.stroke();
+        const R3 = (k) => hash(c2 * 11 + k, rr * 17 + k * 3);
+        if (t === "forest") for (let k = 0; k < 5; k++) {
+          const fx = x + (R3(k) - 0.5) * r * 1.2, fy = y + (R3(k + 9) - 0.4) * r * 1;
+          bctx.fillStyle = "#1f5230";
+          bctx.beginPath();
+          bctx.moveTo(fx, fy - 6);
+          bctx.lineTo(fx - 3.6, fy + 2.5);
+          bctx.lineTo(fx + 3.6, fy + 2.5);
+          bctx.fill();
+          bctx.fillStyle = "#2d7440";
+          bctx.beginPath();
+          bctx.moveTo(fx, fy - 6);
+          bctx.lineTo(fx - 3.6, fy + 2.5);
+          bctx.lineTo(fx, fy + 2.5);
+          bctx.fill();
+        }
+        else if (t === "hills") for (let k = 0; k < 2; k++) {
+          const fx = x + (k - 0.5) * r * 0.7, fy = y + 2;
+          bctx.fillStyle = "#7a8148";
+          bctx.beginPath();
+          bctx.ellipse(fx, fy, r * 0.42, r * 0.3, 0, Math.PI, 0);
+          bctx.fill();
+          bctx.fillStyle = "rgba(255,255,255,.18)";
+          bctx.beginPath();
+          bctx.ellipse(fx - 2, fy - 1, r * 0.25, r * 0.15, 0, Math.PI, 0);
+          bctx.fill();
+        }
+        else if (t === "mountain") {
+          for (let k = 0; k < 2; k++) {
+            const fx = x + (k - 0.5) * r * 0.6, hh = r * (0.75 - k * 0.15);
+            bctx.fillStyle = "#6c6761";
+            bctx.beginPath();
+            bctx.moveTo(fx - r * 0.42, y + r * 0.45);
+            bctx.lineTo(fx, y + r * 0.45 - hh);
+            bctx.lineTo(fx + r * 0.42, y + r * 0.45);
+            bctx.fill();
+            bctx.fillStyle = "#b9b4ad";
+            bctx.beginPath();
+            bctx.moveTo(fx, y + r * 0.45 - hh);
+            bctx.lineTo(fx + r * 0.42, y + r * 0.45);
+            bctx.lineTo(fx + 2, y + r * 0.45);
+            bctx.fill();
+            bctx.fillStyle = "#fff";
+            bctx.beginPath();
+            bctx.moveTo(fx, y + r * 0.45 - hh);
+            bctx.lineTo(fx - r * 0.14, y + r * 0.45 - hh + r * 0.3);
+            bctx.lineTo(fx + r * 0.14, y + r * 0.45 - hh + r * 0.3);
+            bctx.fill();
+          }
+        } else if (t === "desert") {
+          bctx.strokeStyle = "rgba(150,110,40,.45)";
+          bctx.lineWidth = 1.2;
+          for (let k = 0; k < 3; k++) {
+            const fy = y - 6 + k * 6;
+            bctx.beginPath();
+            bctx.moveTo(x - r * 0.5, fy);
+            bctx.quadraticCurveTo(x, fy - 3, x + r * 0.5, fy);
+            bctx.stroke();
+          }
+        } else if (t === "grass" || t === "plains") {
+          bctx.strokeStyle = "rgba(30,80,20,.35)";
+          bctx.lineWidth = 1;
+          for (let k = 0; k < 4; k++) {
+            const fx = x + (R3(k) - 0.5) * r * 1.3, fy = y + (R3(k + 5) - 0.5) * r * 1;
+            bctx.beginPath();
+            bctx.moveTo(fx, fy + 2);
+            bctx.lineTo(fx - 1.4, fy - 2);
+            bctx.moveTo(fx, fy + 2);
+            bctx.lineTo(fx + 1.4, fy - 2);
+            bctx.stroke();
+          }
+        }
+      }
+      bctx.lineCap = "round";
+      for (let rr = 0; rr < ROWS; rr++) for (let c2 = 0; c2 < COLS; c2++) {
+        const t = w.T[rr * COLS + c2];
+        if (t === "deep" || t === "shallow") continue;
+        const [x, y] = hc(c2, rr);
+        for (let k = 0; k < 6; k++) {
+          const nb = edgeNb(c2, rr, k);
+          if (!nb || !inb(nb[0], nb[1])) continue;
+          const nt = w.T[nb[1] * COLS + nb[0]];
+          if (nt === "deep" || nt === "shallow") {
+            const [a1, a2] = corner(x, y, k), [b1, b2] = corner(x, y, k + 1);
+            bctx.strokeStyle = "rgba(236,250,255,.85)";
+            bctx.lineWidth = 2.6;
+            bctx.beginPath();
+            bctx.moveTo(a1, a2);
+            bctx.lineTo(b1, b2);
+            bctx.stroke();
+            bctx.strokeStyle = "rgba(120,210,235,.35)";
+            bctx.lineWidth = 6;
+            bctx.stroke();
+          }
+        }
+      }
+      const colorOf = (id) => id === "KES" ? "#ff4d6d" : (data.cities.find((c2) => c2.id === id) || {}).color || "#fff";
+      for (let rr = 0; rr < ROWS; rr++) for (let c2 = 0; c2 < COLS; c2++) {
+        const o = w.O[rr * COLS + c2];
+        if (!o) continue;
+        const [x, y] = hc(c2, rr);
+        hexPath(bctx, x, y, r);
+        bctx.fillStyle = colorOf(o) + "30";
+        bctx.fill();
+      }
+      bctx.lineCap = "round";
+      for (let rr = 0; rr < ROWS; rr++) for (let c2 = 0; c2 < COLS; c2++) {
+        const o = w.O[rr * COLS + c2];
+        if (!o) continue;
+        const [x, y] = hc(c2, rr);
+        for (let k = 0; k < 6; k++) {
+          const nb = edgeNb(c2, rr, k);
+          const no = nb && inb(nb[0], nb[1]) ? w.O[nb[1] * COLS + nb[0]] : null;
+          if (no === o) continue;
+          const [a1, a2] = corner(x, y, k, r - 1.5), [b1, b2] = corner(x, y, k + 1, r - 1.5);
+          bctx.strokeStyle = colorOf(o);
+          bctx.lineWidth = 3.2;
+          bctx.beginPath();
+          bctx.moveTo(a1, a2);
+          bctx.lineTo(b1, b2);
+          bctx.stroke();
+          bctx.strokeStyle = "rgba(255,255,255,.5)";
+          bctx.lineWidth = 1;
+          bctx.stroke();
+        }
+      }
+      bctx.setLineDash([2, 5]);
+      bctx.strokeStyle = "rgba(90,60,30,.7)";
+      bctx.lineWidth = 2;
+      const ids = w.ids;
+      for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) if (hexDist(SITES[ids[i]], SITES[ids[j]]) <= 5) {
+        const [x1, y1] = hc(...SITES[ids[i]]), [x2, y2] = hc(...SITES[ids[j]]);
+        bctx.beginPath();
+        bctx.moveTo(x1, y1);
+        bctx.lineTo(x2, y2);
+        bctx.stroke();
+      }
+      bctx.setLineDash([]);
+      for (const [c2, rr, kind] of w.RES) {
+        const [x, y] = hc(c2, rr), col = { chip: "#c9d1dc", data: "#6fb4ff", energy: "#ffd24a", talent: "#7be08a" }[kind];
+        bctx.fillStyle = "rgba(8,14,26,.75)";
+        bctx.beginPath();
+        bctx.arc(x + r * 0.45, y - r * 0.35, 5.4, 0, 6.3);
+        bctx.fill();
+        bctx.fillStyle = col;
+        bctx.beginPath();
+        if (kind === "chip") bctx.rect(x + r * 0.45 - 2.6, y - r * 0.35 - 2.6, 5.2, 5.2);
+        else if (kind === "energy") {
+          bctx.moveTo(x + r * 0.45 + 1, y - r * 0.35 - 3.4);
+          bctx.lineTo(x + r * 0.45 - 2.2, y - r * 0.35 + 0.6);
+          bctx.lineTo(x + r * 0.45, y - r * 0.35 + 0.6);
+          bctx.lineTo(x + r * 0.45 - 1, y - r * 0.35 + 3.4);
+          bctx.lineTo(x + r * 0.45 + 2.2, y - r * 0.35 - 0.6);
+          bctx.lineTo(x + r * 0.45, y - r * 0.35 - 0.6);
+        } else bctx.arc(x + r * 0.45, y - r * 0.35, 2.6, 0, 6.3);
+        bctx.fill();
+      }
+      for (let rr = 0; rr < ROWS; rr++) for (let c2 = 0; c2 < COLS; c2++) {
+        const f = fog[rr * COLS + c2];
+        if (f <= 0.02) continue;
+        const [x, y] = hc(c2, rr);
+        hexPath(bctx, x, y, r + 0.8);
+        bctx.fillStyle = `rgba(14,20,34,${0.2 + f * 0.62})`;
+        bctx.fill();
+        if (f > 0.5) {
+          bctx.fillStyle = `rgba(150,170,205,${0.05 * f})`;
+          bctx.beginPath();
+          bctx.arc(x + (hash(c2, rr) - 0.5) * r, y + (hash(rr, c2) - 0.5) * r, r * 0.6, 0, 6.3);
+          bctx.fill();
+        }
+      }
+      const vg = bctx.createRadialGradient(W2 / 2, H2 / 2, Math.min(W2, H2) * 0.35, W2 / 2, H2 / 2, Math.max(W2, H2) * 0.75);
+      vg.addColorStop(0, "rgba(0,0,0,0)");
+      vg.addColorStop(1, "rgba(2,6,14,.62)");
+      bctx.fillStyle = vg;
+      bctx.fillRect(0, 0, W2, H2);
+    }
+    const boats = [[3, 0.2, 14, 0.012], [7, 0.7, 11, -0.01], [18, 0.4, 20, 0.014], [23, 0.62, 16, -0.012], [31, 0.8, 14, 0.01]].map(([c2, v, len, sp]) => ({ c: c2, v, len, sp }));
+    function drawClouds(t) {
+      octx.save();
+      for (let i = 0; i < 7; i++) {
+        const sp = 6 + i * 2.2, x = (i * 0.31 * W2 + t * sp) % (W2 + 400) - 200, y = (0.1 + 0.8 * hash(i, 5)) * H2, s = 80 + hash(i, 9) * 110;
+        octx.fillStyle = "rgba(8,16,30,.10)";
+        octx.beginPath();
+        octx.ellipse(x + 26, y + 36, s, s * 0.34, 0, 0, 6.3);
+        octx.fill();
+        octx.fillStyle = "rgba(235,244,255,.14)";
+        for (let k = 0; k < 5; k++) {
+          octx.beginPath();
+          octx.ellipse(x + (k - 2) * s * 0.34, y + k % 2 * 6, s * 0.34, s * 0.2, 0, 0, 6.3);
+          octx.fill();
+        }
+      }
+      octx.restore();
+    }
+    function frame(now) {
+      if (!W2) return;
+      const t = (now - t0) / 1e3;
+      octx.setTransform(dpr2, 0, 0, dpr2, 0, 0);
+      octx.clearRect(0, 0, W2, H2);
+      drawClouds(t);
+      const rt = [["TS", "NV", "#9fd0ff"], ["BK", "AP", "#ffd98a"], ["MS", "GO", "#9fd0ff"], ["TS", "BC", "#c79bff"]];
+      rt.forEach(([a, b, col], i) => {
+        const A = hc(...SITES[a]), B2 = hc(...SITES[b]), mx = (A[0] + B2[0]) / 2, my = (A[1] + B2[1]) / 2 - Math.hypot(B2[0] - A[0], B2[1] - A[1]) * 0.22;
+        octx.strokeStyle = col + "88";
+        octx.lineWidth = 1.6;
+        octx.setLineDash([4, 6]);
+        octx.beginPath();
+        octx.moveTo(...A);
+        octx.quadraticCurveTo(mx, my, ...B2);
+        octx.stroke();
+        octx.setLineDash([]);
+        for (let k = 0; k < 2; k++) {
+          const u = (t * 0.07 + i * 0.25 + k * 0.5) % 1, v = 1 - u, x = v * v * A[0] + 2 * v * u * mx + u * u * B2[0], y = v * v * A[1] + 2 * v * u * my + u * u * B2[1];
+          octx.fillStyle = col;
+          octx.beginPath();
+          octx.arc(x, y, 3.2, 0, 6.3);
+          octx.fill();
+          octx.fillStyle = col + "44";
+          octx.beginPath();
+          octx.arc(x, y, 8, 0, 6.3);
+          octx.fill();
+        }
+      });
+      for (const b of boats) {
+        const u = ((b.c / COLS + t * b.sp) % 1 + 1) % 1, x = ox + u * COLS * r * S3, y = oy + b.v * ROWS * r * 1.5 + Math.sin(t * 1.4 + b.c) * 2;
+        if (fog && fog[Math.min(ROWS - 1, Math.floor(b.v * ROWS)) * COLS + Math.min(COLS - 1, Math.floor(u * COLS))] > 0.55) continue;
+        const d = b.sp > 0 ? 1 : -1;
+        octx.save();
+        octx.translate(x, y);
+        octx.scale(d, 1);
+        octx.fillStyle = "#e9eef6";
+        octx.beginPath();
+        octx.moveTo(-8, 0);
+        octx.lineTo(8, 0);
+        octx.lineTo(5, 4);
+        octx.lineTo(-5, 4);
+        octx.fill();
+        octx.fillStyle = "#fff";
+        octx.beginPath();
+        octx.moveTo(0, -11);
+        octx.lineTo(7, -1);
+        octx.lineTo(0, -1);
+        octx.fill();
+        octx.fillStyle = "rgba(255,255,255,.35)";
+        octx.beginPath();
+        octx.ellipse(-10, 5, 8, 1.4, 0, 0, 6.3);
+        octx.fill();
+        octx.restore();
+      }
+      {
+        const [kx, ky] = hc(...KESTREL), f = fog ? fog[KESTREL[1] * COLS + KESTREL[0]] : 1, p = t * 0.5 % 1;
+        octx.strokeStyle = `rgba(255,77,109,${(1 - p) * (0.7 - f * 0.45)})`;
+        octx.lineWidth = 2;
+        octx.beginPath();
+        octx.arc(kx, ky, r * (1 + p * 3.2), 0, 6.3);
+        octx.stroke();
+      }
+      if (selected && SITES[selected]) {
+        const [x, y] = hc(...SITES[selected]), pu = 0.5 + 0.5 * Math.sin(t * 4);
+        hexPath(octx, x, y, r * 1.02);
+        octx.strokeStyle = `rgba(255,255,255,${0.7 + pu * 0.3})`;
+        octx.lineWidth = 3;
+        octx.stroke();
+        hexPath(octx, x, y, r * 1.3);
+        octx.strokeStyle = `rgba(255,224,130,${0.25 + pu * 0.35})`;
+        octx.lineWidth = 2;
+        octx.stroke();
+      }
+      Object.values(SITES).forEach(([c2, rr], i) => {
+        const [x, y] = hc(c2, rr), p = (t * 0.3 + i * 0.13) % 1;
+        octx.strokeStyle = `rgba(255,236,170,${(1 - p) * 0.28})`;
+        octx.lineWidth = 1.5;
+        octx.beginPath();
+        octx.arc(x, y, r * (0.8 + p * 1.8), 0, 6.3);
+        octx.stroke();
+      });
+    }
+    function loop(now) {
+      if (!running) return;
+      if (now - lastF > 33) {
+        lastF = now;
+        frame(now);
+      }
+      raf2 = requestAnimationFrame(loop);
+    }
+    function layout() {
+      layer.innerHTML = "";
+      const mk = (cls, c2, rr, html, attrs = {}) => {
+        const d = document.createElement("div");
+        d.className = cls;
+        const [x, y] = hc(c2, rr);
+        d.style.left = `${x}px`;
+        d.style.top = `${y}px`;
+        d.style.setProperty("--r", `${r}px`);
+        d.innerHTML = html;
+        for (const [k, v] of Object.entries(attrs)) d.dataset[k] = v;
+        layer.appendChild(d);
+        return d;
+      };
+      for (const v of VILLAGES) {
+        const f = fog ? fog[v[1] * COLS + v[0]] : 0;
+        mk("village" + (f > 0.6 ? " fogged" : ""), v[0], v[1], `<i></i><small>${v[2]}</small>`);
+      }
+      {
+        const f = fog ? fog[KESTREL[1] * COLS + KESTREL[0]] : 1;
+        mk("kcity" + (f > 0.6 ? " fogged" : ""), KESTREL[0], KESTREL[1], `<div class="kc-ico">${f > 0.6 ? "?" : "\u{1F441}"}</div><small>${f > 0.6 ? "\uBBF8\uC9C0\uC758 \uB545" : "\uCF08\uC2A4\uD2B8\uB7F4"}</small>`);
+      }
+      for (const c2 of data.cities) {
+        const [col, row] = SITES[c2.id];
+        const d = mk("city" + (c2.id === selected ? " sel" : ""), col, row, c2.html, { id: c2.id });
+        d.style.setProperty("--c", c2.color);
+        d.addEventListener("click", (e) => {
+          e.stopPropagation();
+          cb.city && cb.city(c2.id);
+        });
+        d.addEventListener("dblclick", (e) => {
+          e.stopPropagation();
+          cb.open && cb.open(c2.id);
+        });
+      }
+      for (const u of data.units) {
+        if (u.cls === "enemy" && fog && fog[u.row * COLS + u.col] > 0.6) continue;
+        const d = mk("unit " + (u.cls || ""), u.col, u.row, u.html, { id: u.id });
+        d.addEventListener("click", (e) => {
+          e.stopPropagation();
+          cb.unit && cb.unit(u.id);
+        });
+      }
+    }
+    function resize2() {
+      const rc = el.getBoundingClientRect();
+      if (!rc.width || !rc.height) return;
+      dpr2 = Math.min(1.5, devicePixelRatio || 1);
+      W2 = rc.width;
+      H2 = rc.height;
+      r = Math.max(W2 / (S3 * (COLS + 0.5)), H2 / (1.5 * (ROWS - 1) + 2));
+      ox = (W2 - r * S3 * (COLS + 0.5)) / 2;
+      oy = (H2 - r * (1.5 * (ROWS - 1) + 2)) / 2;
+      ov.width = W2 * dpr2;
+      ov.height = H2 * dpr2;
+      ov.style.width = base.style.width = `${W2}px`;
+      ov.style.height = base.style.height = `${H2}px`;
+      drawBase();
+      layout();
+      frame(performance.now());
+    }
+    function hexAtPx(px, py) {
+      let best = null, bd = 1e9;
+      for (let rr = 0; rr < ROWS; rr++) for (let c2 = 0; c2 < COLS; c2++) {
+        const [x, y] = hc(c2, rr), d = (x - px) ** 2 + (y - py) ** 2;
+        if (d < bd) {
+          bd = d;
+          best = [c2, rr];
+        }
+      }
+      return bd < (r * 1.05) ** 2 ? best : null;
+    }
+    el.addEventListener("mousemove", (e) => {
+      const rc = el.getBoundingClientRect(), h = hexAtPx(e.clientX - rc.left, e.clientY - rc.top);
+      if (!h || e.target.closest(".city,.unit")) {
+        tip.classList.add("hidden");
+        return;
+      }
+      const w = world(), i = h[1] * COLS + h[0], o = w.O[i], f = fog ? fog[i] : 0;
+      const cname = o === "KES" ? "\uCF08\uC2A4\uD2B8\uB7F4 \uC601\uD1A0" : o ? (data.cities.find((c2) => c2.id === o) || {}).name + " \uC601\uD1A0" : "\uBB34\uC8FC\uC9C0";
+      tip.innerHTML = f > 0.6 ? "<b>\uBBF8\uD0D0\uD5D8</b><small>\uC815\uBCF4\uB97C \uBAA8\uC73C\uBA74 \uC2DC\uC57C\uAC00 \uB113\uC5B4\uC9D1\uB2C8\uB2E4</small>" : `<b>${TNAME[w.T[i]]}</b><small>${cname}</small>`;
+      tip.style.left = `${e.clientX - rc.left + 14}px`;
+      tip.style.top = `${e.clientY - rc.top + 14}px`;
+      tip.classList.remove("hidden");
+    });
+    el.addEventListener("mouseleave", () => tip.classList.add("hidden"));
+    el.addEventListener("click", (e) => {
+      if (e.target.closest(".city,.unit")) return;
+      cb.empty && cb.empty();
+    });
+    const ro = new ResizeObserver(() => resize2());
+    ro.observe(el);
+    return {
+      el,
+      set(d, callbacks) {
+        const key = d.turn + "|" + d.units.length;
+        const redraw = key !== lastKey;
+        lastKey = key;
+        data = d;
+        cb = callbacks || cb;
+        if (d.selected !== void 0) selected = d.selected;
+        if (W2) {
+          if (redraw) drawBase();
+          layout();
+        }
+      },
+      select(id) {
+        selected = id;
+        layout();
+      },
+      start() {
+        if (running) return;
+        running = true;
+        t0 = performance.now();
+        raf2 = requestAnimationFrame(loop);
+      },
+      stop() {
+        running = false;
+        cancelAnimationFrame(raf2);
+      },
+      resize: resize2,
+      pos: (id) => SITES[id] ? hc(...SITES[id]) : null
     };
   }
 
@@ -1199,6 +1885,19 @@ svg text{font-family:var(--font)}
     alone: { n: 9, key: "alone", title: "\uD63C\uC790 \uB0A8\uC740 \uBD80\uC790", en: "THE LONELY BILLIONAIRE", quote: '"\uC138\uACC4\uC5D0\uC11C \uAC00\uC7A5 \uBD80\uC720\uD55C \uC0AC\uB78C\uC774, \uAC00\uC7A5 \uC678\uB85C\uC6B4 \uC0AC\uB78C\uC774 \uB418\uC5C8\uB2E4."', text: ["\uB2F9\uC2E0\uC758 \uC21C\uC790\uC0B0\uC740 \uC5B4\uB5A4 \uC21C\uC704\uD45C\uC5D0\uC11C\uB3C4 \uCD5C\uC0C1\uB2E8\uC5D0 \uC62C\uB790\uB2E4.", "\uADF8\uB7EC\uB098 \uC5F4\uD55C \uAC1C\uC758 \uBD88\uC740 \uC11C\uC11C\uD788 \uC2DD\uC5B4 \uAC14\uACE0, \uC0AC\uB78C\uB4E4\uC740 \uD558\uB098\uB458 \uB5A0\uB0AC\uB2E4.", "\uCEF4\uD329\uD2B8\uB294 \uB0A8\uC558\uB2E4. \uAECD\uB370\uAE30\uB9CC."] },
     prototype: { n: 1, key: "prototype", title: "\uC544\uC9C1 \uB05D\uB098\uC9C0 \uC54A\uC740 \uC774\uC57C\uAE30", en: "TO BE CONTINUED", quote: '"\uB9C8\uC9C0\uB9C9 \uD3B8\uC9C0\uB294 \uC544\uC9C1 \uC5F4\uB9AC\uC9C0 \uC54A\uC558\uB2E4."', text: ["\uC5F4\uB450 \uBD84\uAE30\uAC00 \uC9C0\uB0AC\uB2E4. \uC774 \uD504\uB85C\uD1A0\uD0C0\uC785\uC758 \uC774\uC57C\uAE30\uB294 \uC5EC\uAE30\uAE4C\uC9C0\uB2E4.", "\uC77C\uACF1 \uD1B5\uC758 \uD3B8\uC9C0 \uC911 \uB124 \uD1B5\uC774 \uC5F4\uB838\uACE0, \uCCA9\uC790\uC640 \uCF08\uC2A4\uD2B8\uB7F4\uC758 \uC815\uCCB4\uB294 \uC544\uC9C1 \uC644\uC804\uD788 \uB4DC\uB7EC\uB098\uC9C0 \uC54A\uC558\uB2E4.", "\uB2F9\uC2E0\uC758 \uC120\uD0DD\uC740 \uAE30\uB85D\uB418\uC5C8\uB2E4. \uC815\uC2DD \uBC84\uC804\uC5D0\uC11C\uB294 \uB9C8\uD754 \uBD84\uAE30\uAC00 \uC774\uC5B4\uC9C4\uB2E4."] }
   };
+  var TECHS = [
+    { id: "scaling", tier: 1, row: 0, kr: "\uC2A4\uCF00\uC77C\uB9C1 \uBC95\uCE59", en: "SCALING LAWS", cost: 10, req: [], icon: "chart", desc: "\uBAA8\uB378 \uADDC\uBAA8\uB97C \uD0A4\uC6B8\uC218\uB85D \uC131\uB2A5\uC774 \uC624\uB978\uB2E4\uB294 \uACBD\uD5D8\uCE59. \uC804 \uAE30\uC5C5 \uAE30\uBCF8 \uC131\uC7A5 +0.4%p", fx: { permG: 4e-3 } },
+    { id: "dc", tier: 1, row: 1, kr: "\uB300\uADDC\uBAA8 \uB370\uC774\uD130\uC13C\uD130", en: "HYPERSCALE DC", cost: 10, req: [], icon: "server", desc: "\uD45C\uC900\uD654\uB41C \uB300\uD615 \uC13C\uD130 \uC124\uACC4. \uB9C8\uC774\uD06C\uB85C\uC18C\uD504\uD2B8\xB7\uC544\uB9C8\uC874\xB7\uC54C\uD30C\uBCB3 \uC131\uC7A5 +0.6%p", fx: { permComp: { MS: { g: 6e-3 }, AM: { g: 6e-3 }, GO: { g: 6e-3 } } } },
+    { id: "rlhf", tier: 1, row: 2, kr: "\uC815\uB82C \uAE30\uC220", en: "ALIGNMENT", cost: 12, req: [], icon: "shield", desc: "\uBAA8\uB378\uC744 \uC0AC\uB78C\uC758 \uC758\uB3C4\uC5D0 \uB9DE\uCD98\uB2E4. \uC815\uBD80 +4, SAGE \uC2E0\uB8B0 +4", fx: { gov: 4, trust: { sage: 4 } } },
+    { id: "euv", tier: 2, row: 0.5, kr: "High-NA EUV \uACF5\uC815", en: "HIGH-NA EUV", cost: 20, req: ["dc"], icon: "chip", desc: "TSMC \uC131\uC7A5 +1.2%p, \uC5D4\uBE44\uB514\uC544 +0.6%p, \uAE30\uC220 +3", fx: { permComp: { TS: { g: 0.012 }, NV: { g: 6e-3 } }, tech: 3 } },
+    { id: "moe", tier: 2, row: 1.5, kr: "\uD76C\uC18C \uC804\uBB38\uAC00 \uBAA8\uB378", en: "MIXTURE OF EXPERTS", cost: 20, req: ["scaling"], icon: "brain", desc: "\uAC19\uC740 \uC131\uB2A5\uC744 \uC808\uBC18\uC758 \uC5F0\uC0B0\uC73C\uB85C. \uAC70\uD488 \u22123, Anthropic\xB7OpenAI \uC131\uC7A5 +1%p", fx: { bubble: -3, permComp: { AN: { g: 0.01 }, OA: { g: 0.01 } } } },
+    { id: "sec", tier: 2, row: 2.5, kr: "\uBCF4\uC548 \uC544\uD0A4\uD14D\uCC98", en: "ZERO-TRUST", cost: 18, req: ["rlhf"], icon: "lock", desc: "\uB0B4\uBD80\uC790 \uC720\uCD9C \uBC29\uC5B4. \uAC10\uC0AC \uC704\uD5D8 \u221210, \uCF08\uC2A4\uD2B8\uB7F4 \uB2E8\uC11C +1", fx: { audit: -10, clue: { who: "victor", n: 1 } } },
+    { id: "agent", tier: 3, row: 1, kr: "\uC790\uC728 \uC5D0\uC774\uC804\uD2B8", en: "AUTONOMOUS AGENTS", cost: 30, req: ["moe"], icon: "robot", desc: "\uC804 \uAE30\uC5C5 \uAE30\uBCF8 \uC131\uC7A5 +0.8%p. \uB2E8, \uAC70\uD488 +4", fx: { permG: 8e-3, bubble: 4 } },
+    { id: "fusion", tier: 3, row: 0, kr: "\uC18C\uD615 \uC6D0\uC790\uB85C", en: "SMALL MODULAR REACTOR", cost: 30, req: ["euv"], icon: "bolt", desc: "\uC804\uB825 \uBB38\uC81C \uD574\uACB0. \uC804 \uAE30\uC5C5 \uB9C8\uC9C4 +0.4%p", fx: { permNm: 4e-3 } },
+    { id: "interp", tier: 3, row: 2, kr: "\uD574\uC11D\uAC00\uB2A5\uC131", en: "INTERPRETABILITY", cost: 28, req: ["sec", "moe"], icon: "eye", desc: "\uBAA8\uB378 \uB0B4\uBD80\uB97C \uB4E4\uC5EC\uB2E4\uBCF8\uB2E4. \uC815\uBD80 +6, SAGE \uC2E0\uB8B0 +6", fx: { gov: 6, trust: { sage: 6 } } },
+    { id: "agi", tier: 4, row: 0.6, kr: "\uBC94\uC6A9 \uC9C0\uB2A5", en: "GENERAL INTELLIGENCE", cost: 50, req: ["agent", "fusion"], icon: "star", desc: "\uC804 \uAE30\uC5C5 \uC131\uC7A5 +1.5%p. \uAC70\uD488 +10 \u2014 \uBD88\uC740 \uCF1C\uC9C0\uB9CC \uBD88\uAE38\uC774 \uCEE4\uC9C4\uB2E4", fx: { permG: 0.015, bubble: 10 } },
+    { id: "unwind", tier: 4, row: 1.8, kr: "\uCEF4\uD329\uD2B8 \uD574\uCCB4 \uD504\uB85C\uD1A0\uCF5C", en: "UNWIND PROTOCOL", cost: 50, req: ["interp", "agent"], icon: "key", desc: "\uC120\uB300\uAC00 \uB0A8\uAE34 \uB9C8\uC9C0\uB9C9 \uC5F4\uC1E0. \uC720\uC0B0 \uC810\uC218 +12, \uC815\uBD80 +8", fx: { gov: 8, flag: "unwind" } }
+  ];
 
   // js/state.js
   var state_exports = {};
@@ -1224,11 +1923,15 @@ svg text{font-family:var(--font)}
     nextPending: () => nextPending,
     openLetter: () => openLetter,
     pickEnding: () => pickEnding,
+    pickTech: () => pickTech,
     previewCompany: () => previewCompany,
     recomputeMcap: () => recomputeMcap,
+    researchRate: () => researchRate,
     resolutionEvent: () => resolutionEvent,
     saveGame: () => saveGame,
     sentiment: () => sentiment,
+    techOf: () => techOf,
+    techState: () => techState,
     totalMcap: () => totalMcap,
     unlockEnding: () => unlockEnding,
     useIntelAction: () => useIntelAction
@@ -1284,7 +1987,8 @@ svg text{font-family:var(--font)}
       log: [],
       last: null,
       history: [],
-      revealed: {}
+      revealed: {},
+      tech: { done: [], cur: null, prog: 0 }
     };
     for (const c2 of COMPANIES) {
       s.comp[c2.id] = { rev: c2.rev, nm: c2.nm, g: c2.g, gb: 0, nmb: 0, cash: c2.cash, morale: 70, reg: 50, rep: 70, cap: 82, profit: c2.rev * c2.nm, hist: Array.from({ length: 8 }, (_, k) => {
@@ -1351,6 +2055,14 @@ svg text{font-family:var(--font)}
     if (fx.all) for (const id of Object.keys(s.comp)) applyCompFx(s.comp[id], fx.all);
     if (fx.levers) for (const id of Object.keys(s.comp)) Object.assign(s.comp[id].lev, fx.levers);
     if (fx.flag) s.flags[fx.flag] = true;
+    if (fx.permG) for (const id of Object.keys(s.comp)) s.comp[id].g += fx.permG;
+    if (fx.permNm) for (const id of Object.keys(s.comp)) s.comp[id].nm += fx.permNm;
+    if (fx.permComp) for (const [id, d] of Object.entries(fx.permComp)) {
+      if (s.comp[id]) {
+        if (d.g) s.comp[id].g += d.g;
+        if (d.nm) s.comp[id].nm += d.nm;
+      }
+    }
     if (fx.clue) addClue(s, fx.clue.who, fx.clue.n || 1);
     if (fx.clueMole) {
       const real = s.rng() < 0.55;
@@ -1493,6 +2205,39 @@ svg text{font-family:var(--font)}
     s.flags[it.flag] = true;
     return true;
   }
+  var techOf = (id) => TECHS.find((t) => t.id === id);
+  function techState(s, id) {
+    const t = techOf(id);
+    if (s.tech.done.includes(id)) return "done";
+    if (s.tech.cur === id) return "cur";
+    return t.req.every((r) => s.tech.done.includes(r)) ? "open" : "locked";
+  }
+  function researchRate(s) {
+    const rnd2 = COMPANIES.reduce((a, c2) => a + s.comp[c2.id].lev.rnd / 50, 0);
+    return Math.round((rnd2 * 0.3 + s.stats.tech / 60) * (1 + (s.flags.fieldSense ? 0.15 : 0)) * 10) / 10;
+  }
+  function pickTech(s, id) {
+    if (techState(s, id) === "open" || techState(s, id) === "cur") {
+      s.tech.cur = id;
+      return true;
+    }
+    return false;
+  }
+  function advanceResearch(s) {
+    const rate = researchRate(s);
+    const out = { rate, done: null };
+    if (!s.tech.cur) return out;
+    s.tech.prog += rate;
+    const t = techOf(s.tech.cur);
+    if (s.tech.prog >= t.cost) {
+      s.tech.prog -= t.cost;
+      s.tech.done.push(t.id);
+      applyFx(s, t.fx);
+      out.done = t;
+      s.tech.cur = null;
+    }
+    return out;
+  }
   function endTurn(s) {
     const rng = s.rng;
     const prevM = totalMcap(s), prevNW = netWorth(s);
@@ -1564,6 +2309,8 @@ svg text{font-family:var(--font)}
       shortGain = 1.4;
       s.flags.short_paid = true;
     }
+    const rs = advanceResearch(s);
+    recomputeMcap(s, gEffs);
     const take = salary + div + carry + fundGain + shortGain;
     s.me.liquid += salary + div + carry + shortGain;
     const nw = netWorth(s);
@@ -1581,7 +2328,8 @@ svg text{font-family:var(--font)}
       nwAfter: nw,
       crashMsg,
       payout: s.payout,
-      bubble: s.stats.bubble
+      bubble: s.stats.bubble,
+      research: rs
     };
     s.last = res;
     s.history.push(newM);
@@ -1606,7 +2354,7 @@ svg text{font-family:var(--font)}
     const grade = (v, t) => v >= t[0] ? "S" : v >= t[1] ? "A" : v >= t[2] ? "B" : v >= t[3] ? "C" : "D";
     const empire = empireValueT(s), wealth = netWorth(s);
     const trusts = SUSPECTS.map((k) => s.trust[k]).concat([s.trust.sage]);
-    const legacy = clamp(trusts.reduce((a, b) => a + b, 0) / trusts.length * 0.6 + s.stats.gov * 0.2 + (s.flags.soft ? 20 : 0) + (s.flags.mole_found ? 10 : 0) - (s.flags.short_own ? 15 : 0) - (s.flags.mole_wrong ? 8 : 0), 0, 100);
+    const legacy = clamp(trusts.reduce((a, b) => a + b, 0) / trusts.length * 0.6 + s.stats.gov * 0.2 + (s.flags.soft ? 20 : 0) + (s.flags.mole_found ? 10 : 0) + (s.flags.unwind ? 12 : 0) - (s.flags.short_own ? 15 : 0) - (s.flags.mole_wrong ? 8 : 0), 0, 100);
     return { key, e, empire, wealth, legacy, grades: { empire: grade(empire, [34, 30, 25, 18]), wealth: grade(wealth, [60, 45, 35, 25]), legacy: grade(legacy, [80, 65, 50, 35]) } };
   }
   function previewCompany(s, id, lev) {
@@ -1740,8 +2488,8 @@ svg text{font-family:var(--font)}
     if (o.kind === "chef") d += `<path d="M38 75l12 8 12-8" fill="#fff" stroke="${INK}" stroke-width="1.2"/><circle cx="44" cy="90" r="1.6" fill="#c9ced8"/><circle cx="56" cy="90" r="1.6" fill="#c9ced8"/><path d="M40 77l-8 6M60 77l8 6" stroke="#e44" stroke-width="3"/>`;
     return d;
   }
-  function shade(hex, k) {
-    const n = parseInt(hex.slice(1), 16), f = (c2) => Math.max(0, Math.min(255, Math.round(c2 + (k < 0 ? c2 * k : (255 - c2) * k))));
+  function shade(hex2, k) {
+    const n = parseInt(hex2.slice(1), 16), f = (c2) => Math.max(0, Math.min(255, Math.round(c2 + (k < 0 ? c2 * k : (255 - c2) * k))));
     return "#" + [n >> 16 & 255, n >> 8 & 255, n & 255].map(f).map((v) => v.toString(16).padStart(2, "0")).join("");
   }
   function person(o, emo) {
@@ -2044,6 +2792,23 @@ ${[[24, 14], [40, 18], [58, 13], [30, 30], [52, 32], [64, 26]].map(([x, y]) => `
     sound: '<path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/>',
     mute: '<path d="M4 9v6h4l5 4V5L8 9zM17 9l5 6M22 9l-5 6"/>',
     arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    flask: '<path d="M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2.2h12.4a1.5 1.5 0 0 0 1.3-2.2L14 9V3M7.5 15h9"/>',
+    coin: '<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c0-1.2 1.2-2 2.5-2s2.5.8 2.5 2-1.2 1.7-2.5 2-2.5.8-2.5 2 1.2 2 2.5 2 2.5-.8 2.5-2"/>',
+    chart: '<path d="M4 20V4M4 20h16M8 16l4-5 3 3 5-7"/>',
+    server: '<rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M8 7h.01M8 17h.01"/>',
+    shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.500-1-8-4-8-9V6z"/>',
+    chip: '<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',
+    brain: '<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V4a3 3 0 0 0-3 0zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/>',
+    lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    robot: '<rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 8V4M9 13h.01M15 13h.01M9 17h6"/>',
+    bolt: '<path d="M13 2L5 14h6l-1 8 8-12h-6z"/>',
+    eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    star: '<path d="M12 3l2.7 5.8 6.3.7-4.700 4.300 1.300 6.200L12 16.900 6.400 20l1.300-6.200L3 9.500l6.300-.7z"/>',
+    key: '<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v4M15 12v3"/>',
+    users: '<circle cx="9" cy="8" r="3.500"/><path d="M2.500 20a6.500 6.500 0 0 1 13 0M16 4.500a3.500 3.500 0 0 1 0 7M18 14a6 6 0 0 1 3.500 6"/>',
+    warn: '<path d="M12 3l10 18H2zM12 10v5M12 18h.01"/>',
+    bubble: '<circle cx="9" cy="14" r="5"/><circle cx="17" cy="7" r="3"/><circle cx="18" cy="16" r="2"/>',
+    gov: '<path d="M3 10 12 4l9 6M5 10v8M10 10v8M14 10v8M19 10v8M3 20h18"/>',
     spark: '<path d="m12 3 2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>'
   };
   var ic = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${P2[n] || ""}</svg>`;
@@ -2076,30 +2841,34 @@ ${[[24, 14], [40, 18], [58, 13], [30, 30], [52, 32], [64, 26]].map(([x, y]) => `
     if (fx.levers) out.push('<span class="chip acc">\uC804\uC0AC \uBC29\uD5A5 \uC870\uC815</span>');
     return out.join("");
   }
-  var NAV = [["hub", "map", "\uC9C0\uB3C4"], ["company", "co", "\uD68C\uC0AC"], ["wallet", "wallet", "\uC9C0\uAC11"], ["invest", "probe", "\uC218\uC0AC"], ["archive", "doc", "\uAE30\uB85D"]];
+  var NAV = [["hub", "map", "\uC9C0\uB3C4"], ["company", "co", "\uB3C4\uC2DC"], ["tech", "flask", "\uC5F0\uAD6C"], ["wallet", "wallet", "\uAD6D\uACE0"], ["invest", "probe", "\uCCA9\uBCF4"], ["archive", "doc", "\uC678\uAD50"]];
   var quarterLabel = (s) => QUARTERS[Math.min(s.turn, TOTAL_TURNS) - 1];
   var totalCash = (s) => COMPANIES.reduce((a, c2) => a + s.comp[c2.id].cash, 0);
+  function nextLabel(s) {
+    const nq = (s.pending ? 1 : 0) + s.eventQueue.length + s.letterQueue.length;
+    if (nq) return ["\uD589\uB3D9 \uD544\uC694", `\uC790\uBB38 ${nq}\uAC74`, "warn"];
+    if (!s.tech.cur && TECHS.some((t) => techState(s, t.id) === "open")) return ["\uC5F0\uAD6C \uC120\uD0DD", "\uC5F0\uAD6C \uB300\uC0C1 \uC5C6\uC74C", "warn"];
+    return [s.turn >= TOTAL_TURNS ? "\uB9C8\uC9C0\uB9C9 \uD134" : "\uB2E4\uC74C \uD134", QUARTERS[Math.min(s.turn, TOTAL_TURNS) - 1], ""];
+  }
   function shell(s, V2, inner) {
     const nq = (s.pending ? 1 : 0) + s.eventQueue.length + s.letterQueue.length;
     const dm = s.last ? s.last.dM / 1e3 : 0;
     const b = Math.round(s.stats.bubble), bc = b > 92 ? "var(--bad)" : b > 80 ? "var(--warn)" : "var(--good)";
     const ticks = Array.from({ length: TOTAL_TURNS }, (_, i) => `<i class="${i + 1 < s.turn ? "on" : i + 1 === s.turn ? "cur" : ""}"></i>`).join("");
-    return `<div class="rail"><div class="logo">C</div>${NAV.map(([id, icn, lab]) => `<button class="nav ${V2.screen === id ? "on" : ""}" data-act="go" data-to="${id}">${ic(icn)}${lab}${id === "hub" && nq ? '<span class="dot"></span>' : ""}</button>`).join("")}<div class="sp"></div><button class="mute" data-act="mute" title="\uC0AC\uC6B4\uB4DC">${ic(V2.muted ? "mute" : "sound")}</button></div>
-<div class="top"><div class="qtr"><b>${QUARTERS[Math.min(s.turn, TOTAL_TURNS) - 1]} <span class="muted" style="font-weight:500;font-size:.78rem">\xB7 ${s.turn}/${TOTAL_TURNS}</span></b><div class="ticks">${ticks}</div></div>
-<div class="kpi"><small>\uC81C\uAD6D \uAC00\uCE58</small><b>$${(totalMcap(s) / 1e3).toFixed(1)}T${s.last ? `<em class="${dm >= 0 ? "good" : "bad"}">${dm >= 0 ? "\u25B2" : "\u25BC"}${Math.abs(dm).toFixed(2)}</em>` : ""}</b></div>
-<div class="kpi"><small>\uADF8\uB8F9 \uD604\uAE08</small><b>${fmtB(totalCash(s))}</b></div>
-<div class="kpi"><small>\uB0B4 \uC7AC\uC0B0</small><b class="money">${fmtB(netWorth(s))}</b></div>
-<div class="kpi"><small>\uAC70\uD488 \uC9C0\uC218</small><b style="color:${bc}">${b}</b><div class="gauge"><i style="width:${Math.min(100, b)}%;background:${bc}"></i></div></div>
-<div class="kpi"><small>\uC815\uBD80 \xB7 \uAE30\uC220 \xB7 \uC778\uC7AC</small><b>${Math.round(s.stats.gov)} \xB7 ${Math.round(s.stats.tech)} \xB7 ${Math.round(s.stats.talent)}</b></div>
-<div class="kpi"><small>\uC815\uBCF4</small><b>${s.intel}</b></div>
-<div class="sp"></div><button class="btn primary" data-act="end-turn">${nq ? `\uB300\uD654 ${nq}\uAC74 \uBA3C\uC800` : "\uBD84\uAE30 \uB9C8\uAC10"}${ic("arrow")}</button></div>
-<div class="main">${inner}</div>`;
-  }
-  var HUBGROUP = { sv: ["NV", "AP", "GO", "ME", "BC", "AN", "OA"], sea: ["MS", "AM"], oma: ["BK"], tw: ["TS"] };
-  var HUBINFO = { sv: ["\uC2E4\uB9AC\uCF58\uBC38\uB9AC", "7\uAC1C \uAE30\uC5C5"], sea: ["\uC2DC\uC560\uD2C0", "2\uAC1C \uAE30\uC5C5"], oma: ["\uC624\uB9C8\uD558", "\uBC84\uD06C\uC154"], tw: ["\uC2E0\uC8FC", "TSMC"] };
-  function hubNodes(s) {
-    const side = { sv: "r", sea: "r", oma: "r", tw: "l" };
-    return Object.keys(HUBGROUP).map((id) => ({ id, name: HUBINFO[id][0], sub: `$${(HUBGROUP[id].reduce((a, c2) => a + s.comp[c2].mcap, 0) / 1e3).toFixed(1)}T`, side: side[id], alert: HUBGROUP[id].some((c2) => s.comp[c2].reg > 75) }));
+    const np = s.last ? s.last.netIncome : COMPANIES.reduce((a, c2) => a + s.comp[c2.id].profit, 0);
+    const rate = researchRate(s), tcur = s.tech.cur ? techOf(s.tech.cur) : null;
+    const nl = nextLabel(s);
+    return `<div class="rail"><div class="logo">C</div>${NAV.map(([id, icn, lab]) => `<button class="nav ${V2.screen === id ? "on" : ""}" data-act="go" data-to="${id}">${ic(icn)}${lab}${id === "hub" && nq ? '<span class="dot"></span>' : ""}${id === "tech" && !s.tech.cur && TECHS.some((t) => techState(s, t.id) === "open") ? '<span class="dot"></span>' : ""}</button>`).join("")}<div class="sp"></div><button class="mute" data-act="mute" title="\uC0AC\uC6B4\uB4DC">${ic(V2.muted ? "mute" : "sound")}</button></div>
+<div class="top"><div class="qtr"><b>\uD134 ${s.turn} <span class="muted" style="font-weight:500;font-size:.78rem">\xB7 ${QUARTERS[Math.min(s.turn, TOTAL_TURNS) - 1]} / ${TOTAL_TURNS}\uD134</span></b><div class="ticks">${ticks}</div></div>
+<div class="yl"><div class="yd" title="\uC81C\uAD6D \uAC00\uCE58">${ic("chart")}<div><b>$${(totalMcap(s) / 1e3).toFixed(1)}T</b>${s.last ? `<small class="${dm >= 0 ? "good" : "bad"}">${dm >= 0 ? "\u25B2" : "\u25BC"}${Math.abs(dm).toFixed(2)}T</small>` : "<small>\uC81C\uAD6D \uAC00\uCE58</small>"}</div></div>
+<div class="yd gold" title="\uADF8\uB8F9 \uD604\uAE08 / \uBD84\uAE30 \uC21C\uC774\uC775">${ic("coin")}<div><b>${fmtB(totalCash(s))}</b><small class="${np >= 0 ? "good" : "bad"}">${np >= 0 ? "+" : "\u2212"}${fmtB(Math.abs(np))}/\uD134</small></div></div>
+<div class="yd sci" title="\uC5F0\uAD6C \uC18D\uB3C4">${ic("flask")}<div><b>+${rate}</b><small>${tcur ? tcur.kr : "\uC5F0\uAD6C \uC5C6\uC74C"}</small></div></div>
+<div class="yd" title="\uB0B4 \uC7AC\uC0B0">${ic("wallet")}<div><b class="money">${fmtB(netWorth(s))}</b><small>\uB0B4 \uC7AC\uC0B0</small></div></div>
+<div class="yd" title="\uAC70\uD488 \uC9C0\uC218">${ic("bubble")}<div><b style="color:${bc}">${b}</b><div class="gauge"><i style="width:${Math.min(100, b)}%;background:${bc}"></i></div></div></div>
+<div class="yd" title="\uC815\uBD80 \uAD00\uACC4">${ic("gov")}<div><b>${Math.round(s.stats.gov)}</b><small>\uC815\uBD80</small></div></div>
+<div class="yd" title="\uC778\uC7AC">${ic("users")}<div><b>${Math.round(s.stats.talent)}</b><small>\uC778\uC7AC</small></div></div>
+<div class="yd" title="\uC815\uBCF4 \uC790\uC6D0">${ic("probe")}<div><b>${s.intel}</b><small>\uC815\uBCF4</small></div></div></div></div>
+<div class="main">${inner}<button class="nextturn ${nl[2]}" data-act="end-turn"><span class="nt-l">${nl[0]}</span><span class="nt-s">${nl[1]}</span><span class="nt-i">${ic("arrow")}</span></button></div>`;
   }
   function queueItems(s) {
     const items = [];
@@ -2108,39 +2877,63 @@ ${[[24, 14], [40, 18], [58, 13], [30, 30], [52, 32], [64, 26]].map(([x, y]) => `
     for (const id of s.eventQueue) items.push({ kind: "event", id });
     return items;
   }
-  function hub(s, V2) {
-    const q = queueItems(s);
-    const threads = q.length ? q.map((it) => {
-      if (it.kind === "letter") return `<div class="thread ${it.cur ? "unread" : ""}" ${it.cur ? 'data-act="open-pending"' : ""}>${av("elias", 2.6)}<div class="t"><b>\uC5D8\uB9AC\uC544\uC2A4 \uBC34\uC2A4 <span class="chip warn">\uD3B8\uC9C0</span></b><p>${LETTERS[it.id].title}</p></div>${it.cur ? '<span class="badge">1</span>' : '<span class="chip">\uB300\uAE30</span>'}</div>`;
-      const ev = getEvent(s, it.id), who = (ev.advisors || []).map((a) => a.who);
-      const stack = who.length ? `<div class="stack">${who.slice(0, 3).map((w) => av(w, 2.2)).join("")}</div>` : av("mira", 2.6);
-      return `<div class="thread ${it.cur ? "unread" : ""}" ${it.cur ? 'data-act="open-pending"' : ""}>${stack}<div class="t"><b>${ev.title}</b><p>${ev.body}</p></div>${it.cur ? '<span class="badge">1</span>' : '<span class="chip">\uB300\uAE30</span>'}</div>`;
-    }).join("") : `<div class="empty-hero">${portrait(heroId(s), 8, "happy")}<div>\uCC98\uB9AC\uD560 \uB300\uD654\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.<br>\uD68C\uC0AC \uB808\uBC84\uC640 \uBC30\uB2F9\uC744 \uC810\uAC80\uD55C \uB4A4<br><b style="color:var(--text)">\uBD84\uAE30 \uB9C8\uAC10</b>\uC744 \uB204\uB974\uC138\uC694.</div></div>`;
-    const goals = [
-      [!s.pending && !s.eventQueue.length && !s.letterQueue.length, "\uB300\uD654 \uBAA8\uB450 \uCC98\uB9AC", "\uC790\uBB38\uB2E8\uC758 \uC758\uACAC\uC744 \uB4E3\uACE0 \uACB0\uC815\uD55C\uB2E4"],
-      [V2.levSeen, "\uD68C\uC0AC \uB808\uBC84 \uC810\uAC80", "\uAE30\uB300\uCE58(\uC804\uBD84\uAE30 \uC774\uC775 \xD7 \uC131\uC7A5)\uB97C \uB118\uAE38 \uC218 \uC788\uB294\uC9C0 \uD655\uC778"],
-      [V2.paySeen, "\uBC30\uB2F9 \uBE44\uC728 \uD655\uC778", `\uC9C0\uAE08 ${s.payout}% \xB7 40% \uCD08\uACFC \uC2DC \uAC10\uC0AC \uC704\uD5D8`]
-    ].map(([d, t, sub]) => `<div class="goal ${d ? "done" : ""}"><i>${d ? "\u2713" : ""}</i><div>${t}<small>${sub}</small></div></div>`).join("");
-    const news = s.last ? `<div class="goal" style="border-top:1px solid var(--line);margin-top:.3rem"><i style="border:0"></i><div>\uC9C0\uB09C \uBD84\uAE30 ${s.last.quarter}<small>\uC21C\uC774\uC775 ${fmtB(s.last.netIncome)} \xB7 \uC81C\uAD6D \uAC00\uCE58 ${sgn(s.last.dM / 1e3, 2)}T${s.last.crashMsg ? " \xB7 " + s.last.crashMsg : ""}</small></div></div>` : "";
-    const ppl = ["mira", "victor", "jonah", "lin", "dana", "sage", "aria"].map((k) => {
-      const v = Math.round(s.trust[k]), c2 = v >= 60 ? "var(--good)" : v >= 40 ? "var(--warn)" : "var(--bad)";
-      return `<div class="row">${av(k, 1.9, emoOfTrust(v))}<div class="nm">${CHARS[k].kr.split(" ")[0]}<small>${CHARS[k].tag}</small></div><div class="meter"><i style="width:${v}%;background:${c2}"></i></div><span class="mono muted" style="width:1.6rem;text-align:right">${v}</span></div>`;
-    }).join("");
-    const hl = headlines(s).map((h) => `<span>${h}</span>`).join("");
-    return `<div class="hub"><div class="mapslot" id="mapslot"><div class="ticker"><b>LIVE</b><div class="tk"><div class="tk-in">${hl}${hl}</div></div></div></div>
-<div class="dock"><div class="panel"><div class="ph"><span>\uB300\uD654\uD568</span><span class="chip ${q.length ? "acc" : ""}">${q.length}</span></div><div class="body">${threads}</div></div>
-<div class="panel"><div class="ph"><span>\uC774\uBC88 \uBD84\uAE30</span></div><div class="body">${goals}${news}</div></div>
-<div class="panel"><div class="ph"><span>\uC0AC\uB78C\uB4E4 \xB7 \uC2E0\uB8B0</span></div><div class="body">${ppl}</div></div></div>
-${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
+  function cityPanel(s, id) {
+    if (!id) return `<div class="cp-empty">${portrait(heroId(s), 7, "smug")}<div><b>\uB3C4\uC2DC\uB97C \uC120\uD0DD\uD558\uC138\uC694</b><small>\uBC30\uB108\uB97C \uD074\uB9AD\uD558\uBA74 \uC815\uBCF4\uAC00, \uB354\uBE14\uD074\uB9AD\uD558\uBA74 \uB3C4\uC2DC \uAD00\uB9AC \uD654\uBA74\uC774 \uC5F4\uB9BD\uB2C8\uB2E4.</small></div></div>`;
+    const c2 = COMP[id], st = s.comp[id];
+    const y = (icn, v, l, cls = "") => `<div class="cy ${cls}">${ic(icn)}<b>${v}</b><small>${l}</small></div>`;
+    return `<div class="cp-h">${coAv(id, 3.6)}<div><b>${c2.kr}</b><small>${c2.en} \xB7 ${c2.desc}</small></div></div>
+<div class="cp-y">${y("coin", fmtB(st.profit), "\uBD84\uAE30 \uC774\uC775", st.profit >= 0 ? "good" : "bad")}${y("chart", pct(st.g + st.gb), "\uC131\uC7A5")}${y("users", Math.round(st.morale), "\uC0AC\uAE30")}${y("gov", Math.round(st.reg), "\uADDC\uC81C", st.reg > 75 ? "bad" : "")}${y("wallet", fmtB(st.cash), "\uD604\uAE08", st.cash < 8 ? "bad" : "")}${y("bubble", Math.round(st.cap) + "%", "\uAC00\uB3D9\uB960")}</div>
+<button class="btn primary" style="width:100%" data-act="open-city" data-id="${id}">\uB3C4\uC2DC \uAD00\uB9AC ${ic("arrow")}</button>`;
   }
-  function hubPop(s, p) {
-    return `<div class="pop" style="left:${p.x}px;top:${p.y}px"><div class="ph" style="padding:.4rem .6rem">${HUBINFO[p.id][0]}</div>${HUBGROUP[p.id].map((c2) => `<div class="row" data-act="pick-company" data-id="${c2}" data-go="1">${coAv(c2, 1.9)}<div class="nm">${COMP[c2].kr}<small>${COMP[c2].desc}</small></div><span class="mono muted">$${(s.comp[c2].mcap / 1e3).toFixed(2)}T</span></div>`).join("")}</div>`;
+  function notes(s) {
+    const q = queueItems(s), out = [];
+    q.forEach((it) => {
+      if (it.kind === "letter") out.push(`<button class="note ${it.cur ? "cur" : "wait"}" ${it.cur ? 'data-act="open-pending"' : ""}>${av("elias", 2.4)}<div><b>\uC120\uB300\uC758 \uD3B8\uC9C0</b><small>${LETTERS[it.id].title}</small></div><span>${it.cur ? "!" : "\u2026"}</span></button>`);
+      else {
+        const ev = getEvent(s, it.id), w = (ev.advisors || [])[0];
+        out.push(`<button class="note ${it.cur ? "cur" : "wait"}" ${it.cur ? 'data-act="open-pending"' : ""}>${av(w ? w.who : "mira", 2.4, w ? { y: "happy", n: "angry", h: "worried" }[w.stance] : "neutral")}<div><b>${ev.title}</b><small>${ev.kicker.split("\xB7")[1] || ev.kicker}</small></div><span>${it.cur ? "!" : "\u2026"}</span></button>`);
+      }
+    });
+    if (!s.tech.cur && TECHS.some((t) => techState(s, t.id) === "open")) out.push(`<button class="note cur sci" data-act="go" data-to="tech"><div class="nico">${ic("flask")}</div><div><b>\uC5F0\uAD6C \uB300\uC0C1\uC744 \uC120\uD0DD\uD558\uC138\uC694</b><small>\uC5F0\uAD6C \uC18D\uB3C4 +${researchRate(s)}/\uD134</small></div><span>!</span></button>`);
+    return out.join("");
+  }
+  function advisorBar(s) {
+    return `<div class="advbar">${["mira", "victor", "jonah", "lin", "dana", "sage", "aria"].map((k) => {
+      const v = Math.round(s.trust[k]), c2 = v >= 60 ? "var(--good)" : v >= 40 ? "var(--warn)" : "var(--bad)";
+      return `<button class="adv" data-act="open-people" title="${CHARS[k].kr} \xB7 ${CHARS[k].role} \xB7 \uC2E0\uB8B0 ${v}">${av(k, 2.6, emoOfTrust(v))}<i style="width:${v}%;background:${c2}"></i></button>`;
+    }).join("")}</div>`;
+  }
+  function hub(s, V2) {
+    return `<div class="hub2"><div class="notes" id="notes">${notes(s)}</div><div class="cpanel panel" id="cpanel">${cityPanel(s, V2.sel)}</div>${advisorBar(s)}</div>`;
+  }
+  function tech(s, V2) {
+    const cur2 = s.tech.cur ? techOf(s.tech.cur) : null, rate = researchRate(s);
+    const X = (t) => 3 + (t.tier - 1) * 24.5, Y = (t) => 14 + t.row * 28;
+    const lines = TECHS.flatMap((t) => t.req.map((r) => {
+      const a = techOf(r);
+      const on = s.tech.done.includes(r);
+      return `<path d="M${X(a) + 11} ${Y(a) + 4}C${X(a) + 19} ${Y(a) + 4},${X(t) - 8} ${Y(t) + 4},${X(t)} ${Y(t) + 4}" stroke="${on ? "#86aefc" : "#3a4a68"}" stroke-width="${on ? 0.7 : 0.4}" fill="none" ${on ? "" : 'stroke-dasharray="1.2 1"'} vector-effect="non-scaling-stroke" style="stroke-width:${on ? 2.4 : 1.4}px"/>`;
+    })).join("");
+    const nodes = TECHS.map((t) => {
+      const st = techState(s, t.id), pr = st === "cur" ? Math.min(100, s.tech.prog / t.cost * 100) : 0, eta = Math.ceil(t.cost / Math.max(0.1, rate));
+      return `<button class="tnode ${st}" style="left:${X(t)}%;top:${Y(t)}%" data-act="pick-tech" data-id="${t.id}" ${st === "locked" || st === "done" ? "disabled" : ""}><div class="ti-ico">${ic(t.icon)}</div><div class="ti-t"><b>${t.kr}</b><small>${t.en}</small></div><div class="ti-f">${st === "done" ? '<span class="chip good">\uC644\uB8CC</span>' : `<span class="chip">${t.cost} RP</span><span class="chip">~${eta}\uD134</span>`}</div>${st === "cur" ? `<i class="tbar"><u style="width:${pr}%"></u></i>` : ""}<div class="tip"><b>${t.kr}</b><p>${t.desc}</p>${t.req.length ? `<small>\uC120\uD589: ${t.req.map((r) => techOf(r).kr).join(", ")}</small>` : ""}</div></button>`;
+    }).join("");
+    const hd = cur2 ? `<div class="th-cur">${ic(cur2.icon)}<div><small>\uD604\uC7AC \uC5F0\uAD6C</small><b>${cur2.kr}</b></div><div class="th-bar"><i style="width:${Math.min(100, s.tech.prog / cur2.cost * 100)}%"></i></div><span class="mono">${s.tech.prog.toFixed(1)} / ${cur2.cost}</span></div>` : `<div class="th-cur warn">${ic("flask")}<div><small>\uD604\uC7AC \uC5F0\uAD6C</small><b>\uC120\uD0DD\uB41C \uC5F0\uAD6C\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4</b></div><span class="muted">\uC544\uB798\uC5D0\uC11C \uC5F0\uAD6C\uD560 \uAE30\uC220\uC744 \uACE0\uB974\uC138\uC694</span></div>`;
+    return `<div class="view techv"><div class="th"><div><h2>\uC5F0\uAD6C \xB7 \uAE30\uC220 \uD2B8\uB9AC</h2><small class="muted">\uBAA8\uB4E0 \uAE30\uC5C5\uC758 R&amp;D \uB808\uBC84\uC640 \uAE30\uC220 \uB2A5\uB825\uCE58\uAC00 \uC5F0\uAD6C \uC18D\uB3C4\uB97C \uC815\uD569\uB2C8\uB2E4</small></div>${hd}<div class="th-r"><small>\uC5F0\uAD6C \uC18D\uB3C4</small><b class="mono">+${rate}<span class="muted" style="font-size:.7rem"> RP/\uD134</span></b></div></div>
+<div class="tree"><svg viewBox="0 0 100 100" preserveAspectRatio="none">${lines}</svg>${["", "1\uC138\uB300", "2\uC138\uB300", "3\uC138\uB300", "4\uC138\uB300"].slice(1).map((l, i) => `<div class="tier" style="left:${3 + i * 24.5}%">${l}</div>`).join("")}${nodes}</div></div>`;
   }
   function spark(vals, color, w = 300, h = 70) {
     const mn = Math.min(...vals), mx = Math.max(...vals), r = mx - mn || 1;
     const pts = vals.map((v, i) => [i / (vals.length - 1) * w, h - 6 - (v - mn) / r * (h - 14)]);
     const d = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join("");
     return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:${h}px"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".35"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs><path d="${d}L${w},${h}L0,${h}Z" fill="url(#sg)"/><path d="${d}" fill="none" stroke="${color}" stroke-width="2"/><circle cx="${pts.at(-1)[0]}" cy="${pts.at(-1)[1]}" r="3.5" fill="${color}"/></svg>`;
+  }
+  function cityIcon(pop, col) {
+    const n = Math.min(5, 2 + Math.floor(pop / 3)), bars = Array.from({ length: n }, (_, i) => {
+      const h = 10 + (i * 7 + pop * 3) % 9 + (i === Math.floor(n / 2) ? 7 : 0), w = 5;
+      return `<rect x="${3 + i * 6.4}" y="${28 - h}" width="${w}" height="${h}" fill="#f4f1e6" stroke="#2a2418" stroke-width=".8"/><rect x="${4.4 + i * 6.4}" y="${30 - h}" width="1.4" height="1.4" fill="${col}"/><rect x="${4.4 + i * 6.4}" y="${34 - h}" width="1.4" height="1.4" fill="${col}"/>`;
+    }).join("");
+    return `<svg viewBox="0 0 ${6.4 * n + 3} 32" class="cisvg"><ellipse cx="${(6.4 * n + 3) / 2}" cy="29.5" rx="${3.2 * n + 2}" ry="3" fill="rgba(0,0,0,.35)"/>${bars}<path d="M0 29h${6.4 * n + 3}" stroke="${col}" stroke-width="2"/></svg>`;
   }
   function previewHTML(s, id) {
     const st = s.comp[id], c2 = COMP[id], p = previewCompany(s, id, st.lev), exp = st.profit * (1 + c2.g), beat = exp !== 0 ? (p.profit - exp) / Math.abs(exp) : 0;
@@ -2255,7 +3048,7 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
 <div class="bign" style="margin-top:1.4rem"><small>\uC81C\uAD6D \uAC00\uCE58 ${sgn(r.dM / 1e3, 2)}T</small>$${(r.mcap / 1e3).toFixed(2)}T</div>
 <div style="margin-top:1.6rem" class="muted">\uB9C9\uB300 \uAC00\uC6B4\uB370 \uC120 = \uC2DC\uC7A5 \uAE30\uB300\uCE58</div>${rows}</div>
 <div style="position:relative"><div class="earn-hero">${portrait(heroId(s), 13, r.crashMsg && r.crashMsg.includes("\u{1F4A5}") ? "shock" : r.take.total > 0.3 ? "happy" : "smug")}</div><h2>YOUR TAKE</h2><h1>\uC774\uBC88 \uBD84\uAE30 \uB0B4 \uBAAB</h1><div class="leg" style="font-size:.95rem;gap:.7rem 1rem"><span>\uAE09\uC5EC</span><span>${fmtB(r.take.salary)}</span><span>\uBC30\uB2F9 (${r.payout}%)</span><span>${fmtB(r.take.div)}</span><span>\uC131\uACFC\uBCF4\uC218</span><span>${fmtB(r.take.carry)}</span><span>\uAC1C\uC778 \uD380\uB4DC \uC190\uC775</span><span class="${r.take.fund >= 0 ? "good" : "bad"}">${fmtB(r.take.fund)}</span>${r.take.short ? `<span>\uACF5\uB9E4\uB3C4 \uC218\uC775</span><span class="good">${fmtB(r.take.short)}</span>` : ""}</div>
-<div class="take"><div class="bign"><small>\uC774\uBC88 \uBD84\uAE30 \uD569\uACC4</small><span data-count="${r.take.total}">${fmtB(r.take.total)}</span></div></div>
+${r.research && r.research.done ? `<div class="rs-done">${ic("flask")}<div><small>\uC5F0\uAD6C \uC644\uB8CC</small><b>${r.research.done.kr}</b><span>${r.research.done.desc}</span></div></div>` : r.research && s.tech.cur ? `<div class="rs-prog">${ic("flask")}<div><small>\uC5F0\uAD6C \uC9C4\uD589</small><b>${techOf(s.tech.cur).kr} <span class="mono">${s.tech.prog.toFixed(1)}/${techOf(s.tech.cur).cost}</span></b></div></div>` : ""}<div class="take"><div class="bign"><small>\uC774\uBC88 \uBD84\uAE30 \uD569\uACC4</small><span data-count="${r.take.total}">${fmtB(r.take.total)}</span></div></div>
 <div class="bign" style="margin-top:2rem"><small>\uB0B4 \uC21C\uC790\uC0B0</small>${fmtB(r.nwBefore)} \u2192 <span class="money">${fmtB(r.nwAfter)}</span></div>
 <button class="btn primary big" style="margin-top:2.4rem" data-act="next-turn">${s.turn >= TOTAL_TURNS ? "\uACB0\uB9D0\uC744 \uBCF8\uB2E4" : "\uB2E4\uC74C \uBD84\uAE30\uB85C"} ${ic("arrow")}</button></div></div>`;
   }
@@ -2440,12 +3233,12 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
     osc("sine", N(n - 12), t, len, v, 0.01);
     osc("triangle", N(n - 12) * 2, t, len * 0.5, v * 0.2, 0.01);
   };
-  var brass = (t, notes, len = 0.3, v = 0.05) => notes.forEach((n) => {
+  var brass = (t, notes2, len = 0.3, v = 0.05) => notes2.forEach((n) => {
     osc("sawtooth", N(n), t, len, v, 0.02, 2400, -6);
     osc("sawtooth", N(n), t, len, v, 0.02, 2400, 7);
   });
-  function strings(t, notes, dur, v = 0.026) {
-    for (const n of notes) for (const det of [-10, 9]) {
+  function strings(t, notes2, dur, v = 0.026) {
+    for (const n of notes2) for (const det of [-10, 9]) {
       const o = ac.createOscillator(), f = ac.createBiquadFilter(), g = ac.createGain();
       o.type = "sawtooth";
       o.frequency.value = N(n);
@@ -2963,8 +3756,13 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
   var app = document.getElementById("app");
   var loading = document.getElementById("loading");
   var map = createMap();
+  var hex = createHexMap();
+  var host = document.createElement("div");
+  host.id = "hexhost";
+  host.appendChild(hex.el);
+  document.body.insertBefore(host, document.getElementById("app"));
   var G = null;
-  var V = { screen: "title", origin: "engineer", name: "\uC5D0\uB2E8 \uB958", steps: [], idx: 0, company: "NV", suspect: "victor", note: null, modal: null, pop: null, chat: null, earn: false, letter: null, arch: "letters", fast: false, muted: Audio.muted, levSeen: false, paySeen: false };
+  var V = { screen: "title", origin: "engineer", name: "\uC5D0\uB2E8 \uB958", steps: [], idx: 0, company: "NV", suspect: "victor", note: null, modal: null, pop: null, chat: null, earn: false, letter: null, arch: "letters", sel: null, fast: false, muted: Audio.muted, levSeen: false, paySeen: false };
   var wait = (ms) => new Promise((r) => setTimeout(r, V.fast ? 0 : ms));
   var STANCE = { y: ["y", "\uCC2C\uC131"], n: ["n", "\uBC18\uB300"], h: ["h", "\uBCF4\uB958"] };
   var REACT = {
@@ -3007,22 +3805,28 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
         html = ending(s);
         break;
       default: {
-        const inner = { hub, company, wallet, invest, archive }[V.screen](s, V);
+        const inner = { hub, company, tech, wallet, invest, archive }[V.screen](s, V);
         html = shell(s, V, inner + (V.chat ? chatHTML() : ""));
       }
     }
     if (V.earn && s) html += earnings(s);
     if (V.inter && s) html += interstitial(s);
     html += V.modal || "";
-    app.className = fullScreens.has(V.screen) ? "full" : "";
+    app.className = (fullScreens.has(V.screen) ? "full" : "") + (V.screen === "hub" ? " hubmode" : "");
     app.innerHTML = html;
     const slot = document.getElementById("mapslot");
     if (slot) {
       slot.appendChild(map.el);
-      map.setNodes(V.screen === "hub" && s ? hubNodes(s) : [], onNode);
+      map.setNodes([], onNode);
       map.start();
       map.resize();
     } else map.stop();
+    const showHex = V.screen === "hub" && s;
+    host.classList.toggle("on", !!showHex);
+    if (showHex) {
+      hex.set(hexData(), hexCbs);
+      hex.start();
+    } else hex.stop();
     if (V.earn) countUp();
     setMood();
     const lg = document.getElementById("chatlog");
@@ -3039,6 +3843,7 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
     if (V.screen === "scene") return V.idx < 3 ? "piano" : "noir";
     if (V.chat) return EVENT_TRACK[V.chat.id] || "tense";
     if (V.screen === "invest") return "noir";
+    if (V.screen === "tech") return "synth";
     if (V.screen === "archive") return "piano";
     if (V.screen === "wallet") return "lofi";
     return b > 95 ? "crisis" : b > 82 ? "pulse" : "lofi";
@@ -3065,6 +3870,49 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
     void el.offsetWidth;
     el.classList.add("show");
   }
+  var hexCbs = {
+    city(id) {
+      V.sel = id;
+      hex.select(id);
+      const p = document.getElementById("cpanel");
+      if (p) p.innerHTML = cityPanel(G, id);
+      Audio.sfx("click");
+    },
+    open(id) {
+      openCity(id);
+    },
+    empty() {
+      V.sel = null;
+      hex.select(null);
+      const p = document.getElementById("cpanel");
+      if (p) p.innerHTML = cityPanel(G, null);
+    },
+    unit(id) {
+      if (id === "hero") go("wallet");
+      else if (id.startsWith("k")) {
+        G.intel >= 1 ? go("invest") : toasts({ intel: 0 });
+      } else {
+        V.arch = "people";
+        go("archive");
+      }
+    }
+  };
+  function openCity(id) {
+    V.company = id;
+    V.levSeen = true;
+    go("company");
+  }
+  function hexData() {
+    const cities = Object.keys(SITES).map((id) => {
+      const c2 = COMP_BY[id], st = G.comp[id], pop = Math.max(1, Math.min(13, Math.round(st.mcap / 450))), bad = st.reg > 75 || st.cash < 8;
+      return { id, name: c2.kr, color: c2.color, html: `<div class="cico">${cityIcon(pop, c2.color)}</div><div class="cb ${bad ? "alert" : ""}"><span class="cpop">${pop}</span>${coAv(id, 1.6)}<b>${c2.kr}</b><em class="${st.profit >= 0 ? "good" : "bad"}">${st.profit >= 0 ? "+" : "\u2212"}${Math.abs(st.profit).toFixed(1)}</em>${bad ? '<i class="wn">!</i>' : ""}</div>` };
+    });
+    const U = (id, who, emo, host2, d = [0, 1]) => ({ id, col: SITES[host2][0] + d[0], row: SITES[host2][1] + d[1], html: `<div class="uflag" style="--c:${COMP_BY[host2].color}"></div>${portrait(who === "hero" ? heroId(G) : who, 3.6, emo)}` });
+    const units = [U("hero", "hero", "smug", "BK"), U("mira", "mira", "happy", "AP"), U("victor", "victor", "smug", "GO"), U("jonah", "jonah", "happy", "NV"), U("lin", "lin", "neutral", "TS"), U("sage", "sage", "neutral", "AN"), U("aria", "aria", "happy", "OA")];
+    const k = [[33, 12], [36, 10], [31, 10]].map(([c2, r], i) => ({ id: "k" + i, col: c2, row: r, cls: "enemy", html: `<div class="uflag" style="--c:#ff4d6d"></div>${portrait("cm_guard", 3.2, "angry")}` }));
+    return { cities, units: units.concat(k), turn: G.turn, selected: V.sel };
+  }
+  var COMP_BY = Object.fromEntries(COMPANIES.map((c2) => [c2.id, c2]));
   function onNode(id) {
     const pin = document.querySelector(`[data-node="${id}"]`), hubEl = document.querySelector(".hub");
     if (!pin || !hubEl) return;
@@ -3387,16 +4235,46 @@ ${V2.pop ? hubPop(s, V2.pop) : ""}</div>`;
       V.chat = null;
       render();
     },
+    "open-city"(d) {
+      openCity(d.id);
+    },
+    "open-people"() {
+      V.arch = "people";
+      go("archive");
+    },
+    "pick-tech"(d) {
+      if (pickTech(G, d.id)) {
+        Audio.sfx("choose");
+        saveGame(G);
+        render();
+      }
+    },
     "end-turn"() {
       if (G.pending) {
         openPending();
         return;
       }
+      if (!G.tech.cur && TECHS.some((t) => techState(G, t.id) === "open") && !V.techAsked) {
+        V.techAsked = true;
+        Audio.sfx("warn");
+        go("tech");
+        return;
+      }
+      V.techAsked = false;
       endTurn(G);
       saveGame(G);
       V.earn = true;
       V.chat = null;
       render();
+      if (G.last.research && G.last.research.done) {
+        toasts({});
+        const d = G.last.research.done;
+        const box = document.createElement("div");
+        box.className = "techdone";
+        box.innerHTML = `<small>\uC5F0\uAD6C \uC644\uB8CC</small><b>${d.kr}</b><span>${d.desc}</span>`;
+        document.body.appendChild(box);
+        setTimeout(() => box.remove(), 5200);
+      }
       const crash = G.last.crashMsg && G.last.crashMsg.includes("\u{1F4A5}");
       if (crash) {
         Audio.sfx("crash");

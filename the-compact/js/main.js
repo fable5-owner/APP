@@ -1,6 +1,7 @@
 // App controller: routing, conversation playback, input handling, turn flow.
 import { createMap } from './map.js';
-import { PROLOGUE, ORIGINS, TOTAL_TURNS, CHARS, SUSPECTS, LETTERS } from './data.js';
+import { createHexMap, SITES } from './hexmap.js';
+import { PROLOGUE, ORIGINS, TOTAL_TURNS, CHARS, SUSPECTS, LETTERS, COMPANIES, TECHS } from './data.js';
 import * as S from './state.js';
 import * as UI from './ui.js';
 import { Audio } from './audio.js';
@@ -10,9 +11,11 @@ import { CAMEO, EMO_OF_STANCE, art } from './chars.js';
 const app = document.getElementById('app');
 const loading = document.getElementById('loading');
 const map = createMap();
+const hex = createHexMap();
+const host = document.createElement('div'); host.id = 'hexhost'; host.appendChild(hex.el); document.body.insertBefore(host, document.getElementById('app'));
 
 let G = null;
-const V = { screen: 'title', origin: 'engineer', name: '에단 류', steps: [], idx: 0, company: 'NV', suspect: 'victor', note: null, modal: null, pop: null, chat: null, earn: false, letter: null, arch: 'letters', fast: false, muted: Audio.muted, levSeen: false, paySeen: false };
+const V = { screen: 'title', origin: 'engineer', name: '에단 류', steps: [], idx: 0, company: 'NV', suspect: 'victor', note: null, modal: null, pop: null, chat: null, earn: false, letter: null, arch: 'letters', sel: null, fast: false, muted: Audio.muted, levSeen: false, paySeen: false };
 const wait = (ms) => new Promise((r) => setTimeout(r, V.fast ? 0 : ms));
 const STANCE = { y: ['y', '찬성'], n: ['n', '반대'], h: ['h', '보류'] };
 const REACT = {
@@ -45,21 +48,20 @@ function render() {
     case 'scene': html = UI.scene(V.steps[V.idx], V.name, V.idx, V.steps.length); break;
     case 'ending': html = UI.ending(s); break;
     default: {
-      const inner = { hub: UI.hub, company: UI.company, wallet: UI.wallet, invest: UI.invest, archive: UI.archive }[V.screen](s, V);
+      const inner = { hub: UI.hub, company: UI.company, tech: UI.tech, wallet: UI.wallet, invest: UI.invest, archive: UI.archive }[V.screen](s, V);
       html = UI.shell(s, V, inner + (V.chat ? chatHTML() : ''));
     }
   }
   if (V.earn && s) html += UI.earnings(s);
   if (V.inter && s) html += UI.interstitial(s);
   html += V.modal || '';
-  app.className = fullScreens.has(V.screen) ? 'full' : '';
+  app.className = (fullScreens.has(V.screen) ? 'full' : '') + (V.screen === 'hub' ? ' hubmode' : '');
   app.innerHTML = html;
   const slot = document.getElementById('mapslot');
-  if (slot) {
-    slot.appendChild(map.el);
-    map.setNodes(V.screen === 'hub' && s ? UI.hubNodes(s) : [], onNode);
-    map.start(); map.resize();
-  } else map.stop();
+  if (slot) { slot.appendChild(map.el); map.setNodes([], onNode); map.start(); map.resize(); } else map.stop();
+  const showHex = V.screen === 'hub' && s;
+  host.classList.toggle('on', !!showHex);
+  if (showHex) { hex.set(hexData(), hexCbs); hex.start(); } else hex.stop();
   if (V.earn) countUp();
   setMood();
   const lg = document.getElementById('chatlog'); if (lg) lg.scrollTop = lg.scrollHeight;
@@ -76,6 +78,7 @@ function pickTrack() {
   if (V.screen === 'scene') return V.idx < 3 ? 'piano' : 'noir';
   if (V.chat) return EVENT_TRACK[V.chat.id] || 'tense';
   if (V.screen === 'invest') return 'noir';
+  if (V.screen === 'tech') return 'synth';
   if (V.screen === 'archive') return 'piano';
   if (V.screen === 'wallet') return 'lofi';
   return b > 95 ? 'crisis' : b > 82 ? 'pulse' : 'lofi';
@@ -90,6 +93,25 @@ function nowPlaying(txt) {
   let el = document.getElementById('np'); if (!el) { el = document.createElement('div'); el.id = 'np'; document.body.appendChild(el); }
   el.textContent = txt; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
 }
+
+const hexCbs = {
+  city(id) { V.sel = id; hex.select(id); const p = document.getElementById('cpanel'); if (p) p.innerHTML = UI.cityPanel(G, id); Audio.sfx('click'); },
+  open(id) { openCity(id); },
+  empty() { V.sel = null; hex.select(null); const p = document.getElementById('cpanel'); if (p) p.innerHTML = UI.cityPanel(G, null); },
+  unit(id) { if (id === 'hero') go('wallet'); else if (id.startsWith('k')) { G.intel >= 1 ? go('invest') : toasts({ intel: 0 }); } else { V.arch = 'people'; go('archive'); } },
+};
+function openCity(id) { V.company = id; V.levSeen = true; go('company'); }
+function hexData() {
+  const cities = Object.keys(SITES).map((id) => {
+    const c = COMP_BY[id], st = G.comp[id], pop = Math.max(1, Math.min(13, Math.round(st.mcap / 450))), bad = st.reg > 75 || st.cash < 8;
+    return { id, name: c.kr, color: c.color, html: `<div class="cico">${UI.cityIcon(pop, c.color)}</div><div class="cb ${bad ? 'alert' : ''}"><span class="cpop">${pop}</span>${UI.coAv(id, 1.6)}<b>${c.kr}</b><em class="${st.profit >= 0 ? 'good' : 'bad'}">${st.profit >= 0 ? '+' : '−'}${Math.abs(st.profit).toFixed(1)}</em>${bad ? '<i class="wn">!</i>' : ''}</div>` };
+  });
+  const U = (id, who, emo, host, d = [0, 1]) => ({ id, col: SITES[host][0] + d[0], row: SITES[host][1] + d[1], html: `<div class="uflag" style="--c:${COMP_BY[host].color}"></div>${UI.portrait(who === 'hero' ? UI.heroId(G) : who, 3.6, emo)}` });
+  const units = [U('hero', 'hero', 'smug', 'BK'), U('mira', 'mira', 'happy', 'AP'), U('victor', 'victor', 'smug', 'GO'), U('jonah', 'jonah', 'happy', 'NV'), U('lin', 'lin', 'neutral', 'TS'), U('sage', 'sage', 'neutral', 'AN'), U('aria', 'aria', 'happy', 'OA')];
+  const k = [[33, 12], [36, 10], [31, 10]].map(([c, r], i) => ({ id: 'k' + i, col: c, row: r, cls: 'enemy', html: `<div class="uflag" style="--c:#ff4d6d"></div>${UI.portrait('cm_guard', 3.2, 'angry')}` }));
+  return { cities, units: units.concat(k), turn: G.turn, selected: V.sel };
+}
+const COMP_BY = Object.fromEntries(COMPANIES.map((c) => [c.id, c]));
 
 function onNode(id) {
   const pin = document.querySelector(`[data-node="${id}"]`), hubEl = document.querySelector('.hub');
@@ -254,9 +276,15 @@ const actions = {
   go(d) { if (G) go(d.to); },
   'open-pending'() { openPending(); },
   'close-chat'() { V.chat = null; render(); },
+  'open-city'(d) { openCity(d.id); },
+  'open-people'() { V.arch = 'people'; go('archive'); },
+  'pick-tech'(d) { if (S.pickTech(G, d.id)) { Audio.sfx('choose'); S.saveGame(G); render(); } },
   'end-turn'() {
     if (G.pending) { openPending(); return; }
+    if (!G.tech.cur && TECHS.some((t) => S.techState(G, t.id) === 'open') && !V.techAsked) { V.techAsked = true; Audio.sfx('warn'); go('tech'); return; }
+    V.techAsked = false;
     S.endTurn(G); S.saveGame(G); V.earn = true; V.chat = null; render();
+    if (G.last.research && G.last.research.done) { toasts({}); const d = G.last.research.done; const box = document.createElement('div'); box.className = 'techdone'; box.innerHTML = `<small>연구 완료</small><b>${d.kr}</b><span>${d.desc}</span>`; document.body.appendChild(box); setTimeout(() => box.remove(), 5200); }
     const crash = G.last.crashMsg && G.last.crashMsg.includes('💥');
     if (crash) { Audio.sfx('crash'); FX.burst('crash', innerWidth / 2, innerHeight / 3, 220); FX.flash('255,70,90', 700); app.classList.add('shake'); setTimeout(() => app.classList.remove('shake'), 700); }
     else { Audio.sfx(G.last.take.total > 0 ? 'win' : 'coin'); FX.burst('coin', innerWidth * 0.72, innerHeight * 0.4, 110); FX.burst('p', innerWidth * 0.25, innerHeight * 0.3, 60); }

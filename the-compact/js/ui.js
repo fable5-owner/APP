@@ -1,9 +1,9 @@
 // View templates: pure functions returning HTML strings. No drawn faces — avatars are initials / orbs.
-import { COMPANIES, CHARS, ORIGINS, SHOP, LEVERS, LETTERS, QUARTERS, TOTAL_TURNS, SUSPECTS, ENDINGS } from './data.js';
+import { COMPANIES, CHARS, ORIGINS, SHOP, LEVERS, LETTERS, QUARTERS, TOTAL_TURNS, SUSPECTS, ENDINGS, TECHS } from './data.js';
 import { art, CAMEO, emoOfTrust, EMO_OF_STANCE } from './chars.js';
 import { scene as backdrop, SCENE_OF } from './scenes.js';
 export { backdrop, SCENE_OF };
-import { COMP, totalMcap, netWorth, getEvent, previewCompany, pickEnding } from './state.js';
+import { COMP, totalMcap, netWorth, getEvent, previewCompany, pickEnding, techOf, techState, researchRate } from './state.js';
 
 export const fmtB = (b) => { const sg = b < 0 ? '−' : '', a = Math.abs(b); return a >= 1000 ? `${sg}$${(a / 1000).toFixed(2)}T` : a >= 1 ? `${sg}$${a.toFixed(1)}B` : `${sg}$${Math.round(a * 1000)}M`; };
 const sgn = (n, d = 1) => `${n >= 0 ? '+' : '−'}${Math.abs(n).toFixed(d)}`;
@@ -21,7 +21,13 @@ const P = {
   art: '<rect x="3" y="4" width="18" height="14" rx="2"/><path d="m3 15 5-5 4 4 3-3 6 5"/>', found: '<path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/>',
   bunker: '<path d="M3 18c2-6 6-9 9-9s7 3 9 9zM12 9V5"/>', media: '<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/>',
   sound:'<path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/>', mute:'<path d="M4 9v6h4l5 4V5L8 9zM17 9l5 6M22 9l-5 6"/>',
-  arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>', spark: '<path d="m12 3 2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>',
+  arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  flask: '<path d="M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2.2h12.4a1.5 1.5 0 0 0 1.3-2.2L14 9V3M7.5 15h9"/>', coin: '<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c0-1.2 1.2-2 2.5-2s2.5.8 2.5 2-1.2 1.7-2.5 2-2.5.8-2.5 2 1.2 2 2.5 2 2.5-.8 2.5-2"/>',
+  chart: '<path d="M4 20V4M4 20h16M8 16l4-5 3 3 5-7"/>', server: '<rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M8 7h.01M8 17h.01"/>', shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.500-1-8-4-8-9V6z"/>',
+  chip: '<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>', brain: '<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V4a3 3 0 0 0-3 0zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>', robot: '<rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 8V4M9 13h.01M15 13h.01M9 17h6"/>', bolt: '<path d="M13 2L5 14h6l-1 8 8-12h-6z"/>',
+  eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', star: '<path d="M12 3l2.7 5.8 6.3.7-4.700 4.300 1.300 6.200L12 16.900 6.400 20l1.300-6.200L3 9.500l6.300-.7z"/>', key: '<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v4M15 12v3"/>',
+  users: '<circle cx="9" cy="8" r="3.500"/><path d="M2.500 20a6.500 6.500 0 0 1 13 0M16 4.500a3.500 3.500 0 0 1 0 7M18 14a6 6 0 0 1 3.500 6"/>', warn: '<path d="M12 3l10 18H2zM12 10v5M12 18h.01"/>', bubble: '<circle cx="9" cy="14" r="5"/><circle cx="17" cy="7" r="3"/><circle cx="18" cy="16" r="2"/>', gov: '<path d="M3 10 12 4l9 6M5 10v8M10 10v8M14 10v8M19 10v8M3 20h18"/>', spark: '<path d="m12 3 2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>',
 };
 export const ic = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${P[n] || ''}</svg>`;
 
@@ -53,24 +59,34 @@ export function fxChips(fx) {
 }
 
 // ---------- shell ----------
-const NAV = [['hub', 'map', '지도'], ['company', 'co', '회사'], ['wallet', 'wallet', '지갑'], ['invest', 'probe', '수사'], ['archive', 'doc', '기록']];
+const NAV = [['hub', 'map', '지도'], ['company', 'co', '도시'], ['tech', 'flask', '연구'], ['wallet', 'wallet', '국고'], ['invest', 'probe', '첩보'], ['archive', 'doc', '외교']];
 export const quarterLabel = (s) => QUARTERS[Math.min(s.turn, TOTAL_TURNS) - 1];
 export const totalCash = (s) => COMPANIES.reduce((a, c) => a + s.comp[c.id].cash, 0);
+export function nextLabel(s) {
+  const nq = (s.pending ? 1 : 0) + s.eventQueue.length + s.letterQueue.length;
+  if (nq) return ['행동 필요', `자문 ${nq}건`, 'warn'];
+  if (!s.tech.cur && TECHS.some((t) => techState(s, t.id) === 'open')) return ['연구 선택', '연구 대상 없음', 'warn'];
+  return [s.turn >= TOTAL_TURNS ? '마지막 턴' : '다음 턴', QUARTERS[Math.min(s.turn, TOTAL_TURNS) - 1], ''];
+}
 export function shell(s, V, inner) {
   const nq = (s.pending ? 1 : 0) + s.eventQueue.length + s.letterQueue.length;
   const dm = s.last ? s.last.dM / 1000 : 0;
   const b = Math.round(s.stats.bubble), bc = b > 92 ? 'var(--bad)' : b > 80 ? 'var(--warn)' : 'var(--good)';
   const ticks = Array.from({ length: TOTAL_TURNS }, (_, i) => `<i class="${i + 1 < s.turn ? 'on' : i + 1 === s.turn ? 'cur' : ''}"></i>`).join('');
-  return `<div class="rail"><div class="logo">C</div>${NAV.map(([id, icn, lab]) => `<button class="nav ${V.screen === id ? 'on' : ''}" data-act="go" data-to="${id}">${ic(icn)}${lab}${id === 'hub' && nq ? '<span class="dot"></span>' : ''}</button>`).join('')}<div class="sp"></div><button class="mute" data-act="mute" title="사운드">${ic(V.muted ? 'mute' : 'sound')}</button></div>
-<div class="top"><div class="qtr"><b>${QUARTERS[Math.min(s.turn, TOTAL_TURNS) - 1]} <span class="muted" style="font-weight:500;font-size:.78rem">· ${s.turn}/${TOTAL_TURNS}</span></b><div class="ticks">${ticks}</div></div>
-<div class="kpi"><small>제국 가치</small><b>$${(totalMcap(s) / 1000).toFixed(1)}T${s.last ? `<em class="${dm >= 0 ? 'good' : 'bad'}">${dm >= 0 ? '▲' : '▼'}${Math.abs(dm).toFixed(2)}</em>` : ''}</b></div>
-<div class="kpi"><small>그룹 현금</small><b>${fmtB(totalCash(s))}</b></div>
-<div class="kpi"><small>내 재산</small><b class="money">${fmtB(netWorth(s))}</b></div>
-<div class="kpi"><small>거품 지수</small><b style="color:${bc}">${b}</b><div class="gauge"><i style="width:${Math.min(100, b)}%;background:${bc}"></i></div></div>
-<div class="kpi"><small>정부 · 기술 · 인재</small><b>${Math.round(s.stats.gov)} · ${Math.round(s.stats.tech)} · ${Math.round(s.stats.talent)}</b></div>
-<div class="kpi"><small>정보</small><b>${s.intel}</b></div>
-<div class="sp"></div><button class="btn primary" data-act="end-turn">${nq ? `대화 ${nq}건 먼저` : '분기 마감'}${ic('arrow')}</button></div>
-<div class="main">${inner}</div>`;
+  const np = s.last ? s.last.netIncome : COMPANIES.reduce((a, c) => a + s.comp[c.id].profit, 0);
+  const rate = researchRate(s), tcur = s.tech.cur ? techOf(s.tech.cur) : null;
+  const nl = nextLabel(s);
+  return `<div class="rail"><div class="logo">C</div>${NAV.map(([id, icn, lab]) => `<button class="nav ${V.screen === id ? 'on' : ''}" data-act="go" data-to="${id}">${ic(icn)}${lab}${id === 'hub' && nq ? '<span class="dot"></span>' : ''}${id === 'tech' && !s.tech.cur && TECHS.some((t) => techState(s, t.id) === 'open') ? '<span class="dot"></span>' : ''}</button>`).join('')}<div class="sp"></div><button class="mute" data-act="mute" title="사운드">${ic(V.muted ? 'mute' : 'sound')}</button></div>
+<div class="top"><div class="qtr"><b>턴 ${s.turn} <span class="muted" style="font-weight:500;font-size:.78rem">· ${QUARTERS[Math.min(s.turn, TOTAL_TURNS) - 1]} / ${TOTAL_TURNS}턴</span></b><div class="ticks">${ticks}</div></div>
+<div class="yl"><div class="yd" title="제국 가치">${ic('chart')}<div><b>$${(totalMcap(s) / 1000).toFixed(1)}T</b>${s.last ? `<small class="${dm >= 0 ? 'good' : 'bad'}">${dm >= 0 ? '▲' : '▼'}${Math.abs(dm).toFixed(2)}T</small>` : '<small>제국 가치</small>'}</div></div>
+<div class="yd gold" title="그룹 현금 / 분기 순이익">${ic('coin')}<div><b>${fmtB(totalCash(s))}</b><small class="${np >= 0 ? 'good' : 'bad'}">${np >= 0 ? '+' : '−'}${fmtB(Math.abs(np))}/턴</small></div></div>
+<div class="yd sci" title="연구 속도">${ic('flask')}<div><b>+${rate}</b><small>${tcur ? tcur.kr : '연구 없음'}</small></div></div>
+<div class="yd" title="내 재산">${ic('wallet')}<div><b class="money">${fmtB(netWorth(s))}</b><small>내 재산</small></div></div>
+<div class="yd" title="거품 지수">${ic('bubble')}<div><b style="color:${bc}">${b}</b><div class="gauge"><i style="width:${Math.min(100, b)}%;background:${bc}"></i></div></div></div>
+<div class="yd" title="정부 관계">${ic('gov')}<div><b>${Math.round(s.stats.gov)}</b><small>정부</small></div></div>
+<div class="yd" title="인재">${ic('users')}<div><b>${Math.round(s.stats.talent)}</b><small>인재</small></div></div>
+<div class="yd" title="정보 자원">${ic('probe')}<div><b>${s.intel}</b><small>정보</small></div></div></div></div>
+<div class="main">${inner}<button class="nextturn ${nl[2]}" data-act="end-turn"><span class="nt-l">${nl[0]}</span><span class="nt-s">${nl[1]}</span><span class="nt-i">${ic('arrow')}</span></button></div>`;
 }
 
 // ---------- hub ----------
@@ -87,30 +103,39 @@ export function queueItems(s) {
   for (const id of s.eventQueue) items.push({ kind: 'event', id });
   return items;
 }
-export function hub(s, V) {
-  const q = queueItems(s);
-  const threads = q.length ? q.map((it) => {
-    if (it.kind === 'letter') return `<div class="thread ${it.cur ? 'unread' : ''}" ${it.cur ? 'data-act="open-pending"' : ''}>${av('elias', 2.6)}<div class="t"><b>엘리아스 밴스 <span class="chip warn">편지</span></b><p>${LETTERS[it.id].title}</p></div>${it.cur ? '<span class="badge">1</span>' : '<span class="chip">대기</span>'}</div>`;
-    const ev = getEvent(s, it.id), who = (ev.advisors || []).map((a) => a.who);
-    const stack = who.length ? `<div class="stack">${who.slice(0, 3).map((w) => av(w, 2.2)).join('')}</div>` : av('mira', 2.6);
-    return `<div class="thread ${it.cur ? 'unread' : ''}" ${it.cur ? 'data-act="open-pending"' : ''}>${stack}<div class="t"><b>${ev.title}</b><p>${ev.body}</p></div>${it.cur ? '<span class="badge">1</span>' : '<span class="chip">대기</span>'}</div>`;
-  }).join('') : `<div class="empty-hero">${portrait(heroId(s), 8, 'happy')}<div>처리할 대화가 없습니다.<br>회사 레버와 배당을 점검한 뒤<br><b style="color:var(--text)">분기 마감</b>을 누르세요.</div></div>`;
-  const goals = [
-    [!s.pending && !s.eventQueue.length && !s.letterQueue.length, '대화 모두 처리', '자문단의 의견을 듣고 결정한다'],
-    [V.levSeen, '회사 레버 점검', '기대치(전분기 이익 × 성장)를 넘길 수 있는지 확인'],
-    [V.paySeen, '배당 비율 확인', `지금 ${s.payout}% · 40% 초과 시 감사 위험`],
-  ].map(([d, t, sub]) => `<div class="goal ${d ? 'done' : ''}"><i>${d ? '✓' : ''}</i><div>${t}<small>${sub}</small></div></div>`).join('');
-  const news = s.last ? `<div class="goal" style="border-top:1px solid var(--line);margin-top:.3rem"><i style="border:0"></i><div>지난 분기 ${s.last.quarter}<small>순이익 ${fmtB(s.last.netIncome)} · 제국 가치 ${sgn(s.last.dM / 1000, 2)}T${s.last.crashMsg ? ' · ' + s.last.crashMsg : ''}</small></div></div>` : '';
-  const ppl = ['mira', 'victor', 'jonah', 'lin', 'dana', 'sage', 'aria'].map((k) => { const v = Math.round(s.trust[k]), c = v >= 60 ? 'var(--good)' : v >= 40 ? 'var(--warn)' : 'var(--bad)'; return `<div class="row">${av(k, 1.9, emoOfTrust(v))}<div class="nm">${CHARS[k].kr.split(' ')[0]}<small>${CHARS[k].tag}</small></div><div class="meter"><i style="width:${v}%;background:${c}"></i></div><span class="mono muted" style="width:1.6rem;text-align:right">${v}</span></div>`; }).join('');
-  const hl = headlines(s).map((h) => `<span>${h}</span>`).join('');
-  return `<div class="hub"><div class="mapslot" id="mapslot"><div class="ticker"><b>LIVE</b><div class="tk"><div class="tk-in">${hl}${hl}</div></div></div></div>
-<div class="dock"><div class="panel"><div class="ph"><span>대화함</span><span class="chip ${q.length ? 'acc' : ''}">${q.length}</span></div><div class="body">${threads}</div></div>
-<div class="panel"><div class="ph"><span>이번 분기</span></div><div class="body">${goals}${news}</div></div>
-<div class="panel"><div class="ph"><span>사람들 · 신뢰</span></div><div class="body">${ppl}</div></div></div>
-${V.pop ? hubPop(s, V.pop) : ''}</div>`;
+export function cityPanel(s, id) {
+  if (!id) return `<div class="cp-empty">${portrait(heroId(s), 7, 'smug')}<div><b>도시를 선택하세요</b><small>배너를 클릭하면 정보가, 더블클릭하면 도시 관리 화면이 열립니다.</small></div></div>`;
+  const c = COMP[id], st = s.comp[id];
+  const y = (icn, v, l, cls = '') => `<div class="cy ${cls}">${ic(icn)}<b>${v}</b><small>${l}</small></div>`;
+  return `<div class="cp-h">${coAv(id, 3.6)}<div><b>${c.kr}</b><small>${c.en} · ${c.desc}</small></div></div>
+<div class="cp-y">${y('coin', fmtB(st.profit), '분기 이익', st.profit >= 0 ? 'good' : 'bad')}${y('chart', pct(st.g + st.gb), '성장')}${y('users', Math.round(st.morale), '사기')}${y('gov', Math.round(st.reg), '규제', st.reg > 75 ? 'bad' : '')}${y('wallet', fmtB(st.cash), '현금', st.cash < 8 ? 'bad' : '')}${y('bubble', Math.round(st.cap) + '%', '가동률')}</div>
+<button class="btn primary" style="width:100%" data-act="open-city" data-id="${id}">도시 관리 ${ic('arrow')}</button>`;
 }
-function hubPop(s, p) {
-  return `<div class="pop" style="left:${p.x}px;top:${p.y}px"><div class="ph" style="padding:.4rem .6rem">${HUBINFO[p.id][0]}</div>${HUBGROUP[p.id].map((c) => `<div class="row" data-act="pick-company" data-id="${c}" data-go="1">${coAv(c, 1.9)}<div class="nm">${COMP[c].kr}<small>${COMP[c].desc}</small></div><span class="mono muted">$${(s.comp[c].mcap / 1000).toFixed(2)}T</span></div>`).join('')}</div>`;
+export function notes(s) {
+  const q = queueItems(s), out = [];
+  q.forEach((it) => {
+    if (it.kind === 'letter') out.push(`<button class="note ${it.cur ? 'cur' : 'wait'}" ${it.cur ? 'data-act="open-pending"' : ''}>${av('elias', 2.4)}<div><b>선대의 편지</b><small>${LETTERS[it.id].title}</small></div><span>${it.cur ? '!' : '…'}</span></button>`);
+    else { const ev = getEvent(s, it.id), w = (ev.advisors || [])[0]; out.push(`<button class="note ${it.cur ? 'cur' : 'wait'}" ${it.cur ? 'data-act="open-pending"' : ''}>${av(w ? w.who : 'mira', 2.4, w ? ({ y: 'happy', n: 'angry', h: 'worried' })[w.stance] : 'neutral')}<div><b>${ev.title}</b><small>${ev.kicker.split('·')[1] || ev.kicker}</small></div><span>${it.cur ? '!' : '…'}</span></button>`); }
+  });
+  if (!s.tech.cur && TECHS.some((t) => techState(s, t.id) === 'open')) out.push(`<button class="note cur sci" data-act="go" data-to="tech"><div class="nico">${ic('flask')}</div><div><b>연구 대상을 선택하세요</b><small>연구 속도 +${researchRate(s)}/턴</small></div><span>!</span></button>`);
+  return out.join('');
+}
+export function advisorBar(s) {
+  return `<div class="advbar">${['mira', 'victor', 'jonah', 'lin', 'dana', 'sage', 'aria'].map((k) => { const v = Math.round(s.trust[k]), c = v >= 60 ? 'var(--good)' : v >= 40 ? 'var(--warn)' : 'var(--bad)'; return `<button class="adv" data-act="open-people" title="${CHARS[k].kr} · ${CHARS[k].role} · 신뢰 ${v}">${av(k, 2.6, emoOfTrust(v))}<i style="width:${v}%;background:${c}"></i></button>`; }).join('')}</div>`;
+}
+export function hub(s, V) {
+  return `<div class="hub2"><div class="notes" id="notes">${notes(s)}</div><div class="cpanel panel" id="cpanel">${cityPanel(s, V.sel)}</div>${advisorBar(s)}</div>`;
+}
+
+// ---------- tech tree ----------
+export function tech(s, V) {
+  const cur = s.tech.cur ? techOf(s.tech.cur) : null, rate = researchRate(s);
+  const X = (t) => 3 + (t.tier - 1) * 24.5, Y = (t) => 14 + t.row * 28;
+  const lines = TECHS.flatMap((t) => t.req.map((r) => { const a = techOf(r); const on = s.tech.done.includes(r); return `<path d="M${X(a) + 11} ${Y(a) + 4}C${X(a) + 19} ${Y(a) + 4},${X(t) - 8} ${Y(t) + 4},${X(t)} ${Y(t) + 4}" stroke="${on ? '#86aefc' : '#3a4a68'}" stroke-width="${on ? 0.7 : 0.4}" fill="none" ${on ? '' : 'stroke-dasharray="1.2 1"'} vector-effect="non-scaling-stroke" style="stroke-width:${on ? 2.4 : 1.4}px"/>`; })).join('');
+  const nodes = TECHS.map((t) => { const st = techState(s, t.id), pr = st === 'cur' ? Math.min(100, s.tech.prog / t.cost * 100) : 0, eta = Math.ceil(t.cost / Math.max(0.1, rate)); return `<button class="tnode ${st}" style="left:${X(t)}%;top:${Y(t)}%" data-act="pick-tech" data-id="${t.id}" ${st === 'locked' || st === 'done' ? 'disabled' : ''}><div class="ti-ico">${ic(t.icon)}</div><div class="ti-t"><b>${t.kr}</b><small>${t.en}</small></div><div class="ti-f">${st === 'done' ? '<span class="chip good">완료</span>' : `<span class="chip">${t.cost} RP</span><span class="chip">~${eta}턴</span>`}</div>${st === 'cur' ? `<i class="tbar"><u style="width:${pr}%"></u></i>` : ''}<div class="tip"><b>${t.kr}</b><p>${t.desc}</p>${t.req.length ? `<small>선행: ${t.req.map((r) => techOf(r).kr).join(', ')}</small>` : ''}</div></button>`; }).join('');
+  const hd = cur ? `<div class="th-cur">${ic(cur.icon)}<div><small>현재 연구</small><b>${cur.kr}</b></div><div class="th-bar"><i style="width:${Math.min(100, s.tech.prog / cur.cost * 100)}%"></i></div><span class="mono">${s.tech.prog.toFixed(1)} / ${cur.cost}</span></div>` : `<div class="th-cur warn">${ic('flask')}<div><small>현재 연구</small><b>선택된 연구가 없습니다</b></div><span class="muted">아래에서 연구할 기술을 고르세요</span></div>`;
+  return `<div class="view techv"><div class="th"><div><h2>연구 · 기술 트리</h2><small class="muted">모든 기업의 R&amp;D 레버와 기술 능력치가 연구 속도를 정합니다</small></div>${hd}<div class="th-r"><small>연구 속도</small><b class="mono">+${rate}<span class="muted" style="font-size:.7rem"> RP/턴</span></b></div></div>
+<div class="tree"><svg viewBox="0 0 100 100" preserveAspectRatio="none">${lines}</svg>${['', '1세대', '2세대', '3세대', '4세대'].slice(1).map((l, i) => `<div class="tier" style="left:${3 + i * 24.5}%">${l}</div>`).join('')}${nodes}</div></div>`;
 }
 
 // ---------- company ----------
@@ -119,6 +144,10 @@ function spark(vals, color, w = 300, h = 70) {
   const pts = vals.map((v, i) => [(i / (vals.length - 1)) * w, h - 6 - ((v - mn) / r) * (h - 14)]);
   const d = pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join('');
   return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:${h}px"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".35"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs><path d="${d}L${w},${h}L0,${h}Z" fill="url(#sg)"/><path d="${d}" fill="none" stroke="${color}" stroke-width="2"/><circle cx="${pts.at(-1)[0]}" cy="${pts.at(-1)[1]}" r="3.5" fill="${color}"/></svg>`;
+}
+export function cityIcon(pop, col) {
+  const n = Math.min(5, 2 + Math.floor(pop / 3)), bars = Array.from({ length: n }, (_, i) => { const h = 10 + ((i * 7 + pop * 3) % 9) + (i === Math.floor(n / 2) ? 7 : 0), w = 5; return `<rect x="${3 + i * 6.4}" y="${28 - h}" width="${w}" height="${h}" fill="#f4f1e6" stroke="#2a2418" stroke-width=".8"/><rect x="${4.4 + i * 6.4}" y="${30 - h}" width="1.4" height="1.4" fill="${col}"/><rect x="${4.4 + i * 6.4}" y="${34 - h}" width="1.4" height="1.4" fill="${col}"/>`; }).join('');
+  return `<svg viewBox="0 0 ${6.4 * n + 3} 32" class="cisvg"><ellipse cx="${(6.4 * n + 3) / 2}" cy="29.5" rx="${3.2 * n + 2}" ry="3" fill="rgba(0,0,0,.35)"/>${bars}<path d="M0 29h${6.4 * n + 3}" stroke="${col}" stroke-width="2"/></svg>`;
 }
 export function previewHTML(s, id) {
   const st = s.comp[id], c = COMP[id], p = previewCompany(s, id, st.lev), exp = st.profit * (1 + c.g), beat = exp !== 0 ? (p.profit - exp) / Math.abs(exp) : 0;
@@ -229,7 +258,7 @@ export function earnings(s) {
 <div class="bign" style="margin-top:1.4rem"><small>제국 가치 ${sgn(r.dM / 1000, 2)}T</small>$${(r.mcap / 1000).toFixed(2)}T</div>
 <div style="margin-top:1.6rem" class="muted">막대 가운데 선 = 시장 기대치</div>${rows}</div>
 <div style="position:relative"><div class="earn-hero">${portrait(heroId(s), 13, r.crashMsg && r.crashMsg.includes('💥') ? 'shock' : r.take.total > 0.3 ? 'happy' : 'smug')}</div><h2>YOUR TAKE</h2><h1>이번 분기 내 몫</h1><div class="leg" style="font-size:.95rem;gap:.7rem 1rem"><span>급여</span><span>${fmtB(r.take.salary)}</span><span>배당 (${r.payout}%)</span><span>${fmtB(r.take.div)}</span><span>성과보수</span><span>${fmtB(r.take.carry)}</span><span>개인 펀드 손익</span><span class="${r.take.fund >= 0 ? 'good' : 'bad'}">${fmtB(r.take.fund)}</span>${r.take.short ? `<span>공매도 수익</span><span class="good">${fmtB(r.take.short)}</span>` : ''}</div>
-<div class="take"><div class="bign"><small>이번 분기 합계</small><span data-count="${r.take.total}">${fmtB(r.take.total)}</span></div></div>
+${r.research && r.research.done ? `<div class="rs-done">${ic('flask')}<div><small>연구 완료</small><b>${r.research.done.kr}</b><span>${r.research.done.desc}</span></div></div>` : r.research && s.tech.cur ? `<div class="rs-prog">${ic('flask')}<div><small>연구 진행</small><b>${techOf(s.tech.cur).kr} <span class="mono">${s.tech.prog.toFixed(1)}/${techOf(s.tech.cur).cost}</span></b></div></div>` : ''}<div class="take"><div class="bign"><small>이번 분기 합계</small><span data-count="${r.take.total}">${fmtB(r.take.total)}</span></div></div>
 <div class="bign" style="margin-top:2rem"><small>내 순자산</small>${fmtB(r.nwBefore)} → <span class="money">${fmtB(r.nwAfter)}</span></div>
 <button class="btn primary big" style="margin-top:2.4rem" data-act="next-turn">${s.turn >= TOTAL_TURNS ? '결말을 본다' : '다음 분기로'} ${ic('arrow')}</button></div></div>`;
 }

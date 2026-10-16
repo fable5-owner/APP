@@ -1,5 +1,5 @@
 // Game state + economy engine. No DOM here.
-import { COMPANIES, CHARS, ORIGINS, SHOP, EVENTS, SCRIPT_ORDER, FILLERS, BONUS_TURNS, TOTAL_TURNS, QUARTERS, SUSPECTS, LEVERS, ENDINGS } from './data.js';
+import { COMPANIES, CHARS, ORIGINS, SHOP, EVENTS, SCRIPT_ORDER, FILLERS, BONUS_TURNS, TOTAL_TURNS, QUARTERS, SUSPECTS, LEVERS, ENDINGS, TECHS } from './data.js';
 
 export const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 export const COMP = Object.fromEntries(COMPANIES.map((c) => [c.id, c]));
@@ -34,6 +34,7 @@ export function newGame({ name = '에단 류', origin = 'engineer', seed = Date.
     letters: [], letterQueue: [],
     done: [], pending: null, eventQueue: [], log: [],
     last: null, history: [], revealed: {},
+    tech: { done: [], cur: null, prog: 0 },
   };
   for (const c of COMPANIES) {
     s.comp[c.id] = { rev: c.rev, nm: c.nm, g: c.g, gb: 0, nmb: 0, cash: c.cash, morale: 70, reg: 50, rep: 70, cap: 82, profit: c.rev * c.nm, hist: Array.from({ length: 8 }, (_, k) => { const r = c.rev / Math.pow(1 + c.g, 7 - k); return { rev: r, profit: r * c.nm }; }), lev: { capex: 50, rnd: 50, hire: 50, price: 50, lobby: 50, mkt: 50 }, mcap: 0 };
@@ -89,6 +90,9 @@ export function applyFx(s, fx) {
   if (fx.all) for (const id of Object.keys(s.comp)) applyCompFx(s.comp[id], fx.all);
   if (fx.levers) for (const id of Object.keys(s.comp)) Object.assign(s.comp[id].lev, fx.levers);
   if (fx.flag) s.flags[fx.flag] = true;
+  if (fx.permG) for (const id of Object.keys(s.comp)) s.comp[id].g += fx.permG;
+  if (fx.permNm) for (const id of Object.keys(s.comp)) s.comp[id].nm += fx.permNm;
+  if (fx.permComp) for (const [id, d] of Object.entries(fx.permComp)) { if (s.comp[id]) { if (d.g) s.comp[id].g += d.g; if (d.nm) s.comp[id].nm += d.nm; } }
   if (fx.clue) addClue(s, fx.clue.who, fx.clue.n || 1);
   if (fx.clueMole) {
     const real = s.rng() < 0.55;
@@ -208,6 +212,26 @@ export function buyItem(s, id) {
   return true;
 }
 
+// ---------- research ----------
+export const techOf = (id) => TECHS.find((t) => t.id === id);
+export function techState(s, id) {
+  const t = techOf(id); if (s.tech.done.includes(id)) return 'done'; if (s.tech.cur === id) return 'cur';
+  return t.req.every((r) => s.tech.done.includes(r)) ? 'open' : 'locked';
+}
+export function researchRate(s) {
+  const rnd = COMPANIES.reduce((a, c) => a + s.comp[c.id].lev.rnd / 50, 0);
+  return Math.round((rnd * 0.3 + s.stats.tech / 60) * (1 + (s.flags.fieldSense ? 0.15 : 0)) * 10) / 10;
+}
+export function pickTech(s, id) { if (techState(s, id) === 'open' || techState(s, id) === 'cur') { s.tech.cur = id; return true; } return false; }
+function advanceResearch(s) {
+  const rate = researchRate(s); const out = { rate, done: null };
+  if (!s.tech.cur) return out;
+  s.tech.prog += rate;
+  const t = techOf(s.tech.cur);
+  if (s.tech.prog >= t.cost) { s.tech.prog -= t.cost; s.tech.done.push(t.id); applyFx(s, t.fx); out.done = t; s.tech.cur = null; }
+  return out;
+}
+
 // ---------- turn processing ----------
 export function endTurn(s) {
   const rng = s.rng;
@@ -268,6 +292,7 @@ export function endTurn(s) {
   const fundGain = s.me.fund * r; s.me.fund += fundGain;
   let shortGain = 0;
   if (s.flags.short_own && crashMsg && s.crashed) { shortGain = 1.4; s.flags.short_paid = true; }
+  const rs = advanceResearch(s); recomputeMcap(s, gEffs);
   const take = salary + div + carry + fundGain + shortGain;
   s.me.liquid += salary + div + carry + shortGain;
   const nw = netWorth(s);
@@ -275,7 +300,7 @@ export function endTurn(s) {
     turn: s.turn, quarter: QUARTERS[s.turn - 1], revenue: totRev, netIncome: totProfit, rows,
     prevMcap: prevM, mcap: newM, dM: newM - prevM,
     take: { salary, div, carry, fund: fundGain, short: shortGain, total: take }, nwBefore: prevNW, nwAfter: nw,
-    crashMsg, payout: s.payout, bubble: s.stats.bubble,
+    crashMsg, payout: s.payout, bubble: s.stats.bubble, research: rs,
   };
   s.last = res; s.history.push(newM);
   s.phase = 'earnings';
@@ -298,7 +323,7 @@ export function pickEnding(s) {
   const grade = (v, t) => (v >= t[0] ? 'S' : v >= t[1] ? 'A' : v >= t[2] ? 'B' : v >= t[3] ? 'C' : 'D');
   const empire = empireValueT(s), wealth = netWorth(s);
   const trusts = SUSPECTS.map((k) => s.trust[k]).concat([s.trust.sage]);
-  const legacy = clamp(trusts.reduce((a, b) => a + b, 0) / trusts.length * 0.6 + s.stats.gov * 0.2 + (s.flags.soft ? 20 : 0) + (s.flags.mole_found ? 10 : 0) - (s.flags.short_own ? 15 : 0) - (s.flags.mole_wrong ? 8 : 0), 0, 100);
+  const legacy = clamp(trusts.reduce((a, b) => a + b, 0) / trusts.length * 0.6 + s.stats.gov * 0.2 + (s.flags.soft ? 20 : 0) + (s.flags.mole_found ? 10 : 0) + (s.flags.unwind ? 12 : 0) - (s.flags.short_own ? 15 : 0) - (s.flags.mole_wrong ? 8 : 0), 0, 100);
   return { key, e, empire, wealth, legacy, grades: { empire: grade(empire, [34, 30, 25, 18]), wealth: grade(wealth, [60, 45, 35, 25]), legacy: grade(legacy, [80, 65, 50, 35]) } };
 }
 
