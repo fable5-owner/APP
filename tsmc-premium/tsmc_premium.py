@@ -15,6 +15,8 @@
 """
 import argparse
 import csv
+import json
+import os
 import datetime as dt
 import sys
 from pathlib import Path
@@ -89,6 +91,24 @@ def save(rows):
             w.writerow(old[k])
 
 
+def export_json(path: str, days: int = 800):
+    """웹 대시보드용 JSON (최근 약 3년)"""
+    rows = compute(days)
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    keys = ["date", "adr_usd", "local_twd", "usdkrw", "twdkrw",
+            "adr_krw", "local5_krw", "premium_krw", "premium_pct"]
+    payload = {
+        "updated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+        "ratio": ADR_RATIO,
+        "fields": keys,
+        "rows": [[r[k] for k in keys] for r in rows],
+    }
+    p.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")),
+                 encoding="utf-8")
+    return p
+
+
 def show(rows):
     print(f"{'날짜':<11}{'ADR($)':>9}{'본주(NT$)':>10}{'USD/KRW':>9}{'TWD/KRW':>9}"
           f"{'ADR(원)':>12}{'본주x5(원)':>13}{'차이(원)':>11}{'프리미엄':>9}")
@@ -108,6 +128,7 @@ def main():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--days", type=int, default=1, help="최근 N거래일 (기본 1)")
     ap.add_argument("--no-save", action="store_true", help="CSV 저장 안 함")
+    ap.add_argument("--json", metavar="PATH", help="웹 대시보드용 JSON 저장 경로")
     ap.add_argument("--notify", action="store_true", help="카카오톡 나에게 보내기로 알림")
     a = ap.parse_args()
     try:
@@ -120,7 +141,11 @@ def main():
     if not a.no_save:
         save(rows)
         print(f"\n저장: {HIST}")
-    if a.notify:
+    if a.json:
+        print(f"JSON: {export_json(a.json)}")
+    if a.notify and not os.environ.get("KAKAO_REFRESH_TOKEN"):
+        print("카카오 키가 설정되지 않아 알림을 건너뜁니다.")
+    elif a.notify:
         import kakao
         r = rows[-1]
         kind = "프리미엄" if r["premium_krw"] > 0 else "디스카운트"

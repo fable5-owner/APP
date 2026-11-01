@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   run:
@@ -19,7 +20,7 @@ jobs:
           python-version: "3.12"
       - run: pip install -r tsmc-premium/requirements.txt
       - name: Calculate premium
-        run: python tsmc-premium/tsmc_premium.py --days 5 --notify | tee -a "$GITHUB_STEP_SUMMARY"
+        run: python tsmc-premium/tsmc_premium.py --days 5 --notify --json public/tsmc/data.json | tee -a "$GITHUB_STEP_SUMMARY"
         env:
           KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
           KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
@@ -28,6 +29,11 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add tsmc-premium/data/history.csv
+          git add tsmc-premium/data/history.csv public/tsmc/data.json
           git diff --cached --quiet || git commit -m "Update TSMC premium history"
           git push
+      - name: Redeploy site (GITHUB_TOKEN 커밋은 자동 배포를 트리거하지 않음)
+        if: github.ref_name == 'main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main

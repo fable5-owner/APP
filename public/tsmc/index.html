@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#F2F4F6" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#101013" media="(prefers-color-scheme: dark)" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="TSMC 프리미엄" />
+<title>TSMC ADR 프리미엄</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%233182F6'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='800'>T</text></svg>" />
+<style>
+  :root{
+    --bg:#F2F4F6; --card:#FFFFFF; --text:#191F28; --sub:#4E5968; --mute:#8B95A1; --line:#E5E8EB; --fill:#F2F4F6;
+    --blue:#3182F6; --blue-weak:#E8F3FF; --red:#F04452; --red-weak:#FFEEEE; --green:#03B26C;
+    --shadow:0 1px 2px rgba(0,0,0,.03);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#101013; --card:#1B1B1F; --text:#F2F4F6; --sub:#B0B8C1; --mute:#7E8691; --line:#2C2C33; --fill:#26262C;
+      --blue:#4C9BFF; --blue-weak:#1A2A40; --red:#FF5A66; --red-weak:#3A1C20; }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--text)}
+  body{font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    -webkit-font-smoothing:antialiased;letter-spacing:-.01em;font-feature-settings:"tnum"}
+  .wrap{max-width:480px;margin:0 auto;padding:0 16px calc(32px + env(safe-area-inset-bottom))}
+  header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);margin:0 -16px;padding-left:20px!important;padding-right:12px!important;display:flex;align-items:center;justify-content:space-between;
+    padding:calc(12px + env(safe-area-inset-top)) 4px 12px}
+  header h1{font-size:18px;font-weight:700;margin:0}
+  .icon-btn{width:40px;height:40px;border:0;border-radius:12px;background:transparent;color:var(--sub);display:grid;place-items:center;cursor:pointer}
+  .icon-btn:active{background:var(--fill)}
+  .icon-btn svg{width:22px;height:22px}
+  .spin svg{animation:spin .8s linear infinite} @keyframes spin{to{transform:rotate(360deg)}}
+
+  .card{background:var(--card);border-radius:24px;padding:24px 22px;margin-bottom:12px;box-shadow:var(--shadow)}
+  .label{font-size:15px;color:var(--sub);font-weight:500}
+  .muted{color:var(--mute)}
+  .red{color:var(--red)} .blue{color:var(--blue)}
+
+  /* hero */
+  .hero-num{font-size:40px;font-weight:800;letter-spacing:-.03em;margin:6px 0 4px;line-height:1.15}
+  .hero-num small{font-size:28px;font-weight:700;margin-left:4px}
+  .hero-sub{font-size:17px;font-weight:600;color:var(--text)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+  .chip{font-size:13px;font-weight:600;padding:6px 10px;border-radius:10px;background:var(--fill);color:var(--sub)}
+  .chip.red{background:var(--red-weak);color:var(--red)} .chip.blue{background:var(--blue-weak);color:var(--blue)}
+
+  /* gauge */
+  .gauge{position:relative;height:8px;border-radius:8px;background:linear-gradient(90deg,var(--blue),#B5D3FF 50%,#FFB5BB 50%,var(--red));margin:18px 0 8px;opacity:.9}
+  .gauge .avg{position:absolute;top:-4px;width:2px;height:16px;background:var(--mute);border-radius:2px}
+  .gauge .dot{position:absolute;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:var(--card);border:5px solid var(--text);
+    box-shadow:0 2px 6px rgba(0,0,0,.18);transition:left .6s cubic-bezier(.2,.8,.2,1)}
+  .gauge-legend{display:flex;justify-content:space-between;font-size:12px;color:var(--mute)}
+  .insight{font-size:17px;font-weight:700;margin:2px 0 0;line-height:1.45}
+
+  /* chart */
+  .chart-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  .chart-val{font-size:22px;font-weight:700}
+  .chart-date{font-size:13px;color:var(--mute)}
+  .chart{position:relative;height:200px;margin:14px -6px 4px;touch-action:pan-y;user-select:none;cursor:crosshair}
+  .chart svg{width:100%;height:100%;display:block;overflow:visible}
+  .axis{display:flex;justify-content:space-between;font-size:11px;color:var(--mute);padding:0 2px}
+  .seg{display:flex;background:var(--fill);border-radius:12px;padding:3px;margin-top:14px}
+  .seg button{flex:1;border:0;background:transparent;color:var(--mute);font:inherit;font-size:14px;font-weight:600;padding:8px 0;border-radius:9px;cursor:pointer;transition:all .15s}
+  .seg button.on{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+  .stat{background:var(--fill);border-radius:14px;padding:12px}
+  .stat b{display:block;font-size:16px;margin-top:2px}
+  .stat span{font-size:12px;color:var(--mute)}
+
+  /* compare */
+  .row{display:flex;justify-content:space-between;align-items:center;padding:10px 0}
+  .row .k{font-size:15px;color:var(--sub)} .row .v{font-size:16px;font-weight:600}
+  .bar{height:10px;border-radius:6px;background:var(--fill);overflow:hidden;margin-top:6px}
+  .bar i{display:block;height:100%;border-radius:6px;transition:width .7s cubic-bezier(.2,.8,.2,1)}
+  .divider{height:1px;background:var(--line);margin:12px 0}
+  .title{font-size:19px;font-weight:700;margin:0 0 14px}
+
+  /* calculator */
+  .input-wrap{display:flex;align-items:baseline;gap:6px;border-bottom:2px solid var(--line);padding:6px 0 10px;transition:border-color .15s}
+  .input-wrap:focus-within{border-color:var(--blue)}
+  .input-wrap input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--text);font:inherit;font-size:28px;font-weight:700;letter-spacing:-.02em}
+  .input-wrap input::placeholder{color:var(--line)}
+  .input-wrap .unit{font-size:22px;font-weight:700;color:var(--sub)}
+  .quick{display:flex;gap:8px;margin-top:12px;overflow-x:auto;scrollbar-width:none}
+  .quick button{flex:none;border:0;background:var(--fill);color:var(--sub);font:inherit;font-size:14px;font-weight:600;padding:9px 14px;border-radius:12px;cursor:pointer}
+  .quick button:active,.seg button:active{transform:scale(.96)}
+  .result{margin-top:18px;background:var(--blue-weak);border-radius:16px;padding:16px 18px}
+  .result p{margin:0;font-size:16px;font-weight:600;line-height:1.55}
+  .result p b{font-weight:800}
+  .result .small{font-size:13px;color:var(--sub);font-weight:500;margin-top:6px}
+
+  /* list */
+  .list-item{display:flex;align-items:center;padding:13px 0}
+  .list-item + .list-item{border-top:1px solid var(--line)}
+  .list-item .d{flex:1} .list-item .d b{display:block;font-size:15px;font-weight:600} .list-item .d span{font-size:13px;color:var(--mute)}
+  .list-item .p{text-align:right} .list-item .p b{display:block;font-size:16px} .list-item .p span{font-size:13px}
+  .more{width:100%;border:0;background:var(--fill);color:var(--sub);font:inherit;font-weight:600;font-size:15px;padding:14px;border-radius:14px;margin-top:10px;cursor:pointer}
+  .more:active{transform:scale(.98)}
+
+  .foot{font-size:12px;color:var(--mute);line-height:1.7;padding:8px 6px}
+  .foot a{color:var(--sub)}
+
+  /* skeleton */
+  .sk{background:linear-gradient(90deg,var(--fill) 25%,var(--line) 37%,var(--fill) 63%);background-size:400% 100%;animation:sk 1.4s ease infinite;border-radius:10px;color:transparent!important}
+  @keyframes sk{0%{background-position:100% 50%}100%{background-position:0 50%}}
+
+  /* bottom sheet */
+  .dim{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+  .sheet{position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;background:var(--card);border-radius:24px 24px 0 0;
+    padding:12px 24px calc(28px + env(safe-area-inset-bottom));transform:translateY(105%);transition:transform .3s cubic-bezier(.2,.8,.2,1);z-index:21}
+  .sheet .grab{width:40px;height:5px;border-radius:4px;background:var(--line);margin:0 auto 18px}
+  .sheet h3{margin:0 0 12px;font-size:20px}
+  .sheet p,.sheet li{font-size:15px;color:var(--sub);line-height:1.7}
+  .sheet ul{padding-left:18px;margin:8px 0}
+  .formula{background:var(--fill);border-radius:14px;padding:14px 16px;font-size:14px;line-height:1.9;color:var(--text)}
+  .cta{width:100%;border:0;background:var(--blue);color:#fff;font:inherit;font-size:17px;font-weight:700;padding:16px;border-radius:16px;margin-top:18px;cursor:pointer}
+  .cta:active{transform:scale(.98)}
+  body.sheet-open .dim{opacity:1;pointer-events:auto}
+  body.sheet-open .sheet{transform:none}
+
+  .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:rgba(25,31,40,.92);color:#fff;
+    font-size:14px;font-weight:600;padding:12px 18px;border-radius:14px;opacity:0;transition:all .25s;z-index:30;white-space:nowrap}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .fade{animation:fade .45s ease both} @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>TSMC 프리미엄</h1>
+    <div style="display:flex">
+      <button class="icon-btn" id="infoBtn" aria-label="계산 방식"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button>
+      <button class="icon-btn" id="shareBtn" aria-label="공유"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg></button>
+      <button class="icon-btn" id="refreshBtn" aria-label="새로고침"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/></svg></button>
+    </div>
+  </header>
+
+  <!-- 히어로 -->
+  <section class="card fade" id="hero">
+    <div class="label">ADR이 본주보다</div>
+    <div class="hero-num sk" id="heroNum">00.00% 비싸요</div>
+    <div class="hero-sub sk" id="heroSub">1주당 00,000원 차이</div>
+    <div class="chips" id="heroChips"><span class="chip sk">로딩중</span></div>
+  </section>
+
+  <!-- 인사이트 -->
+  <section class="card fade">
+    <div class="label">최근 1년과 비교하면</div>
+    <p class="insight" id="insight"><span class="sk">평소 수준이에요</span></p>
+    <div class="gauge" id="gauge"><span class="avg" id="gAvg" style="left:50%"></span><span class="dot" id="gDot" style="left:50%"></span></div>
+    <div class="gauge-legend"><span id="gMin">최저 -</span><span id="gAvgT">평균 -</span><span id="gMax">최고 -</span></div>
+  </section>
+
+  <!-- 차트 -->
+  <section class="card fade">
+    <div class="chart-head">
+      <div><div class="label">프리미엄 추이</div><div class="chart-val" id="cVal">-</div></div>
+      <div class="chart-date" id="cDate"></div>
+    </div>
+    <div class="chart" id="chart"></div>
+    <div class="axis"><span id="axL"></span><span id="axM">┄ 평균</span><span id="axR"></span></div>
+    <div class="seg" id="period">
+      <button data-d="22">1개월</button><button data-d="66" class="on">3개월</button><button data-d="132">6개월</button><button data-d="252">1년</button><button data-d="9999">전체</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><span>평균</span><b id="sAvg">-</b></div>
+      <div class="stat"><span>최고</span><b id="sMax" class="red">-</b></div>
+      <div class="stat"><span>최저</span><b id="sMin" class="blue">-</b></div>
+    </div>
+  </section>
+
+  <!-- 비교 -->
+  <section class="card fade">
+    <h2 class="title">원화로 비교하면</h2>
+    <div class="row"><span class="k">ADR 1주 <span class="muted">(TSM)</span></span><span class="v" id="vAdr">-</span></div>
+    <div class="bar"><i id="bAdr" style="width:0;background:var(--red)"></i></div>
+    <div class="row" style="margin-top:8px"><span class="k">본주 5주 <span class="muted">(2330)</span></span><span class="v" id="vLoc">-</span></div>
+    <div class="bar"><i id="bLoc" style="width:0;background:var(--blue)"></i></div>
+    <div class="divider"></div>
+    <div class="row"><span class="k">TSM</span><span class="v" id="vTsm">-</span></div>
+    <div class="row"><span class="k">2330.TW</span><span class="v" id="v2330">-</span></div>
+    <div class="row"><span class="k">달러 환율</span><span class="v" id="vUsd">-</span></div>
+    <div class="row"><span class="k">대만달러 환율</span><span class="v" id="vTwd">-</span></div>
+  </section>
+
+  <!-- 계산기 -->
+  <section class="card fade">
+    <h2 class="title">내 돈으로 계산해보기</h2>
+    <div class="seg" id="calcMode" style="margin:0 0 18px">
+      <button data-m="won" class="on">투자 금액</button><button data-m="shares">보유 ADR 주수</button>
+    </div>
+    <div class="input-wrap"><input id="amt" inputmode="numeric" placeholder="0" autocomplete="off" /><span class="unit" id="unit">원</span></div>
+    <div class="quick" id="quick"></div>
+    <div class="result" id="result"><p class="muted">금액을 입력하면 바로 계산해드려요</p></div>
+  </section>
+
+  <!-- 일별 -->
+  <section class="card fade">
+    <h2 class="title">일별 기록</h2>
+    <div id="list"></div>
+    <button class="more" id="moreBtn">더보기</button>
+  </section>
+
+  <div class="foot" id="foot">
+    같은 날짜 종가 기준으로 비교해요. 대만 장은 미국 장보다 먼저 마감하기 때문에 시차가 있고, 환율은 실제 환전할 때 적용되는 환율(스프레드 포함)과 다를 수 있어요. 투자 판단의 참고용으로만 봐주세요.<br />
+    데이터: Yahoo Finance · <span id="upd"></span>
+  </div>
+</div>
+
+<div class="dim" id="dim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="grab"></div>
+  <h3 id="sheetTitle">어떻게 계산하나요?</h3>
+  <p>TSMC ADR(TSM) 1주는 대만 본주(2330) 5주와 같아요. 두 가격을 원화로 바꿔서 비교해요.</p>
+  <div class="formula">
+    ADR 원화가 = TSM 가격($) × 달러 환율<br />
+    본주 5주 원화가 = 2330 가격(NT$) × 5 × 대만달러 환율<br />
+    <b>프리미엄 = (ADR − 본주 5주) ÷ 본주 5주</b>
+  </div>
+  <ul>
+    <li>프리미엄이 높을수록 미국 ADR이 상대적으로 비싸요.</li>
+    <li>평균보다 낮을 때는 ADR이 평소보다 싼 편이에요.</li>
+    <li>데이터는 평일 아침(한국 시간)에 자동으로 업데이트돼요.</li>
+  </ul>
+  <button class="cta" id="sheetClose">확인했어요</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const won = n => Math.round(n).toLocaleString('ko-KR') + '원';
+  const signed = (n, d = 2) => (n > 0 ? '+' : '') + n.toFixed(d);
+  const fmtDate = s => { const [y, m, d] = s.split('-'); return `${+m}월 ${+d}일`; };
+  const fmtDateY = s => { const [y, m, d] = s.split('-'); return `${y.slice(2)}.${m}.${d}`; };
+  const koMoney = n => { // 12,345,678 → 1,234만 5,678원
+    n = Math.round(Math.abs(n));
+    if (n < 10000) return n.toLocaleString('ko-KR') + '원';
+    const eok = Math.floor(n / 1e8), man = Math.floor((n % 1e8) / 1e4), rest = n % 1e4;
+    return [eok && eok.toLocaleString() + '억', man && man.toLocaleString() + '만', rest && rest.toLocaleString()].filter(Boolean).join(' ') + '원';
+  };
+  const toast = msg => { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1800); };
+  const haptic = () => navigator.vibrate && navigator.vibrate(4);
+
+  let rows = [], period = +localStorage.getItem('tsmc.period') || 66, listN = 10;
+
+  async function load(manual) {
+    const btn = $('refreshBtn'); btn.classList.add('spin');
+    try {
+      const res = await fetch('./data.json?t=' + Date.now(), { cache: 'no-store' });
+      if (!res.ok) throw new Error(res.status);
+      const j = await res.json();
+      rows = j.rows.map(r => Object.fromEntries(j.fields.map((k, i) => [k, r[i]])));
+      const u = new Date(j.updated_at);
+      $('upd').textContent = `업데이트 ${u.toLocaleString('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`;
+      document.querySelectorAll('.sk').forEach(e => e.classList.remove('sk'));
+      render();
+      if (manual) toast('최신 데이터를 불러왔어요');
+    } catch (e) {
+      $('heroNum').classList.remove('sk');
+      $('heroNum').innerHTML = '<span style="font-size:22px">데이터를 불러오지 못했어요</span>';
+      $('heroSub').classList.remove('sk'); $('heroSub').textContent = '잠시 후 새로고침해 주세요';
+      if (manual) toast('불러오기에 실패했어요');
+    } finally { setTimeout(() => btn.classList.remove('spin'), 300); }
+  }
+
+  function render() {
+    const last = rows.at(-1), prev = rows.at(-2);
+    const up = last.premium_pct >= 0;
+    // hero (숫자 카운트업)
+    countUp($('heroNum'), last.premium_pct, v => `${Math.abs(v).toFixed(2)}%<small>${up ? '비싸요' : '싸요'}</small>`);
+    $('heroNum').className = 'hero-num ' + (up ? 'red' : 'blue');
+    $('heroSub').textContent = `1주당 ${won(Math.abs(last.premium_krw))} 차이`;
+    const dp = last.premium_pct - prev.premium_pct;
+    $('heroChips').innerHTML =
+      `<span class="chip ${dp >= 0 ? 'red' : 'blue'}">어제보다 ${Math.abs(dp).toFixed(2)}%p ${dp >= 0 ? '▲' : '▼'}</span>` +
+      `<span class="chip">${fmtDate(last.date)} 종가 기준</span>`;
+
+    // insight (최근 1년)
+    const y = rows.slice(-252).map(r => r.premium_pct);
+    const mn = Math.min(...y), mx = Math.max(...y), avg = y.reduce((a, b) => a + b, 0) / y.length;
+    const rank = y.filter(v => v < last.premium_pct).length / y.length * 100;
+    const pos = v => ((v - mn) / (mx - mn || 1) * 100).toFixed(1) + '%';
+    $('gDot').style.left = pos(last.premium_pct); $('gAvg').style.left = pos(avg);
+    $('gMin').textContent = `최저 ${mn.toFixed(1)}%`; $('gAvgT').textContent = `평균 ${avg.toFixed(1)}%`; $('gMax').textContent = `최고 ${mx.toFixed(1)}%`;
+    const tone = rank < 20 ? ['평소보다 <span class="blue">많이 낮은</span> 편이에요', 'ADR이 상대적으로 저렴한 구간이에요']
+               : rank < 40 ? ['평소보다 <span class="blue">조금 낮은</span> 편이에요', '']
+               : rank <= 60 ? ['평소와 <b>비슷한</b> 수준이에요', '']
+               : rank <= 80 ? ['평소보다 <span class="red">조금 높은</span> 편이에요', '']
+               : ['평소보다 <span class="red">많이 높은</span> 편이에요', 'ADR이 상대적으로 비싼 구간이에요'];
+    $('insight').innerHTML = `${tone[0]}<br><span class="muted" style="font-size:14px;font-weight:500">1년 중 하위 ${Math.round(rank)}% · 평균 대비 ${signed(last.premium_pct - avg, 1)}%p${tone[1] ? ' · ' + tone[1] : ''}</span>`;
+
+    // compare
+    const mxv = Math.max(last.adr_krw, last.local5_krw);
+    $('vAdr').textContent = won(last.adr_krw); $('vLoc').textContent = won(last.local5_krw);
+    requestAnimationFrame(() => { $('bAdr').style.width = (last.adr_krw / mxv * 100) + '%'; $('bLoc').style.width = (last.local5_krw / mxv * 100) + '%'; });
+    $('vTsm').textContent = '$' + last.adr_usd.toFixed(2);
+    $('v2330').textContent = 'NT$' + last.local_twd.toLocaleString();
+    $('vUsd').textContent = last.usdkrw.toLocaleString('ko-KR', { maximumFractionDigits: 2 }) + '원';
+    $('vTwd').textContent = last.twdkrw.toFixed(2) + '원';
+
+    drawChart(); renderList(); calc();
+  }
+
+  function countUp(el, to, fmt) {
+    const dur = 700, t0 = performance.now();
+    const step = t => { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.innerHTML = fmt(to * e); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }
+
+  // ---------- 차트 ----------
+  function drawChart() {
+    const box = $('chart'), data = rows.slice(-period);
+    const W = box.clientWidth, H = box.clientHeight, pt = 14, pb = 14;
+    const vals = data.map(r => r.premium_pct);
+    let mn = Math.min(...vals), mx = Math.max(...vals); const pad = (mx - mn) * .08 || 1; mn -= pad; mx += pad;
+    const X = i => data.length < 2 ? W / 2 : i / (data.length - 1) * W;
+    const Y = v => pt + (1 - (v - mn) / (mx - mn)) * (H - pt - pb);
+    const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const up = vals.at(-1) >= vals[0];
+    const col = up ? 'var(--red)' : 'var(--blue)';
+    const line = data.map((r, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(r.premium_pct).toFixed(1)}`).join('');
+    box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${up ? '#F04452' : '#3182F6'}" stop-opacity=".18"/><stop offset="1" stop-color="${up ? '#F04452' : '#3182F6'}" stop-opacity="0"/></linearGradient></defs>
+      <line x1="0" x2="${W}" y1="${Y(avg)}" y2="${Y(avg)}" stroke="var(--mute)" stroke-dasharray="3 4" stroke-width="1" opacity=".6"/>
+      <path d="${line}L${W},${H}L0,${H}Z" fill="url(#g)"/>
+      <path d="${line}" fill="none" stroke="${col}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+      <line id="cur" y1="0" y2="${H}" stroke="var(--mute)" stroke-width="1" opacity="0"/>
+      <circle id="dot" r="5" fill="${col}" stroke="var(--card)" stroke-width="2.5" cx="${X(data.length - 1)}" cy="${Y(vals.at(-1))}"/>
+    </svg>`;
+    $('axM').textContent = `┄ 평균 ${avg.toFixed(1)}%`; $('axL').textContent = fmtDateY(data[0].date); $('axR').textContent = fmtDateY(data.at(-1).date);
+    const setHead = i => {
+      const r = data[i];
+      $('cVal').innerHTML = `<span class="${r.premium_pct >= 0 ? 'red' : 'blue'}">${signed(r.premium_pct)}%</span> <span style="font-size:15px;color:var(--sub);font-weight:600">${won(r.premium_krw)}</span>`;
+      $('cDate').textContent = i === data.length - 1 ? fmtDate(r.date) + ' (최근)' : fmtDateY(r.date);
+    };
+    setHead(data.length - 1);
+    $('sAvg').textContent = avg.toFixed(2) + '%'; $('sMax').textContent = Math.max(...vals).toFixed(2) + '%'; $('sMin').textContent = Math.min(...vals).toFixed(2) + '%';
+
+    const svg = box.querySelector('svg'), cur = svg.querySelector('#cur'), dot = svg.querySelector('#dot');
+    let lastI = -1;
+    const move = e => {
+      const rect = box.getBoundingClientRect();
+      const i = Math.max(0, Math.min(data.length - 1, Math.round((e.clientX - rect.left) / rect.width * (data.length - 1))));
+      if (i === lastI) return; lastI = i; haptic();
+      const x = X(i), yv = Y(data[i].premium_pct);
+      cur.setAttribute('x1', x); cur.setAttribute('x2', x); cur.setAttribute('opacity', '.5');
+      dot.setAttribute('cx', x); dot.setAttribute('cy', yv); setHead(i);
+    };
+    const reset = () => { lastI = -1; cur.setAttribute('opacity', '0'); dot.setAttribute('cx', X(data.length - 1)); dot.setAttribute('cy', Y(vals.at(-1))); setHead(data.length - 1); };
+    box.onpointerdown = e => { box.setPointerCapture(e.pointerId); move(e); };
+    box.onpointermove = e => { if (e.pointerType === 'mouse' || box.hasPointerCapture(e.pointerId)) move(e); };
+    box.onpointerup = box.onpointercancel = reset;
+    box.onpointerleave = e => { if (e.pointerType === 'mouse') reset(); };
+  }
+
+  // ---------- 일별 리스트 ----------
+  function renderList() {
+    const items = rows.slice(-listN - 1).reverse();
+    $('list').innerHTML = items.slice(0, listN).map((r, i) => {
+      const p = items[i + 1], d = p ? r.premium_pct - p.premium_pct : 0;
+      return `<div class="list-item"><div class="d"><b>${fmtDate(r.date)}</b><span>ADR ${won(r.adr_krw)} · 본주×5 ${won(r.local5_krw)}</span></div>
+        <div class="p"><b class="${r.premium_pct >= 0 ? 'red' : 'blue'}">${signed(r.premium_pct)}%</b><span class="${d >= 0 ? 'red' : 'blue'}">${d >= 0 ? '▲' : '▼'} ${Math.abs(d).toFixed(2)}%p</span></div></div>`;
+    }).join('');
+    $('moreBtn').style.display = listN >= rows.length - 1 ? 'none' : '';
+  }
+  $('moreBtn').onclick = () => { listN += 20; renderList(); };
+
+  // ---------- 계산기 ----------
+  let mode = localStorage.getItem('tsmc.mode') || 'won';
+  const quickSets = { won: [['+100만', 1e6], ['+500만', 5e6], ['+1,000만', 1e7], ['+5,000만', 5e7], ['초기화', 0]], shares: [['+1주', 1], ['+10주', 10], ['+50주', 50], ['+100주', 100], ['초기화', 0]] };
+  const amt = $('amt');
+  const num = () => +amt.value.replace(/[^0-9]/g, '') || 0;
+  function setMode(m) {
+    mode = m; localStorage.setItem('tsmc.mode', m);
+    document.querySelectorAll('#calcMode button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+    $('unit').textContent = m === 'won' ? '원' : '주';
+    $('quick').innerHTML = quickSets[m].map(([t, v]) => `<button data-v="${v}">${t}</button>`).join('');
+    amt.value = localStorage.getItem('tsmc.amt.' + m) || ''; calc();
+  }
+  $('quick').onclick = e => {
+    const b = e.target.closest('button'); if (!b) return; haptic();
+    const v = +b.dataset.v; amt.value = v ? (num() + v).toLocaleString('ko-KR') : ''; calc();
+  };
+  amt.oninput = () => { const n = num(); amt.value = n ? n.toLocaleString('ko-KR') : ''; calc(); };
+  document.querySelectorAll('#calcMode button').forEach(b => b.onclick = () => { haptic(); setMode(b.dataset.m); });
+
+  function calc() {
+    const n = num(); localStorage.setItem('tsmc.amt.' + mode, amt.value);
+    if (!rows.length) return;
+    const r = rows.at(-1), p = r.premium_pct / 100;
+    if (!n) { $('result').innerHTML = '<p class="muted">' + (mode === 'won' ? '투자할 금액을 입력하면 바로 계산해드려요' : '보유한 ADR 주수를 입력해보세요') + '</p>'; return; }
+    if (mode === 'won') {
+      const adrSh = n / r.adr_krw, locSh = n / (r.local5_krw / 5);
+      const save = n * p / (1 + p);  // 같은 지분을 본주로 사면 아끼는 돈
+      const cheaper = p >= 0 ? '본주' : 'ADR';
+      $('result').innerHTML = `<p>같은 지분을 <b>${cheaper}</b>로 사면<br><b class="${p >= 0 ? 'blue' : 'red'}" style="font-size:22px">${koMoney(Math.abs(save))}</b> 아낄 수 있어요</p>
+        <p class="small">ADR ${adrSh.toFixed(2)}주 (= 본주 ${(adrSh * 5).toFixed(1)}주) vs 본주 ${locSh.toFixed(1)}주 · 본주는 대만 시장 직접 투자 기준이에요</p>`;
+    } else {
+      const prem = n * r.premium_krw;
+      $('result').innerHTML = `<p>ADR ${n.toLocaleString()}주에 붙은 프리미엄은<br><b class="${prem >= 0 ? 'red' : 'blue'}" style="font-size:22px">${koMoney(prem)}</b>${prem >= 0 ? '' : ' (디스카운트)'}이에요</p>
+        <p class="small">평가금액 ${koMoney(n * r.adr_krw)} · 본주 ${(n * 5).toLocaleString()}주로 환산하면 ${koMoney(n * r.local5_krw)}</p>`;
+    }
+  }
+
+  // ---------- 기타 UI ----------
+  document.querySelectorAll('#period button').forEach(b => {
+    b.classList.toggle('on', +b.dataset.d === period);
+    b.onclick = () => { haptic(); period = +b.dataset.d; localStorage.setItem('tsmc.period', period);
+      document.querySelectorAll('#period button').forEach(x => x.classList.toggle('on', x === b)); drawChart(); };
+  });
+  const openSheet = () => document.body.classList.add('sheet-open');
+  const closeSheet = () => document.body.classList.remove('sheet-open');
+  $('infoBtn').onclick = openSheet; $('sheetClose').onclick = closeSheet; $('dim').onclick = closeSheet;
+  document.addEventListener('keydown', e => e.key === 'Escape' && closeSheet());
+  $('refreshBtn').onclick = () => { haptic(); load(true); };
+  $('shareBtn').onclick = async () => {
+    if (!rows.length) return;
+    const r = rows.at(-1), text = `TSMC ADR 프리미엄 ${signed(r.premium_pct)}% (1주당 ${won(r.premium_krw)}) · ${fmtDate(r.date)} 기준`;
+    try { if (navigator.share) await navigator.share({ title: 'TSMC 프리미엄', text, url: location.href });
+          else { await navigator.clipboard.writeText(text + '\n' + location.href); toast('링크를 복사했어요'); } } catch (_) {}
+  };
+  let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => rows.length && drawChart(), 120); });
+
+  setMode(mode);
+  load();
+})();
+</script>
+</body>
+</html>

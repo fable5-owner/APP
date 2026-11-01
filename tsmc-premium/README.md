@@ -24,3 +24,8 @@ ADR(TSM) 1주 = 본주(2330.TW) 5주. 두 가격을 매일 원화로 환산해 �
 2. 로컬: `KAKAO_REST_API_KEY=... KAKAO_REFRESH_TOKEN=... python tsmc_premium.py --notify`
 3. GitHub Actions: 저장소 Settings → Secrets 에 `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN`(, `KAKAO_CLIENT_SECRET`) 등록
 - 리프레시 토큰은 60일 유효하며 만료 1달 전부터 새 값이 발급될 수 있습니다(로그에 안내 출력 → 시크릿 교체).
+
+## 웹 대시보드 (토스 스타일)
+- `public/tsmc/index.html` + `public/tsmc/data.json` → 사이트의 `/tsmc/` 경로 (GitHub Pages: `https://<user>.github.io/APP/tsmc/`)
+- 로컬 미리보기: `python tsmc_premium.py --json ../public/tsmc/data.json && cd ../public && python3 -m http.server` → http://localhost:8000/tsmc/
+- 기능: 현재 프리미엄/전일 대비, 1년 기준 위치 게이지, 드래그 가능한 추이 차트(1개월~3년), 원화 비교, 투자금·보유주수 계산기, 일별 기록, 다크모드, 공유
