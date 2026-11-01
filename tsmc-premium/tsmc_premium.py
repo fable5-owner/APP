@@ -108,6 +108,7 @@ def main():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--days", type=int, default=1, help="최근 N거래일 (기본 1)")
     ap.add_argument("--no-save", action="store_true", help="CSV 저장 안 함")
+    ap.add_argument("--notify", action="store_true", help="카카오톡 나에게 보내기로 알림")
     a = ap.parse_args()
     try:
         rows = compute(a.days)
@@ -119,6 +120,18 @@ def main():
     if not a.no_save:
         save(rows)
         print(f"\n저장: {HIST}")
+    if a.notify:
+        import kakao
+        r = rows[-1]
+        kind = "프리미엄" if r["premium_krw"] > 0 else "디스카운트"
+        try:
+            kakao.send(f"[TSMC ADR {kind}] {r['date']}\n"
+                       f"{r['premium_pct']:+.2f}% ({r['premium_krw']:+,}원)\n"
+                       f"ADR {r['adr_krw']:,}원 / 본주x5 {r['local5_krw']:,}원\n"
+                       f"TSM ${r['adr_usd']:,.2f} · 2330 NT${r['local_twd']:,.0f}")
+            print("카카오톡 알림 전송 완료")
+        except Exception as e:
+            sys.exit(f"카카오톡 알림 실패: {e}")
 
 
 if __name__ == "__main__":

@@ -18,3 +18,9 @@ ADR(TSM) 1주 = 본주(2330.TW) 5주. 두 가격을 매일 원화로 환산해 �
 ## 참고
 - 같은 날짜의 종가끼리 비교합니다(대만장은 미국장보다 먼저 마감하므로 시차 존재).
 - 환율은 Yahoo 일별 종가 기준이라 실제 환전 환율(스프레드 포함)과 다를 수 있습니다.
+
+## 카카오톡 알림 (나에게 보내기)
+1. 위 `kakao_setup.py` 도움말대로 카카오 앱 생성 후 `python kakao_setup.py <REST_API_KEY>` 로 리프레시 토큰 발급
+2. 로컬: `KAKAO_REST_API_KEY=... KAKAO_REFRESH_TOKEN=... python tsmc_premium.py --notify`
+3. GitHub Actions: 저장소 Settings → Secrets 에 `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN`(, `KAKAO_CLIENT_SECRET`) 등록
+- 리프레시 토큰은 60일 유효하며 만료 1달 전부터 새 값이 발급될 수 있습니다(로그에 안내 출력 → 시크릿 교체).
